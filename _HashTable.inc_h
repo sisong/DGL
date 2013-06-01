@@ -1,0 +1,249 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// _THashTableBase\_THashBaseIterator的声明
+// Create by HouSisong, 2004.03.05
+//------------------------------------------------------------------------------
+                           
+//_HashTable.inc_pas ; _HashTable.inc_h
+
+{$ifndef __HashTable_inc_h_}
+{$define __HashTable_inc_h_}
+
+{$I DGLIntf.inc_h}
+
+type
+  _HashKeyType   = _KeyType;
+  _HashValueType = _ValueType;
+  _PHashValueType = ^_HashValueType;
+
+const
+  csHashKey_Error = 'Hash Key is not within the valid range.';
+  //csHashIterator_Error = 'Hash iterator is not within the valid range.';
+type
+  EHashKeyRangeError = class(Exception);//uses SysUtils! //对不存在的元素进行删除或读取（写是合法的）时触发
+  //EHashIteratorRangeError = class(Exception);
+
+//------------------------------------------------------------------------------
+// _THashTableBase
+
+//var testTHashNodeCount:integer=0;
+
+
+type  //开链hash桶(链表)
+  _PPHashNode = ^_PHashNode;
+  _PHashNode  = ^_THashNode;
+  _THashNode = record
+    PNext      : _PHashNode;
+    Key        : _HashKeyType;
+    Value      : _HashValueType;
+  end;
+  _TPHashNodeDArray=array of _PHashNode;
+
+    _PPHashNode_OnlySet = ^_PHashNode_OnlySet;
+    _PHashNode_OnlySet  = ^_THashNode_OnlySet;
+    _THashNode_OnlySet = record
+      PNext     : _PHashNode;
+      Key       : _HashKeyType;
+      //利用F_DGL_OnlySet定义节约一点内存:) 对于一些自动类型和很大的结构(Record)此优化比较有意义
+    end;
+
+const                        //32 bit
+  _csHashCapacityList:array[0..32] of Cardinal=
+                (
+                31 ,    //1
+                31 ,    //2
+                31 ,    //3
+                31 ,    //7
+                31 ,    //13
+                31 ,
+                61 ,
+                127 ,
+                251 ,
+                509 ,
+                1021 ,
+                2039 ,
+                4093 ,
+                8191 ,
+                16381 ,
+                32749 ,
+                65521 ,
+                131071 ,
+                262139 ,
+                524287 ,
+                1048573 ,
+                2097143 ,
+                4194301 ,
+                8388593 ,
+                16777213 ,
+                33554393 ,
+                67108859 ,
+                134217689 ,
+                268435399 ,
+                536870909 ,
+                1073741789 ,
+                2147483647 ,
+                4294967291
+                );
+  const  _csDefaultHashCapacityIndex = 5;
+  function GetBigHashCapacityIndex(const Capacity:Cardinal;const CapacityIndex:Byte=_csDefaultHashCapacityIndex):Byte;
+  
+type
+  _THashBaseIterator = class;  //hash Iterator
+
+  //_THashTableBase内部维护的简易迭代器
+  _TTagHashIterator =  record
+    ArrayIndex  : integer;
+    pPNode      : _PPHashNode;
+  end;
+
+  _THashTableBase = class;
+  _tmpHashIt_Data = object  //内存结构等价于:_IIterator
+    _ObjIteratorClass : _DGL_TObjIteratorClass;
+    FBase   : _THashTableBase;
+    FNodeIt : _TTagHashIterator;
+  end;
+  _PtmpHashIt_Data = ^_tmpHashIt_Data;
+
+  //----------------------------------------------------------------------------
+  // 作用描述: Hash表，Hash容器的基础实现，用它可以扩展出HashSet\HashMultiSet\HashMap\HashMultiMap
+  // 主要方法：SetCapacity      : 设置Hash表内的节点数组大小
+  //           DecCapacity      ：自动缩减Hash表内的节点数组大小
+  //           CountRange       ：统计有相同Key的元素个数，并返回其区间
+  //           InsertNode       ：插入一个新的节点，确定性的
+  //           UniqueInsertNode、UniqueInsert   ：如果不存该Key值则执行插入操作，否则：如果传递了Value值则替换原来的key对应的值,否则什么也不做；
+  //           MultiInsertNode、MultiInsert     : 不论表中是否已经存在该Key值，执行插入操作，等价于InsertNode
+  //           FindItem         ：查找具有Key值的元素位置，不存在时返回ItEnd
+  //           DeleteNode       ：从表中删除一个节点
+  //           Previous         ：使_TTagHashIterator向前移动一个位置
+  //           Next             ：使_TTagHashIterator向后移动一个位置
+  //           IsEndIt          : 判断是否是ItEnd位置
+  //           IsEqualIt        ：判断两个位置是否相同
+  //
+  //           ItBegin          ：表中第一个元素的位置
+  //           ItEnd            ：表中最后一个元素的下一个位置
+  //           Reserve          ：预留元素空间
+  //           Clear            ：清空容器
+  //           Size             ：返回容器中的元素个数
+  //           Capacity         ：返回容器的当前容积
+  //           GetItemValue     ：根据Key值返回对应的Value值，如果不存在该Key值，则触发EHashKeyRangeError异常
+  //           Swap             ：交换两个容器中的元素
+  //           remove       ：删除值与Value相同的元素，返回删除的个数
+  //           EraseKey         ：删除键值与Key相同的元素，返回删除的个数
+  //           Erase            : 删除某位置上的元素、或删除某区间内的元素
+  //           Count            ：统计有相同Key的元素个数
+  //           FindKey          ：查找某键值的第一次出现位置
+  //           LowerBound       : 返回某键值的第一个可安插位置
+  //           UpperBound       : 返回某键值的最后一个可安插位置
+  //           EqualRange       : 返回某键值的可安插的第一个和最后一个位置
+  // 使用方式：
+  // 注意事项: 内部实现，外部不要直接使用
+  // 作    者: HouSisong , 2004.09.08
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  _THashTableBase = class(TObject)
+  private
+    FDataList     : _TPHashNodeDArray;
+    FCount        : Cardinal;
+    FCapacity     : Cardinal;
+    FCapacityIndex: Byte; //0..32
+    FAlwaysReserveIndex: Byte;
+    F_DGL_OnlySet : boolean;
+    procedure   SetCapacityIndex(const NewCapacityIndex: Byte);
+    procedure   DecCapacity();
+    function    CountRange(const Key:_HashKeyType;out ItBegin,ItEnd:_TTagHashIterator):integer;
+    function    getNewNode(const Key: _HashKeyType;const Value: _HashValueType): _PHashNode;overload;   {$ifdef _DGL_Inline} inline; {$endif}   //todo: Warning inline on if _ValueType if "object" then error!!!
+    function    getNewNode(const Key: _HashKeyType): _PHashNode;overload;  {$ifdef _DGL_Inline} inline; {$endif}
+    procedure   DisposeNode(const pHashNode: _PHashNode);   {$ifdef _DGL_Inline} inline; {$endif}
+  protected
+    procedure   UniqueInsertNode(pPHashNode:_PPHashNode;const Key: _HashKeyType;const Value: _HashValueType);overload;  {$ifdef _DGL_Inline} inline; {$endif}  //todo: Warning inline on if _ValueType if "object" then error!!!
+    procedure   MultiInsertNode(pPHashNode: _PPHashNode;const Key: _HashKeyType;const Value: _HashValueType);  overload;   {$ifdef _DGL_Inline} inline; {$endif}   //todo: Warning inline on if _ValueType if "object" then error!!!
+    procedure   UniqueInsertNode(pPHashNode:_PPHashNode;const Key: _HashKeyType);overload;     {$ifdef _DGL_Inline} inline; {$endif}
+    procedure   MultiInsertNode(pPHashNode: _PPHashNode;const Key: _HashKeyType); overload;   {$ifdef _DGL_Inline} inline; {$endif}
+    function    FindItem(const Key:_HashKeyType):_TTagHashIterator;     {$ifdef _DGL_Inline} inline; {$endif}
+    procedure   DeleteNode(const pPHashNode: _PPHashNode);    {$ifdef _DGL_Inline} inline; {$endif}
+
+    class procedure  Previous(const HashTable:_THashTableBase;var It : _TTagHashIterator);   {$ifdef _DGL_Inline} inline; {$endif}
+    class procedure  Next(const HashTable:_THashTableBase;var It : _TTagHashIterator);       {$ifdef _DGL_Inline} inline; {$endif}
+    class function   IsEndIt(const It : _TTagHashIterator):boolean;                           {$ifdef _DGL_Inline} inline; {$endif}
+    class function   IsEqualIt(const It0,It1 : _TTagHashIterator):boolean;
+    procedure setAlwaysReserve(const aAlwaysReserveSize: Cardinal);   {$ifdef _DGL_Inline} inline; {$endif}
+    function getAlwaysReserveSize():Cardinal;    {$ifdef _DGL_Inline} inline; {$endif}
+  public
+    constructor Create(const IsOnlySet : boolean) ;//use defunlt function Pointer
+    destructor  Destroy; override;
+  public
+    function  ItBegin(): _TTagHashIterator;            {$ifdef _DGL_Inline} inline; {$endif}
+    function  ItEnd(): _TTagHashIterator;               {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Reserve(const ReserveSize: Cardinal);       {$ifdef _DGL_Inline} inline; {$endif}
+    procedure UniqueInsert(const Key: _HashKeyType;const Value: _HashValueType); overload;  //todo: Warning inline on if _ValueType if "object" then error!!!
+    procedure MultiInsert(const Key: _HashKeyType;const Value: _HashValueType);overload;    //todo: Warning inline on if _ValueType if "object" then error!!!
+    procedure UniqueInsert(const Key: _HashKeyType); overload;                            {$ifdef _DGL_Inline} inline; {$endif}
+    procedure MultiInsert(const Key: _HashKeyType);overload;                              {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Clear(); virtual;
+    property  AlwaysReserveSize:Cardinal read getAlwaysReserveSize write setAlwaysReserve;
+    function  Size():Cardinal;                                                            {$ifdef _DGL_Inline} inline; {$endif}
+    property  Capacity: Cardinal read FCapacity;
+    function  GetItemValue(const Key: _HashKeyType): _HashValueType;                      {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Swap(HastTable:_THashTableBase);                                             {$ifdef _DGL_Inline} inline; {$endif}
+
+    function  EraseValue(const Value: _HashValueType): integer;  overload;                  {$ifdef _DGL_Inline} inline; {$endif}
+    function  EraseValue(const Key: _HashKeyType;const Value: _HashValueType): integer;  overload;     {$ifdef _DGL_Inline} inline; {$endif}
+    function  EraseKey(const Key: _HashKeyType): integer;  overload;            {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Erase(const ItPos:_IIterator);  overload;                         // {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Erase(const ItBegin,ItEnd: _IIterator);  overload;               //
+
+    function  Count(const Key:_HashKeyType):integer;
+    function  FindKey(const Key:_HashKeyType):_TTagHashIterator;                  {$ifdef _DGL_Inline} inline; {$endif}
+    function  FindValue(const Value:_HashValueType):_TTagHashIterator;
+    function  LowerBound(const Key:_HashKeyType):_TTagHashIterator;//==FindKey
+    function  UpperBound(const Key:_HashKeyType):_TTagHashIterator;
+    procedure EqualRange(const Key:_HashKeyType;out ItBegin,ItEnd:_TTagHashIterator);    {$ifdef _DGL_Inline} inline; {$endif} 
+
+  end;
+
+  //----------------------------------------------------------------------------
+  // 作用描述: _THashTableBase的迭代器，供使用_THashTableBase的其他对外容器使用
+  // 主要方法：(参见_IMapIterator的说明)
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong , 2004.09.08
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  //hash Iterator
+  _THashBaseIterator = class(_TAbstractIterator)  
+  private
+    //FBase   : _THashTableBase;   //_Data0
+    //FNodeIt : _TTagHashIterator; //_Data1,_Data2
+  public
+    class procedure ItCreate(var SelfItData:_IIterator;const base:_THashTableBase;const NodeIt:_TTagHashIterator);overload;     //{$ifdef _DGL_Inline} inline; {$endif}
+
+    class function  IteratorTraits():TIteratorTraits; override;
+    class function    GetValue(const SelfItData:_IIterator): _HashValueType;override;
+    class procedure   SetValue(const SelfItData:_IIterator;const Value: _HashValueType); override;
+    class function    Map_GetKey(const SelfItData:_IIterator): _HashKeyType;override;
+
+    class procedure   Next(var SelfItData:_IIterator); overload; override;
+    class function    IsEqual(const SelfItData:_IIterator;const Iterator:_IIterator):boolean;override;
+    class procedure   Previous(var SelfItData:_IIterator); override;
+  end;
+
+{$endif } // __HashTable_inc_h_
+

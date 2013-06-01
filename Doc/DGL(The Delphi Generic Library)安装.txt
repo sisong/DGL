@@ -1,0 +1,9 @@
+Copyright (c) 2004
+Delhi泛型库--DGL(The Delphi Generic Library)
+Author: HouSisong@gmail.com
+
+安装：将DGL源代码目录设置到编译器的搜索路径中
+
+使用方法:
+  直接引用DGL_XXX.pas单元，大部分应用都应该没有问题了；
+  如果为了速度或效率等需要库支持自定义的结构等，可以新开一个单元，借鉴DGL_XXX的实现，很容易就可以完成；

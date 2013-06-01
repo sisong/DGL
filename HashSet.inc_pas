@@ -1,0 +1,316 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// _THashSetIterator\_THashSet\_THashMultiSet的实现
+// Create by HouSisong, 2004.09.08
+//------------------------------------------------------------------------------
+
+{$ifndef __HashSet_inc_pas_}
+{$define __HashSet_inc_pas_}
+
+
+  {$I DGLIntf.inc_pas}
+  {$I _HashTable.inc_pas}
+
+{_THashSet_Base}
+
+
+function  _THashSet_Base.GetSelfObj():TObject;
+begin
+  result:=self;
+end;
+
+function  _THashSet_Base.IsEmpty(): Boolean;
+begin
+  result:=FHashTable.Size()=0;
+end;
+
+constructor _THashSet_Base.Create;
+begin
+  inherited Create();
+  self.FHashTable:=_THashTableBase.Create(true);
+end;
+
+
+procedure _THashSet_Base.Clear;
+begin
+  self.FHashTable.Clear();
+end;
+
+function _THashSet_Base.Count(const Value: _HashValueType): integer;
+begin
+  result:=self.FHashTable.Count(Value);
+end;
+
+destructor _THashSet_Base.Destroy;
+begin
+  self.FHashTable.Free();
+  inherited;
+end;
+
+procedure _THashSet_Base.EqualRange(const Value: _HashValueType; out ItBegin,
+  ItEnd: _IIterator);
+var
+  ItBeginNode,ItEndNode :_TTagHashIterator;
+begin
+  self.FHashTable.EqualRange(Value,ItBeginNode,ItEndNode);
+  _THashSetIterator.ItCreate(ItBegin,self.FHashTable,ItBeginNode);
+  _THashSetIterator.ItCreate(ItEnd,self.FHashTable,ItEndNode);
+end;
+
+procedure _THashSet_Base.Erase(const ItPos: _IIterator);
+begin
+  self.FHashTable.Erase(ItPos);
+end;
+
+function _THashSet_Base.EraseValue(const Value: _HashValueType): integer;
+begin
+  result:=self.FHashTable.EraseKey(Value);
+end;
+
+procedure _THashSet_Base.Erase(const ItBegin, ItEnd: _IIterator);
+begin
+  self.FHashTable.Erase(ItBegin, ItEnd);
+end;
+
+function _THashSet_Base.Find(const Value: _HashValueType): _IIterator;
+begin
+  _THashSetIterator.ItCreate(result,
+      self.FHashTable,self.FHashTable.FindKey(Value));
+end;
+function _THashSet_Base.ItBegin: _IIterator;
+begin
+  _THashSetIterator.ItCreate(result,
+      self.FHashTable,self.FHashTable.ItBegin);
+end;
+
+function _THashSet_Base.ItEnd: _IIterator;
+begin
+  _THashSetIterator.ItCreate(result,
+      self.FHashTable,self.FHashTable.ItEnd);
+end;
+
+function _THashSet_Base.LowerBound(const Value: _HashValueType): _IIterator;
+begin
+  _THashSetIterator.ItCreate(result,
+      self.FHashTable,self.FHashTable.LowerBound(Value));
+end;
+
+function _THashSet_Base.Size: Integer;
+begin
+  result:=self.FHashTable.Size();
+end;
+
+function _THashSet_Base.UpperBound(const Value: _HashValueType): _IIterator;
+begin
+  _THashSetIterator.ItCreate(result,self.FHashTable,self.FHashTable.UpperBound(Value));
+end;
+
+procedure _THashSet_Base.Reserve(const ReserveSize: integer);
+begin
+  self.FHashTable.Reserve(ReserveSize);
+end;
+
+///////////////////////////
+
+{ _THashSet }
+
+constructor _THashSet.Create;
+begin
+  inherited Create();
+end;
+
+constructor _THashSet.Create(const ItBegin,ItEnd: _IIterator);
+begin
+  inherited Create();
+  self.Insert(self.ItBegin,ItBegin,ItEnd);
+end;
+
+procedure _THashSet.Assign(const num: integer; const Value: _HashValueType);
+begin
+  self.FHashTable.Clear();
+  if num>0 then
+    self.FHashTable.UniqueInsert(Value);
+end;
+
+procedure _THashSet.Assign(const ItBegin, ItEnd: _IIterator);
+begin
+  self.FHashTable.Clear();
+  self.Insert(self.ItBegin,ItBegin, ItEnd);
+end;
+
+function _THashSet.Clone: _IContainer;
+begin
+  result:=_ISet(_THashSet.Create(self));
+end;
+
+procedure _THashSet.CloneToInterface(out NewContainer);
+begin
+  _ISet(NewContainer):=_THashSet.Create(self);
+end;
+
+constructor _THashSet.Create(const ASet: _THashSet);
+begin
+  inherited Create();
+  self.Insert(self.ItBegin,ASet.ItBegin, ASet.ItEnd);
+end;
+
+
+procedure _THashSet.Insert(const ItPos: _IIterator;
+  const Value: _HashValueType);
+begin
+  self.FHashTable.UniqueInsert(Value);
+end;
+
+procedure _THashSet.Insert(const Value: _HashValueType);
+begin
+  self.FHashTable.UniqueInsert(Value);
+end;
+
+procedure _THashSet.Insert(const ItPos, ItBegin, ItEnd: _IIterator);
+var
+  It :_IIterator;
+begin
+  It:=ItBegin.Clone();
+  while (not It.IsEqual(ItEnd)) do
+  begin
+    self.FHashTable.UniqueInsert(It.Value);
+    It.Next();
+  end;
+end;
+
+procedure _THashSet.Insert(const ItPos: _IIterator; const num: integer;
+  const Value: _HashValueType);
+begin
+  if num>0 then
+    self.FHashTable.UniqueInsert(Value);
+end;
+
+
+{ _THashMultiSet }
+
+procedure _THashMultiSet.Assign(const num: integer; const Value: _HashValueType);
+var
+  i : integer;
+begin
+  self.FHashTable.Clear();
+  for i:=0 to num-1 do
+    self.FHashTable.MultiInsert(Value);
+end;
+
+procedure _THashMultiSet.Assign(const ItBegin,ItEnd:_IIterator);
+begin
+  self.FHashTable.Clear();
+  Insert(self.ItBegin(),ItBegin,ItEnd);
+end;
+
+function _THashMultiSet.Clone: _IContainer;
+begin
+  result:=_IMultiSet(_THashMultiSet.Create(self));
+end;
+
+procedure _THashMultiSet.CloneToInterface(out NewContainer);
+begin
+  _IMultiSet(NewContainer):=_THashMultiSet.Create(self);
+end;
+
+procedure _THashMultiSet.Insert(const Value: _HashValueType);
+begin
+  self.FHashTable.MultiInsert(Value);
+end;
+
+procedure _THashMultiSet.Insert(const ItPos, ItBegin, ItEnd: _IIterator);
+var
+  It :_IIterator;
+begin
+  It:=ItBegin.Clone();
+  while (not It.IsEqual(ItEnd)) do
+  begin
+    self.FHashTable.MultiInsert(It.Value);
+    It.Next();
+  end;
+end;
+
+procedure _THashMultiSet.Insert(const ItPos: _IIterator; const num: integer;
+  const Value: _HashValueType);
+var
+  i : integer;
+begin
+  for i:=0 to num-1 do
+    self.FHashTable.MultiInsert(Value);
+end;
+
+procedure _THashMultiSet.Insert(const ItPos: _IIterator;const Value: _HashValueType);
+begin
+  self.FHashTable.MultiInsert(Value);
+end;
+
+constructor _THashMultiSet.Create(const num: integer;
+  const Value: _HashValueType);
+begin
+  inherited Create();
+  self.Insert(self.ItBegin,num,Value);
+end;
+
+constructor _THashMultiSet.Create;
+begin
+  inherited Create();
+end;
+
+constructor _THashMultiSet.Create(const ItBegin, ItEnd: _IIterator);
+begin
+  inherited Create();
+  self.Insert(self.ItBegin,ItBegin,ItEnd);
+end;
+
+constructor _THashMultiSet.Create(const ASet: _THashMultiSet);
+begin
+  inherited Create();
+  self.Insert(self.ItBegin,Aset.ItBegin,ASet.ItEnd);
+end;
+
+{ _THashSetIterator }
+
+class procedure _THashSetIterator.ItCreate(var SelfItData:_IIterator;
+  const base:_THashTableBase;const NodeIt:_TTagHashIterator);
+begin
+  inherited ItCreate(SelfItData,base,NodeIt);
+  SelfItData._ObjIteratorClass:=_THashSetIterator;
+end;
+
+class function _THashSetIterator.Clone(const SelfItData:_IIterator): _IIterator;
+begin
+  result:=SelfItData;
+end;
+
+class procedure _THashSetIterator.Assign(var SelfItData:_IIterator;const Iterator: _IIterator);
+begin
+  SelfItData:=Iterator;
+end;
+
+class function _THashSetIterator.GetValue(const SelfItData:_IIterator): _HashValueType;
+begin
+  result:=inherited Map_GetKey(SelfItData);
+end;
+
+class procedure _THashSetIterator.SetValue(const SelfItData:_IIterator;const Value: _HashValueType);
+begin
+  Assert(false); //key不能修改
+end;
+
+{$endif } // __HashSet_inc_pas_

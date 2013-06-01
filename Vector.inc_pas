@@ -1,0 +1,715 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// _TVector的实现
+// Create by HouSisong, 2004.09.01
+//------------------------------------------------------------------------------
+// Vector.inc_pas; Vector.inc_h;
+
+{$ifndef  __Vector_inc_pas_}
+{$define  __Vector_inc_pas_}
+
+{$I DGLIntf.inc_pas}
+{$I PointerItBox.inc_pas}
+
+
+{ _TVector }
+
+function  _TVector.GetSelfObj():TObject;
+begin
+  result:=self;
+end;
+
+function  _TVector.IsEmpty(): Boolean;
+begin
+  result:=FCount=0;
+end;
+
+function _TVector.GetBackValue(): _ValueType;
+begin
+  Assert(FCount>0);
+  result:=self.FDataArray[FCount-1];
+end;
+
+procedure _TVector.SetBackValue(const aValue:_ValueType);
+begin
+  Assert(FCount>0);
+  {$ifdef _DGL_ObjValue}
+    _Assign(self.FDataArray[FCount-1],aValue);
+  {$else}
+    self.FDataArray[FCount-1]:=aValue;
+  {$endif}
+end;
+
+procedure _TVector.AlwaysReserve(const aAlwaysReserveSize: integer);
+begin
+  self.Reserve(aAlwaysReserveSize);
+  self.FAlwaysReserveSize:=aAlwaysReserveSize;
+end;
+
+procedure _TVector.Clear;
+var
+  i,L : integer;
+begin
+{$ifdef _DGL_ObjValue}
+  for i:=0 to self.FCount-1 do
+    _Free(self.FDataArray[i]);
+{$endif}
+  self.FCount:=0;
+  self.FArrayLength:=0;
+  if FAlwaysReserveSize<=0 then
+    self.FDataArray:=nil
+  else
+  begin
+    L:=length(FDataArray);
+    if FAlwaysReserveSize<L then
+      L:=FAlwaysReserveSize;
+    setlength(FDataArray,FAlwaysReserveSize);
+    for i:=0 to L-1 do
+      FDataArray[i]:=_NULL_Value;
+  end;
+end;
+
+procedure _TVector.Swap(AVector:_TVector);
+var
+    tmpInt        : Integer;
+    tmpDataArray  : _TValueDArray;
+begin
+  if self=AVector then exit;
+  
+  //tmpInt:=FAlwaysReserveSize; FAlwaysReserveSize:=AVector.FAlwaysReserveSize; AVector.FAlwaysReserveSize:=tmpInt;
+  
+  tmpInt:=FCount;  FCount:=AVector.FCount;  AVector.FCount:=tmpInt;
+  tmpInt:=FArrayLength;  FArrayLength:=AVector.FArrayLength;  AVector.FArrayLength:=tmpInt;
+  tmpDataArray:=FDataArray;  FDataArray:=AVector.FDataArray;  AVector.FDataArray:=tmpDataArray;
+
+end;
+
+constructor _TVector.Create;
+begin
+  inherited;
+end;
+
+destructor _TVector.Destroy;
+begin
+  Clear();
+  inherited;
+end;
+
+function _TVector.ItBegin: _IIterator;
+begin
+  _TVectorIterator.ItCreate(result,self.UnSafe_GetVectorBufPointer(0));
+end;
+
+function  _TVector.NewIterator(const Index: Integer):_IIterator;
+begin
+  _TVectorIterator.ItCreate(result,self.UnSafe_GetVectorBufPointer(Index));
+end;
+
+
+function _TVector.GetItemValue(const Index: Integer): _ValueType;
+begin
+  Assert(Index>=0);
+  Assert(Index<FCount);
+  result:=self.FDataArray[Index];
+end;
+
+procedure _TVector.SetItemValue(const Index: Integer; const Value: _ValueType);
+begin
+  Assert(Index>=0);
+  Assert(Index<FCount);
+  {$ifdef _DGL_ObjValue}
+  _Assign(self.FDataArray[Index],Value);
+  {$else}
+  self.FDataArray[Index]:=Value;
+  {$endif}
+end;
+
+function _TVector.IndexOf(const Value: _ValueType): Integer;
+var
+  i : integer;
+begin
+  for i:=0 to self.FCount-1 do
+  begin
+    {$ifdef  _DGL_Compare}
+    if (_IsEqual(FDataArray[i],Value)) then
+    {$else}
+    if FDataArray[i]=Value then
+    {$endif}
+    begin
+      result:=i;
+      exit;
+    end;
+  end;
+  result:=-1;
+end;
+
+function _TVector.IsEquals(const AContainer: _IContainer): Boolean;
+var
+  i : integer;
+  it : _IIterator;
+begin
+  if self.Size()<>AContainer.Size() then
+  begin
+    result:=false;
+    exit;
+  end;
+
+  it:=AContainer.ItBegin();
+  for i:=0 to FCount-1 do
+  begin
+    {$ifdef  _DGL_Compare}
+    if (not _IsEqual(FDataArray[i],it.Value)) then
+    {$else}
+    if not(FDataArray[i]=it.Value) then
+    {$endif}
+    begin
+      result:=false;
+      exit;
+    end
+    else
+      it.Next();
+  end;
+  result:=true;
+end;
+
+
+function _TVector.IsLess(const AContainer: _IContainer): Boolean;
+var
+  i : integer;
+  ACSize,MinSize : integer;
+  it : _IIterator;
+begin
+  ACSize:=AContainer.Size();
+  MinSize:=ACSize;
+  if FCount<MinSize then MinSize:=FCount;
+
+  it:=AContainer.ItBegin();
+  for i:=0 to MinSize-1 do
+  begin
+    {$ifdef  _DGL_Compare}
+    if (_IsLess(it.Value,FDataArray[i])) then
+    {$else}
+    if it.Value<FDataArray[i] then
+    {$endif}
+    begin
+      result:=false;
+      exit;
+    end
+    else
+      it.Next();
+  end;
+  result:=(FCount<ACSize);
+end;
+
+function _TVector.ItEnd: _IIterator;
+begin
+  _TVectorIterator.ItCreate(result,self.UnSafe_GetVectorBufPointer(FCount));
+end;
+
+procedure _TVector.PushBack(const Value: _ValueType);
+begin
+  if FCount>=FArrayLength then
+  begin
+    SetNewCapability(FCount+1);
+  end;
+  {$ifdef _DGL_ObjValue}
+  self.FDataArray[FCount]:=_CopyCreateNew(Value);
+  {$else}
+  self.FDataArray[FCount]:=Value;
+  {$endif}
+  inc(FCount);
+end;
+
+procedure _TVector.PopBack;
+begin
+  Assert(FCount>0);
+  {$ifdef _DGL_ObjValue}
+  _Free(self.FDataArray[FCount-1]);
+  {$endif}
+  self.FDataArray[FCount-1]:=_NULL_Value;
+  dec(self.FCount);
+end;
+
+procedure _TVector.PushBack(const ItBegin, ItEnd: _IIterator);
+begin
+  self.Insert(self.ItEnd,ItBegin,ItEnd);
+end;
+
+procedure  _TVector.PushBack(const ItBegin,ItEnd:_PValueType);
+begin
+  self.Insert(self.ItEnd,ItBegin, ItEnd);
+end;
+
+procedure _TVector.PushBack(const num:integer;Value: _ValueType); 
+var
+  i : integer;
+begin
+  for i:=0 to num-1 do
+    self.PushBack(Value);
+end;
+
+function _TVector.EraseValue(const Value: _ValueType): integer;
+var
+  iRead  : integer;
+  iWrite : integer;
+  fIndex : integer;
+begin
+  fIndex:=IndexOf(Value);
+  if fIndex<0 then
+  begin
+    result:=0;
+    exit;
+  end;
+
+  result:=0;
+  iWrite:= fIndex;
+  for iRead:=fIndex to FCount-1 do
+  begin
+    {$ifdef  _DGL_Compare}
+    if (_IsEqual(self.FDataArray[iRead],Value)) then
+    {$else}
+    if self.FDataArray[iRead]=Value then
+    {$endif}
+    begin
+      {$ifdef _DGL_ObjValue}
+      _Free(self.FDataArray[iRead]);
+      {$endif}
+      inc(result);
+    end
+    else
+    begin
+      FDataArray[iWrite]:=self.FDataArray[iRead];
+      inc(iWrite);
+    end;
+  end;
+  fill(@FDataArray[FCount-result],@FDataArray[FCount],_NULL_Value);
+  dec(self.FCount,result);
+end;
+
+function _TVector.Size: Integer;
+begin
+  result:=self.FCount;
+end;
+
+procedure _TVector.Insert(const ItPos:_IIterator; const Value: _ValueType);
+begin
+  self.InsertByIndex((ItPos._Data0-integer(UnSafe_GetVectorBufPointer(0))) div sizeof(_ValueType),Value);
+end;
+
+
+procedure _TVector.InsertByIndex(const Index: Integer;const Value: _ValueType);
+var
+  IndexPos : integer;
+begin
+  IndexPos:=Index;
+  Assert(IndexPos>=0);
+  Assert(IndexPos<=FCount);
+  self.SetNewCapability(FCount+1);
+  ReCopy(@FDataArray[IndexPos],@FDataArray[FCount],@FDataArray[IndexPos+1]);
+  {$ifdef _DGL_ObjValue}
+  FDataArray[IndexPos]:=_CopyCreateNew(Value);
+  {$else}
+  FDataArray[IndexPos]:=Value;
+  {$endif}
+  inc(FCount);
+end;
+
+procedure _TVector.Insert(const ItPos:_IIterator; const ItBegin,ItEnd: _IIterator);
+var
+  i : integer;
+  _ItBegin : _IIterator;
+  CopyCount : integer;
+  IndexPos : integer;
+begin
+  //todo: Check safe
+
+  IndexPos:=(ItPos._Data0-integer(UnSafe_GetVectorBufPointer(0))) div sizeof(_ValueType);
+  Assert(IndexPos>=0);
+  Assert(IndexPos<=FCount);
+  CopyCount:=ItBegin.Distance(ItEnd);
+  if CopyCount<=0 then exit;
+
+  self.SetNewCapability(FCount+CopyCount);
+  ReCopy(@FDataArray[IndexPos],@FDataArray[FCount],@FDataArray[IndexPos+CopyCount]);
+
+  _ItBegin:=ItBegin.Clone();
+  for i:=IndexPos+0 to IndexPos+CopyCount-1 do
+  begin
+    {$ifdef _DGL_ObjValue}
+    FDataArray[i]:=_CopyCreateNew(_ItBegin.Value);
+    {$else}
+    FDataArray[i]:=_ItBegin.Value;
+    {$endif}
+    _ItBegin.Next();
+  end;
+  inc(FCount,CopyCount);
+end;
+
+
+procedure _TVector.Insert(const ItPos:_IIterator; const ItBegin,ItEnd: _PValueType);
+var
+  i : integer;
+  _ItBegin : _PValueType;
+  CopyCount : integer;
+  IndexPos : integer;
+begin
+  Assert ( (longword(ItBegin)<longword(UnSafe_GetVectorBufPointer(0)) )
+       or (longword(ItBegin)>=longword(UnSafe_GetVectorBufPointer(FCount)) ) );  //Check safe
+
+  IndexPos:=(ItPos._Data0-integer(UnSafe_GetVectorBufPointer(0))) div sizeof(_ValueType);
+  Assert(IndexPos>=0);
+  Assert(IndexPos<=FCount);
+  CopyCount:=(Cardinal(integer(ItEnd)-integer(ItBegin)) div sizeof(_ValueType));
+  if CopyCount<=0 then exit;
+
+  self.SetNewCapability(FCount+CopyCount);
+  ReCopy(@FDataArray[IndexPos],@FDataArray[FCount],@FDataArray[IndexPos+CopyCount]);
+
+  _ItBegin:=ItBegin;
+  for i:=0 to CopyCount-1 do
+  begin
+    {$ifdef _DGL_ObjValue}
+    FDataArray[IndexPos+i]:=_CopyCreateNew(_ItBegin^);
+    {$else}
+    FDataArray[IndexPos+i]:=_ItBegin^;
+    {$endif}
+    inc(PByte(_ItBegin),sizeof(_ValueType));
+  end;
+  inc(FCount,CopyCount);
+end;
+
+function _DGL_Int_Max_Vector(const x,y:integer):integer;  {$ifdef _DGL_Inline} inline; {$endif}
+begin
+  if x<y then
+    result:=y
+  else
+    result:=x;
+end;
+
+procedure _TVector.SetNewCapability(const NewCapability: integer);
+var
+  NewLength : integer;
+  IncLength : integer;
+const
+  MinSize = 32;
+begin
+  if NewCapability<=FArrayLength then exit;
+  
+  IncLength:=NewCapability-FCount;
+  if FCount=0 then
+    NewLength:=_DGL_Int_Max_Vector(MinSize,IncLength)
+  else
+    NewLength:=FCount+_DGL_Int_Max_Vector(FCount shr 1,IncLength);
+
+  setlength(FDataArray,NewLength);
+  FArrayLength:=length(FDataArray);
+end;
+
+constructor _TVector.Create(const num: integer; const Value: _ValueType);
+begin
+  inherited Create();
+  self.Insert(self.ItBegin,num,Value);
+end;
+
+constructor _TVector.Create(const num: integer);
+{$ifdef  _DGL_ObjValue}
+var
+  _Default_Value : _ValueType;
+{$endif}
+begin
+  inherited Create();
+  {$ifdef  _DGL_ObjValue}
+  _Default_Value:=_CreateNew();
+  self.Insert(self.ItBegin,num,_Default_Value);
+  _Free(_Default_Value);
+  {$else}
+  self.Insert(self.ItBegin,num,_NUll_Value);
+  {$endif}
+end;
+
+constructor _TVector.Create(const ItBegin, ItEnd: _IIterator);
+begin
+  inherited Create();
+  self.Insert(self.ItBegin,ItBegin, ItEnd);
+end;
+
+constructor _TVector.Create(const AVector: _TVector);
+{$ifdef _DGL_ObjValue}
+var
+  i : integer;
+{$endif}
+begin
+  inherited Create();
+  if AVector.FCount>0 then
+  begin
+    self.FCount:=AVector.FCount;
+    self.SetNewCapability(FCount);
+    {$ifdef _DGL_ObjValue}
+    for i:=0 to FCount-1 do FDataArray[i]:=_CopyCreateNew(AVector.FDataArray[i]);
+    {$else}
+    Copy(@AVector.FDataArray[0],@AVector.FDataArray[AVector.FCount],@FDataArray[0]);
+    {$endif}
+  end;
+end;
+
+procedure _TVector.Erase(const ItBegin, ItEnd: _IIterator);
+var
+  DelCount : integer;
+  DelPos   : integer;
+  {$ifdef _DGL_ObjValue}
+  i : integer;
+  {$endif}
+begin
+  DelPos:=(ItBegin._Data0-integer(UnSafe_GetVectorBufPointer(0))) div sizeof(_ValueType);
+  DelCount:=ItBegin.Distance(ItEnd);
+  if DelCount<=0 then exit;
+  {$ifdef _DGL_ObjValue}
+  for i:=DelPos to DelPos+DelCount-1 do _Free(FDataArray[i]);
+  {$endif}
+  Copy(@FDataArray[DelPos+DelCount],@FDataArray[FCount],@FDataArray[DelPos]);
+  fill(@FDataArray[FCount-DelCount],@FDataArray[FCount],_NULL_Value);
+  dec(self.FCount,DelCount);
+end;
+
+procedure _TVector.Erase(const ItPos: _IIterator);
+var
+  ItEnd : _IIterator;
+begin
+  ItEnd:=ItPos.Clone;
+  ItEnd.Next;
+  Erase(ItPos,ItEnd);
+end;
+
+function _TVector.GetFrontValue: _ValueType;
+begin
+  Assert(self.FCount>0);
+  result:=self.FDataArray[0];
+end;
+
+procedure _TVector.SetFrontValue(const aValue:_ValueType);
+begin
+  Assert(self.FCount>0);
+  {$ifdef _DGL_ObjValue}
+    _Assign(self.FDataArray[0],aValue);
+  {$else}
+    self.FDataArray[0]:=aValue;
+  {$endif}
+end;
+
+procedure _TVector.EraseByIndex(const Index: integer);
+begin
+  Erase(NewIterator(Index));
+end;
+
+procedure _TVector.Insert(const Value:_ValueType);
+begin
+  self.pushBack(Value);
+end;
+
+procedure _TVector.Insert(const ItPos: _IIterator; const num: integer; const Value: _ValueType);
+var
+  i : integer;
+  IndexPos : integer;
+begin
+  if num=0 then exit;
+  IndexPos:=(ItPos._Data0-integer(UnSafe_GetVectorBufPointer(0))) div sizeof(_ValueType);
+  Assert(IndexPos>=0);
+  Assert(IndexPos<=FCount);
+  Assert(num>=0);
+
+  self.SetNewCapability(FCount+num);
+  ReCopy(@FDataArray[IndexPos],@FDataArray[FCount],@FDataArray[IndexPos+num]);
+
+  for i:=0 to num-1 do
+  begin
+    {$ifdef _DGL_ObjValue}
+    FDataArray[IndexPos+i]:=_CopyCreateNew(Value);
+    {$else}
+    FDataArray[IndexPos+i]:=Value;
+    {$endif}
+  end;
+  inc(FCount,num);
+end;
+
+procedure _TVector.PopFront;
+begin
+  Assert(FCount>0);
+  self.Erase(self.ItBegin);
+end;
+
+procedure _TVector.PushFront(const Value: _ValueType);
+begin
+  self.Insert(self.ItBegin,Value);
+end;
+
+procedure _TVector.Reserve(const ReserveSize: integer);
+begin
+  self.SetNewCapability(ReserveSize);
+end;
+
+procedure _TVector.Resize(const num: integer; const Value: _ValueType);
+{$ifdef _DGL_ObjValue}
+var
+  i : integer;
+{$endif}
+begin
+  SetNewCapability(num);
+  if num<self.FCount then
+  begin
+    {$ifdef _DGL_ObjValue}
+    for i:=num to FCount-1 do _Free(FDataArray[i]);
+    {$endif}
+    fill(@FDataArray[num],@FDataArray[FCount],_NULL_Value);
+  end
+  else
+  begin
+    {$ifdef _DGL_ObjValue}
+      for i:=FCount to num-1 do FDataArray[i]:=_CopyCreateNew(Value);
+    {$else}
+      {$ifdef _DGL_Compare}
+      if (not (_IsEqual(Value,_NULL_Value))) then
+      {$else}
+      if not (Value=_NULL_Value) then
+      {$endif}
+        fill(@FDataArray[FCount],@FDataArray[num],Value);
+    {$endif}
+  end;
+  FCount:=num;  
+end;
+
+procedure _TVector.Resize(const num:integer);
+{$ifdef  _DGL_ObjValue}
+var
+  _Default_Value : _ValueType;
+{$endif}
+begin
+  {$ifdef  _DGL_ObjValue}
+  _Default_Value:=_CreateNew();
+  self.Resize(num,_Default_Value);
+  _Free(_Default_Value);
+  {$else}
+  self.Resize(num,_NULL_Value);
+  {$endif}
+end;
+
+class procedure _TVector.Copy(PBegin, PEnd, PDest: _PValueType);
+begin
+  while (PBegin<>PEnd) do
+  begin
+    PDest^:=PBegin^;
+    inc(PBegin);
+    inc(PDest);
+  end;
+end;
+
+class procedure _TVector.Fill(PBegin, PEnd: _PValueType; const Value: _ValueType);
+begin
+  while (PBegin<>PEnd) do
+  begin
+    PBegin^:=Value;
+    inc(PBegin);
+  end;
+end;
+
+class procedure _TVector.ReCopy(PBegin, PEnd, PDest: _PValueType);
+var
+  CopyCount : integer;
+  i : integer;
+begin
+  CopyCount:=(integer(PEnd)-integer(PBegin)) div sizeof(_ValueType);
+  //从后面开始拷贝，避免覆盖
+  PEnd:=PBegin;
+  dec(PEnd);
+  i:= integer(CopyCount-1)*Sizeof(_ValueType);
+  PBegin:=_PValueType(integer(PBegin)+i);
+  PDest:=_PValueType(integer(PDest)+i);
+  while PBegin<>PEnd do
+  begin
+    PDest^:=PBegin^;
+    dec(PBegin);
+    dec(PDest);
+  end;
+end;
+
+procedure _TVector.PushFront(const num: integer; Value: _ValueType);
+var
+  EndIndex:integer;
+begin
+  EndIndex:=FCount;
+  self.Resize(EndIndex+num);
+  self.ReCopy(@FDataArray[0],@FDataArray[EndIndex],@FDataArray[num]);
+  {$ifdef  _DGL_ObjValue}
+    for EndIndex:=0 to num-1 do FDataArray[EndIndex]:=_CopyCreateNew(Value);
+  {$else}
+    self.Fill(@FDataArray[0],@FDataArray[num],Value);
+  {$endif}
+end;
+
+procedure _TVector.PushFront(const ItBegin,ItEnd: _IIterator);
+begin
+  self.Insert(self.ItBegin,ItBegin,ItEnd);
+end;
+
+function  _TVector.Clone():_IContainer;
+begin
+  result:=_TVector.Create(self);
+end;
+
+procedure _TVector.CloneToInterface(out NewContainer);
+begin
+  _IVector(NewContainer):=_TVector.Create(self);
+end;
+
+function  _TVector.UnSafe_GetVectorBufPointer(const Index:integer): _PValueType;
+begin
+  if FDataArray=nil then
+    result:=nil
+  else
+    result:=@FDataArray[Index];
+end;
+
+procedure _TVector.Assign(const num:integer;const Value: _ValueType);
+begin
+  self.Clear();
+  self.PushBack(num,Value);
+end;
+
+procedure _TVector.Assign(const ItBegin,ItEnd:_IIterator);
+var
+  tmpVector : _TVector;
+begin
+  if (ItBegin._ObjIteratorClass=_TVectorIterator) then  //todo: Check safe
+  begin
+    tmpVector :=_TVector.Create();
+    try
+      tmpVector.PushBack(ItBegin,ItEnd);
+      self.Swap(tmpVector);
+    finally
+      tmpVector.Free;
+    end;
+    exit;
+  end
+  else
+  begin
+    self.Clear();
+    self.PushBack(ItBegin,ItEnd);
+  end;
+end;
+
+{$endif } // __Vector_inc_pas_

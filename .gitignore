@@ -6,5 +6,7 @@ __history
 *.drc
 *.map
 *.ddp
-
 .DS_Store
+*.exe
+*.cfg
+*.dof

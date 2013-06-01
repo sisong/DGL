@@ -1,0 +1,903 @@
+(*
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+{*_TRB_Tree 的旋转和平衡算法借鉴了SGI的算法实现
+ *
+ * Copyright (c) 1996,1997
+ * Silicon Graphics Computer Systems, Inc.
+ *
+ * Permission to use, copy, modify, distribute and sell this software
+ * and its documentation for any purpose is hereby granted without fee,
+ * provided that the above copyright notice appear in all copies and
+ * that both that copyright notice and this permission notice appear
+ * in supporting documentation.  Silicon Graphics makes no
+ * representations about the suitability of this software for any
+ * purpose.  It is provided "as is" without express or implied warranty.
+ *
+ *
+ * Copyright (c) 1994
+ * Hewlett-Packard Company
+ *
+ * Permission to use, copy, modify, distribute and sell this software
+ * and its documentation for any purpose is hereby granted without fee,
+ * provided that the above copyright notice appear in all copies and
+ * that both that copyright notice and this permission notice appear
+ * in supporting documentation.  Hewlett-Packard Company makes no
+ * representations about the suitability of this software for any
+ * purpose.  It is provided "as is" without express or implied warranty.
+ *
+ *
+ *}
+
+//------------------------------------------------------------------------------
+// _RB_Tree的实现
+// Create by HouSisong, 2006.10.20
+//------------------------------------------------------------------------------
+
+//_RB_Tree.inc_pas ; _RB_Tree.inc_h
+
+{$ifndef __RB_Tree_inc_pas_}
+{$define __RB_Tree_inc_pas_}
+
+
+function _RB_Tree_Minimum(const PNode:_PRB_TreeNode):_PRB_TreeNode;
+begin
+  result:=PNode;
+  while (result.Left<>nil) do
+    result:=result.Left;
+end;
+
+function _RB_Tree_Maximum(const PNode:_PRB_TreeNode):_PRB_TreeNode;
+begin
+  result:=PNode;
+  while (result.Right<>nil) do
+    result:=result.Right;
+end;
+
+procedure _RB_Tree_ReBalance(pNodeNew:_PRB_TreeNode;var pNodeRoot:_PRB_TreeNode);
+var
+  tmpPNode : _PRB_TreeNode;
+begin
+  pNodeNew.Color:=_rbRed;
+  while (pNodeNew<>pNodeRoot) and (pNodeNew.Parent.Color=_rbRed) do
+  begin
+    if (pNodeNew.Parent=pNodeNew.Parent.Parent.Left) then
+    begin
+      tmpPNode:=pNodeNew.Parent.Parent.Right;
+      if (tmpPNode<>nil) and (tmpPNode.Color=_rbRed) then
+      begin
+        pNodeNew.Parent.Color:=_rbBlack;
+        tmpPNode.Color:=_rbBlack;
+        pNodeNew.Parent.Parent.Color:=_rbRed;
+        pNodeNew:=pNodeNew.Parent.Parent;
+      end
+      else
+      begin
+        if (pNodeNew=pNodeNew.Parent.Right) then
+        begin
+          pNodeNew:=pNodeNew.Parent;
+          _RB_Tree_Rotate_Left(pNodeNew,pNodeRoot);
+        end;
+        pNodeNew.Parent.Color:=_rbBlack;
+        pNodeNew.Parent.Parent.Color:=_rbRed;
+        _RB_Tree_Rotate_Right(pNodeNew.Parent.Parent,pNodeRoot);
+      end;
+    end
+    else
+    begin
+      tmpPNode:=pNodeNew.Parent.Parent.Left;
+
+      if (tmpPNode<>nil) and (tmpPNode.Color=_rbRed) then
+      begin
+        pNodeNew.Parent.Color:=_rbBlack;
+        tmpPNode.Color:=_rbBlack;
+        pNodeNew.Parent.Parent.Color:=_rbRed;
+        pNodeNew:=pNodeNew.Parent.Parent;
+      end
+      else
+      begin
+        if (pNodeNew=pNodeNew.Parent.Left) then
+        begin
+          pNodeNew:=pNodeNew.Parent;
+          _RB_Tree_Rotate_Right(pNodeNew,pNodeRoot);
+        end;
+        pNodeNew.Parent.Color:=_rbBlack;
+        pNodeNew.Parent.Parent.Color:=_rbRed;
+        _RB_Tree_Rotate_Left(pNodeNew.Parent.Parent,pNodeRoot);
+      end;
+    end;
+  end;
+  pNodeRoot.Color:=_rbBlack;
+end;
+
+procedure _RB_Tree_Rotate_Left(pNode:_PRB_TreeNode;var pNodeRoot:_PRB_TreeNode);
+var
+  tmpPNode : _PRB_TreeNode;
+begin
+  tmpPNode:= pNode.Right;
+  pNode.Right:=tmpPNode.Left;
+  if (tmpPNode.Left<>nil) then
+    tmpPNode.Left.Parent:=pNode;
+  tmpPNode.Parent:=pNode.Parent;
+
+  if (pNode=pNodeRoot)  then
+    pNodeRoot:=tmpPNode
+  else if (pNode=pnode.Parent.Left) then
+    pNode.Parent.Left:=tmpPNode
+  else
+    pNode.Parent.Right:=tmpPNode;
+  tmpPNode.Left:=pNode;
+  pNode.Parent:=tmpPNode;
+end;
+
+procedure _RB_Tree_Rotate_Right(pNode:_PRB_TreeNode;var pNodeRoot:_PRB_TreeNode);
+var
+  tmpPNode : _PRB_TreeNode;
+begin
+  tmpPNode:= pNode.Left;
+  pNode.Left:=tmpPNode.Right;
+  if (tmpPNode.Right<>nil) then
+    tmpPNode.Right.Parent:=pNode;
+  tmpPNode.Parent:=pNode.Parent;
+
+  if (pNode=pNodeRoot)  then
+    pNodeRoot:=tmpPNode
+  else if (pNode=pnode.Parent.Right) then
+    pNode.Parent.Right:=tmpPNode
+  else
+    pNode.Parent.Left:=tmpPNode;
+  tmpPNode.Right:=pNode;
+  pNode.Parent:=tmpPNode;
+end;
+
+function  _Rb_Tree_Rebalance_For_Erase(ePosNode:_PRB_TreeNode;var TreeRoot,MostLeftNode,MostRightNode:_PRB_TreeNode):_PRB_TreeNode;
+var
+  tRBNode,DelTagRBNode,tRBNode_parent : _PRB_TreeNode;
+  tmpColor : _TRB_TreeColorType;
+  RtRBNode : _PRB_TreeNode;
+begin
+  DelTagRBNode := ePosNode;
+  //tRBNode := nil;
+  //tRBNode_parent := nil;
+  if (DelTagRBNode.left = nil) then     // ePosNode has at most one non-null child. y = z.
+    tRBNode := DelTagRBNode.right     // tRBNode might be null.
+  else
+  begin
+    if (DelTagRBNode.right = nil) then  // ePosNode has exactly one non-null child. y = z.
+      tRBNode := DelTagRBNode.left    // tRBNode is not null.
+    else
+    begin                    // ePosNode has two non-null children.  Set DelTagRBNode to
+      DelTagRBNode := DelTagRBNode.right;   //   ePosNode's successor.  tRBNode might be null.
+      while (DelTagRBNode.left <> nil) do
+        DelTagRBNode := DelTagRBNode.left;
+      tRBNode := DelTagRBNode.right;
+    end;
+  end;
+  if (DelTagRBNode <> ePosNode) then
+  begin           // relink y in place of z.  y is z's successor
+    ePosNode.left.parent := DelTagRBNode;
+    DelTagRBNode.left := ePosNode.left;
+    if (DelTagRBNode <> ePosNode.right) then
+    begin
+      tRBNode_parent := DelTagRBNode.parent;
+      if (tRBNode<>nil) then tRBNode.parent := DelTagRBNode.parent;
+      DelTagRBNode.parent.left := tRBNode;      // DelTagRBNode must be a child of left
+      DelTagRBNode.right := ePosNode.right;
+      ePosNode.right.parent := DelTagRBNode;
+    end
+    else
+      tRBNode_parent := DelTagRBNode;
+    if (TreeRoot = ePosNode) then
+      TreeRoot := DelTagRBNode
+    else if (ePosNode.parent.left = ePosNode) then
+      ePosNode.parent.left := DelTagRBNode
+    else
+      ePosNode.parent.right := DelTagRBNode;
+    DelTagRBNode.parent := ePosNode.parent;
+    tmpColor:=DelTagRBNode.color;
+    DelTagRBNode.color:=ePosNode.color;
+    ePosNode.color:=tmpColor;
+    DelTagRBNode := ePosNode;
+    // DelTagRBNode now points to node to be actually deleted
+  end
+  else
+  begin                         // DelTagRBNode = ePosNode
+    tRBNode_parent := DelTagRBNode.parent;
+    if (tRBNode<>nil) then  tRBNode.parent := DelTagRBNode.parent;
+    if (TreeRoot = ePosNode) then
+      TreeRoot := tRBNode
+    else
+    begin
+      if (ePosNode.parent.left = ePosNode) then
+        ePosNode.parent.left := tRBNode
+      else
+        ePosNode.parent.right := tRBNode;
+    end;
+    if (MostLeftNode = ePosNode) then
+      if (ePosNode.right = nil) then        // ePosNode.left must be null also
+        MostLeftNode := ePosNode.parent
+    // makes MostLeftNode = header if ePosNode = TreeRoot
+      else
+        MostLeftNode :=  _RB_Tree_Minimum(tRBNode);
+    if (MostRightNode = ePosNode) then
+    begin
+      if (ePosNode.left = nil) then         // ePosNode.right must be null also
+        MostRightNode := ePosNode.parent
+    // makes MostRightNode = header if ePosNode = TreeRoot
+      else                      // tRBNode = ePosNode.left
+        MostRightNode := _RB_Tree_Maximum(tRBNode);
+    end;
+  end;
+  if (DelTagRBNode.color <> _rbRed) then
+  begin
+    while ((tRBNode <> TreeRoot)  and  ((tRBNode = nil)  or  (tRBNode.color = _rbBlack))) do
+    begin
+      if (tRBNode = tRBNode_parent.left) then
+       begin
+        RtRBNode := tRBNode_parent.right;
+        if (RtRBNode.color = _rbRed) then
+        begin
+          RtRBNode.color := _rbblack;
+          tRBNode_parent.color := _rbred;
+          _Rb_tree_rotate_left(tRBNode_parent, TreeRoot);
+          RtRBNode := tRBNode_parent.right;
+        end;
+        if (((RtRBNode.left = nil)  or
+             (RtRBNode.left.color = _rbblack))  and
+            ((RtRBNode.right = nil)  or
+             (RtRBNode.right.color = _rbblack)))then
+        begin
+          RtRBNode.color := _rbred;
+          tRBNode := tRBNode_parent;
+          tRBNode_parent := tRBNode_parent.parent;
+        end
+        else
+        begin
+          if ((RtRBNode.right = nil)  or
+              (RtRBNode.right.color = _rbblack)) then
+          begin
+            if (RtRBNode.left<>nil) then RtRBNode.left.color := _rbblack;
+            RtRBNode.color := _rbred;
+            _Rb_tree_rotate_right(RtRBNode, TreeRoot);
+            RtRBNode := tRBNode_parent.right;
+          end;
+          RtRBNode.color := tRBNode_parent.color;
+          tRBNode_parent.color := _rbblack;
+          if (RtRBNode.right<>nil) then RtRBNode.right.color := _rbblack;
+          _Rb_tree_rotate_left(tRBNode_parent, TreeRoot);
+          break;
+        end;
+      end
+      else
+      begin                   // same as above, with right <. left.
+        RtRBNode := tRBNode_parent.left;
+        if (RtRBNode.color = _rbred) then
+        begin
+          RtRBNode.color := _rbblack;
+          tRBNode_parent.color := _rbred;
+          _Rb_tree_rotate_right(tRBNode_parent, TreeRoot);
+          RtRBNode := tRBNode_parent.left;
+        end;
+        if (((RtRBNode.right = nil)  or
+             (RtRBNode.right.color = _rbblack))  and
+            ((RtRBNode.left = nil)  or
+             (RtRBNode.left.color = _rbblack))) then
+        begin
+          RtRBNode.color := _rbred;
+          tRBNode := tRBNode_parent;
+          tRBNode_parent := tRBNode_parent.parent;
+        end
+        else
+        begin
+          if ((RtRBNode.left = nil)  or
+              (RtRBNode.left.color = _rbblack)) then
+          begin
+            if (RtRBNode.right<>nil) then RtRBNode.right.color := _rbblack;
+            RtRBNode.color := _rbred;
+            _Rb_tree_rotate_left(RtRBNode, TreeRoot);
+            RtRBNode := tRBNode_parent.left;
+          end;
+          RtRBNode.color := tRBNode_parent.color;
+          tRBNode_parent.color := _rbblack;
+          if (RtRBNode.left<>nil) then RtRBNode.left.color := _rbblack;
+          _Rb_tree_rotate_right(tRBNode_parent, TreeRoot);
+          break;
+        end;
+      end;
+    end;
+    if (tRBNode<>nil) then tRBNode.color := _rbblack;
+  end;
+  result:=DelTagRBNode;
+end;
+
+
+procedure _TRB_TreeIt_Next(var it:_TRB_TreeIterator);
+var
+  tmpNode,itTmpNode : _PRB_TreeNode;
+begin
+  if (it.node.Right<>nil) then
+  begin
+    tmpNode:=it.node.Right;
+    while (tmpNode.Left<>nil) do
+      tmpNode:=tmpNode.Left;
+    it.Node:=tmpNode;
+  end
+  else
+  begin
+    itTmpNode:=it.node;
+    tmpNode :=itTmpNode.Parent;
+    while (itTmpNode=tmpNode.Right) do
+    begin
+      itTmpNode:=tmpNode;
+      tmpNode:=tmpNode.Parent;
+    end;
+    if (itTmpNode.Right<>tmpNode) then
+      it.Node:=tmpNode
+    else
+      it.Node:=itTmpNode;
+  end;
+end;
+
+procedure _TRB_TreeIt_Previous(var it:_TRB_TreeIterator);
+var
+  tmpNode : _PRB_TreeNode;
+begin
+  if ( (it.node.Color=_rbRed) and (it.node.Parent.Parent=it.node) ) then
+    it.node:=it.node.Right
+  else if (it.node.Left<>nil) then
+  begin
+    tmpNode:=it.node.Left;
+    while (tmpNode.Right<>nil) do
+      tmpNode:=tmpNode.Right;
+    it.node:=tmpNode;
+  end
+  else
+  begin
+    tmpNode :=it.node.Parent;
+    while (it.node=tmpNode.Left) do
+    begin
+      it.node:=tmpNode;
+      tmpNode:=tmpNode.Parent;
+    end;
+    it.node:=tmpNode;
+  end;
+end;
+
+{ _TRB_Tree }
+
+function _TRB_Tree.getNewNode(const Key: _RB_Tree_KeyType): _PRB_TreeNode;
+begin
+  //result:=nil;
+  if F_DGL_OnlySet then
+    system.New(_PRB_TreeNode_OnlySet(result))
+  else
+    system.New(result);
+
+  try
+    {$ifdef _DGL_ObjValue_Key}
+      result.Key:=_CopyCreateNew_Key(Key);
+    {$else}
+      result.Key:=Key;
+    {$endif}
+    result.Parent:=nil;
+    result.Left:=nil;
+    result.Right:=nil;
+    result.Color:=_rbRed;
+  except
+    self.DisposeNode(result);
+    raise;
+  end;
+end;
+
+function _TRB_Tree.getNewNode(const Key: _RB_Tree_KeyType;const Value: _RB_Tree_ValueType): _PRB_TreeNode;
+begin
+  result:= getNewNode(Key);
+  try
+    if (not F_DGL_OnlySet) then
+    begin
+      {$ifdef _DGL_ObjValue_Value}
+        result.Value:=_CopyCreateNew_Value(Value);
+      {$else}
+        result.Value:=Value;
+      {$endif}
+    end;
+  except
+    self.DisposeNode(result);
+    raise;
+  end;
+end;
+
+procedure _TRB_Tree.DisposeNode(PNode: _PRB_TreeNode);
+begin
+  {$ifdef _DGL_ObjValue_Key}
+  _Free_Key(PNode.Key);
+  {$endif}
+  {$ifdef _DGL_ObjValue_Value}
+    if not F_DGL_OnlySet then
+      _Free_Value(PNode.Value);
+  {$endif}
+
+  if F_DGL_OnlySet then
+    system.Dispose(_PRB_TreeNode_OnlySet(PNode))
+  else
+    system.Dispose(PNode);
+end;
+
+procedure _TRB_Tree.Inti;
+begin
+  if (FHeader=nil) then
+    system.new(FHeader);
+  FHeader.Color:=_rbRed;
+  FHeader.Parent:=nil;
+  FHeader.Left:=_PRB_TreeNode(FHeader);
+  FHeader.Right:=_PRB_TreeNode(FHeader);
+  self.FNodeCount:=0;
+end;
+
+constructor _TRB_Tree.Create(const IsOnlySet: boolean);
+begin
+  inherited Create();
+  self.F_DGL_OnlySet:=IsOnlySet;
+  Inti();
+end;
+
+destructor _TRB_Tree.Destroy;
+begin
+  self.Clear();
+  system.Dispose(FHeader);
+  FHeader:=nil;
+  inherited;
+end;
+
+procedure _TRB_Tree.DisposeAll(EraseNode:_PRB_TreeNode);
+  procedure _DisposeAll(EraseNode:_PRB_TreeNode);
+  begin
+    if (EraseNode.Left<>nil) then
+      _DisposeAll(EraseNode.Left);
+    if (EraseNode.Right<>nil) then
+      _DisposeAll(EraseNode.Right);
+    self.DisposeNode(EraseNode);
+  end;
+begin
+  // erase without rebalancing
+  if (EraseNode<>nil) then
+    _DisposeAll(EraseNode);
+end;
+
+procedure _TRB_Tree.Clear();
+begin
+  if (self.FNodeCount>0) then
+  begin
+    self.DisposeAll(self.FHeader.Parent);
+    Inti();
+  end;
+end;
+
+function _TRB_Tree.ItBegin: _TRB_TreeIterator;
+begin
+  result.Node:=self.FHeader.Left;
+end;
+
+function _TRB_Tree.ItEnd: _TRB_TreeIterator;
+begin
+  result.Node:=self.FHeader;
+end;
+
+function _TRB_Tree.IsEmpty: boolean;
+begin
+  result:=self.FNodeCount=0;
+end;
+
+function _TRB_Tree.Size: integer;
+begin
+  result:=self.FNodeCount;
+end;
+
+function _TRB_Tree.FindInsertNodeParent(
+  const Key: _RB_Tree_KeyType;const pIsInsertLeftNode:PBoolean): _PRB_TreeNode;
+var
+  pNodePos: _PRB_TreeNode;
+  resultComp : boolean;
+begin
+  result:=self.FHeader;
+  pNodePos :=self.FHeader.Parent;
+  resultComp:=true;
+  while (pNodePos<>nil) do
+  begin
+    result:=pNodePos;
+    {$ifdef _DGL_Compare_Key}
+    resultComp:=_IsLess_Key(Key,pNodePos.Key);
+    {$else}
+    resultComp:=(Key<pNodePos.Key); 
+    {$endif}
+    if resultComp then
+      pNodePos:=pNodePos.Left
+    else
+      pNodePos:=pNodePos.Right;
+  end;
+  if pIsInsertLeftNode<>nil then
+    pIsInsertLeftNode^:=resultComp;
+end;
+
+procedure _TRB_Tree.privateAddNode(pNodeNew, pNodePos,
+  pNodeParent: _PRB_TreeNode; const Key: _RB_Tree_KeyType);
+begin
+  if (pNodeParent=self.FHeader)or(pNodePos<>nil) or
+    {$ifdef _DGL_Compare_Key}
+    (_IsLess_Key(Key,pNodeParent.Key))
+    {$else}
+    (Key<pNodeParent.Key)
+    {$endif}
+     then
+  begin
+    pNodeParent.Left := pNodeNew;
+
+    if (pNodeParent = self.FHeader) then
+    begin
+      self.FHeader.Parent := pNodeNew;
+      self.FHeader.Right := pNodeNew;
+    end
+    else if (pNodeParent = self.FHeader.Left) then
+      self.FHeader.left := pNodeNew;
+  end
+  else
+  begin
+    pNodeParent.Right := pNodeNew;
+    if (pNodeParent = self.FHeader.Right) then
+      self.FHeader.Right := pNodeNew;
+  end;
+  pNodeNew.Parent := pNodeParent;
+  pNodeNew.Left := nil;
+  pNodeNew.Right := nil;
+  _RB_Tree_ReBalance(pNodeNew, self.FHeader.Parent);
+  inc(self.FNodeCount);
+end;
+
+procedure _TRB_Tree.AddNode(pNodePos: _PRB_TreeNode;pNodeParent: _PRB_TreeNode;
+  const Key: _RB_Tree_KeyType;const Value:_RB_Tree_ValueType);
+begin
+  privateAddNode(self.getNewNode(Key,Value),pNodePos,pNodeParent,Key);
+end;
+
+procedure _TRB_Tree.AddNode(pNodePos: _PRB_TreeNode;pNodeParent: _PRB_TreeNode;
+  const Key: _RB_Tree_KeyType);
+begin
+  privateAddNode(self.getNewNode(Key),pNodePos,pNodeParent,Key);
+end;
+
+procedure _TRB_Tree.MultiInsert(const Key: _RB_Tree_KeyType);
+begin
+  AddNode(nil,FindInsertNodeParent(Key),Key);
+end;
+
+procedure _TRB_Tree.MultiInsert(const Key: _RB_Tree_KeyType;
+  const Value: _RB_Tree_ValueType);
+begin
+  AddNode(nil,FindInsertNodeParent(Key),Key,Value);
+end;
+
+procedure _TRB_Tree.UniqueInsert(const Key: _RB_Tree_KeyType);
+var
+  IsInsertLeftNode : Boolean;
+  InsertNodeParent : _PRB_TreeNode;
+  ItInsert : _TRB_TreeIterator;
+begin
+  InsertNodeParent:=FindInsertNodeParent(Key,@IsInsertLeftNode);
+
+  ItInsert.Node:=InsertNodeParent;
+  if (IsInsertLeftNode) then
+  begin
+    if (ItInsert.Node=self.ItBegin.Node) then
+    begin
+      AddNode(nil,InsertNodeParent,Key);
+      exit;
+    end
+    else
+      _TRB_TreeIt_Previous(ItInsert);
+  end;
+
+  {$ifdef _DGL_Compare_Key}
+  if (_IsLess_Key(ItInsert.Node.Key,Key)) then
+  {$else}
+  if (ItInsert.Node.Key<Key) then
+  {$endif}
+    AddNode(nil,InsertNodeParent,Key);
+  //else  do noting
+end;
+
+procedure _TRB_Tree.UniqueInsert(const Key: _RB_Tree_KeyType;
+  const Value: _RB_Tree_ValueType);
+var
+  IsInsertLeftNode : Boolean;
+  InsertNodeParent : _PRB_TreeNode;
+  ItInsert : _TRB_TreeIterator;
+begin
+  InsertNodeParent:=FindInsertNodeParent(Key,@IsInsertLeftNode);
+
+  ItInsert.Node:=InsertNodeParent;
+  if (IsInsertLeftNode) then
+  begin
+    if (ItInsert.Node=self.ItBegin.Node) then
+    begin
+      AddNode(nil,InsertNodeParent,Key,Value);
+      exit;
+    end
+    else
+      _TRB_TreeIt_Previous(ItInsert);
+  end;
+
+  {$ifdef _DGL_Compare_Key}
+  if (_IsLess_Key(ItInsert.Node.Key,Key)) then
+  {$else}
+  if (ItInsert.Node.Key<Key) then 
+  {$endif}
+    AddNode(nil,InsertNodeParent,Key,Value);
+  //else  do noting
+end;
+
+function  _TRB_Tree.CountRange(const Key:_RB_Tree_KeyType;out ItBegin,ItEnd:_TRB_TreeIterator):integer;
+var
+  it :_TRB_TreeIterator;
+begin
+  EqualRange(Key,ItBegin,ItEnd);
+
+  result:=0;
+  it.Node:=ItBegin.Node;
+  while (It.Node<>ItEnd.Node) do
+  begin
+    inc(result);
+    _TRB_TreeIt_Next(It);
+  end;
+end;
+
+function _TRB_Tree.Count(const Key: _RB_Tree_KeyType): integer;
+var
+  ItBegin,ItEnd: _TRB_TreeIterator;
+begin
+  result:=self.CountRange(Key,ItBegin,ItEnd);
+end;
+
+procedure _TRB_Tree.EqualRange(const Key: _RB_Tree_KeyType; out ItBegin,
+  ItEnd: _TRB_TreeIterator);
+begin
+  ItBegin:=self.LowerBound(Key);
+  ItEnd:=self.UpperBound(Key);
+end;
+
+procedure _TRB_Tree.Erase(const ItPos: _TRB_TreeIterator);
+var
+  tmpPNode : _PRB_TreeNode;
+begin
+  tmpPNode:= _Rb_Tree_Rebalance_For_Erase(ItPos.Node,
+                                          self.FHeader.Parent,
+                                          self.FHeader.Left,
+                                          self.FHeader.Right);
+  self.DisposeNode(tmpPNode);
+  dec(self.FNodeCount);
+end;
+
+procedure _TRB_Tree.Erase(const ItBegin, ItEnd: _TRB_TreeIterator);
+var
+  it     : _TRB_TreeIterator;
+  itBack : _TRB_TreeIterator;
+begin
+  it.Node:=ItBegin.Node;
+  while (it.Node<>ItEnd.Node) do
+  begin
+    itBack:=it;
+    _TRB_TreeIt_Next(it);
+    Erase(itBack);
+  end;
+end;
+
+function _TRB_Tree.EraseKey(const Key: _RB_Tree_KeyType): integer;
+var
+  ItBegin,ItEnd: _TRB_TreeIterator;
+begin
+  result:=self.CountRange(Key,ItBegin,ItEnd);
+  if result>0 then
+    self.Erase(ItBegin,ItEnd);
+end;
+
+function _TRB_Tree.EraseValue(const Key: _RB_Tree_KeyType;
+  const Value: _RB_Tree_ValueType): integer;
+var
+  It: _TRB_TreeIterator;
+begin
+  result:=0;
+  It:=self.FindKey(Key);
+  while It.Node<>self.ItEnd.Node do
+  begin
+    self.Erase(It);
+    inc(result);
+    It:=self.FindKey(Key);
+  end;
+end;
+
+function _TRB_Tree.EraseValue(const Value: _RB_Tree_ValueType): integer;
+var
+  It: _TRB_TreeIterator;
+begin
+  result:=0;
+  It:=self.FindValue(Value);
+  while It.Node<>self.ItEnd.Node do
+  begin
+    self.Erase(It);
+    inc(result);
+    It:=self.FindValue(Value);
+  end;
+end;
+
+function _TRB_Tree.FindKey(const Key: _RB_Tree_KeyType): _TRB_TreeIterator;
+begin
+  result:=LowerBound(Key);
+  if (result.Node=self.FHeader) or
+    {$ifdef _DGL_Compare_Key}
+    (_IsLess_Key(Key,result.Node.Key))
+    {$else}
+    (Key<result.Node.Key)
+    {$endif}
+    then
+      result.Node:=_PRB_TreeNode(self.FHeader);
+end;
+
+function _TRB_Tree.FindValue(
+  const Value: _RB_Tree_ValueType): _TRB_TreeIterator;
+var
+  iEnd : _TRB_TreeIterator;
+begin
+  iEnd:=self.ItEnd();
+  result:=self.itBegin();
+  while (result.Node<>iEnd.Node) do
+  begin
+    {$ifdef _DGL_Compare_Value}
+    if _IsEqual_Value(result.Node.Value,Value) then
+    {$else}
+    if result.Node.Value=Value then
+    {$endif}
+      exit
+    else
+      _TRB_TreeIt_Next(result);
+  end;
+end;
+
+function _TRB_Tree.GetItemValue(
+  const Key: _RB_Tree_KeyType): _RB_Tree_ValueType;
+var
+  It : _TRB_TreeIterator;
+begin
+  It:=FindKey(Key);
+  if it.Node<>self.FHeader then
+    result:=It.Node.Value
+  else
+    raise ERBTreeKeyRangeError.Create(csRBTreeKey_Error);
+end;
+
+function _TRB_Tree.LowerBound(
+  const Key: _RB_Tree_KeyType): _TRB_TreeIterator;
+var
+  x,y : _PRB_TreeNode;
+begin
+  y := self.FHeader;
+  x := self.FHeader.Parent;
+
+  while (x <> nil)  do
+  begin
+    {$ifdef _DGL_Compare_Key}
+    if (not (_IsLess_Key(x.Key,Key))) then
+    {$else}
+    if (not (x.Key<Key)) then
+    {$endif}
+    begin
+      y := x;
+      x := x.Left;
+    end
+    else
+      x := x.Right;
+  end;
+  result.Node:=y;
+end;
+
+function _TRB_Tree.UpperBound(
+  const Key: _RB_Tree_KeyType): _TRB_TreeIterator;
+var
+  x,y: _PRB_TreeNode;
+begin
+  y := self.FHeader;
+  x := self.FHeader.Parent;
+
+  while (x <> nil) do
+  begin
+    {$ifdef _DGL_Compare_Key}
+    if (_IsLess_Key(Key,x.Key)) then
+    {$else}
+    if ((Key<x.Key)) then
+    {$endif}
+    begin
+      y := x;
+      x := x.Left;
+    end
+    else
+      x := x.Right;
+  end;
+  result.Node:=(y);
+end;
+
+
+procedure _TRB_Tree.Swap(RBTree: _TRB_Tree);
+var
+  tmpInt     : integer;
+  tmpPNode   : _PRB_TreeNode;
+begin
+  if self=RBTree then exit;
+
+  Assert(F_DGL_OnlySet=RBTree.F_DGL_OnlySet);
+
+  tmpInt:=self.FNodeCount;
+  self.FNodeCount:=RBTree.FNodeCount;
+  RBTree.FNodeCount:=tmpInt;
+
+  tmpPNode:=self.FHeader;
+  self.FHeader:=RBTree.FHeader;
+  RBTree.FHeader:=tmpPNode;
+end;
+
+
+ { _TRBTreeBaseIterator }
+
+class procedure _TRBTreeBaseIterator.ItCreate(var SelfItData:_IIterator;const NodeIt:_TRB_TreeIterator);
+begin
+  SelfItData._ObjIteratorClass:=_TRBTreeBaseIterator;
+  _TRB_TreeIterator(SelfItData._Data0):=NodeIt;
+end;
+
+class function  _TRBTreeBaseIterator.GetValue(const SelfItData:_IIterator): _ValueType;
+begin
+  result:=_TRB_TreeIterator(SelfItData._Data0).Node.Value;
+end;
+
+class procedure _TRBTreeBaseIterator.SetValue(const SelfItData:_IIterator;const Value: _ValueType);
+begin
+  _TRB_TreeIterator(SelfItData._Data0).Node.Value:=Value;
+end;
+
+class function _TRBTreeBaseIterator.Map_GetKey(const SelfItData:_IIterator): _KeyType;
+begin
+  result:=_TRB_TreeIterator(SelfItData._Data0).Node.Key;
+end;
+
+
+class function  _TRBTreeBaseIterator.IsEqual(const SelfItData:_IIterator;const Iterator:_IIterator):boolean;
+begin
+  result:=(SelfItData._Data0=Iterator._Data0);
+end;
+
+class procedure _TRBTreeBaseIterator.Next(var SelfItData:_IIterator);
+begin
+  _TRB_TreeIt_Next(_TRB_TreeIterator(SelfItData._Data0));
+end;
+
+class procedure _TRBTreeBaseIterator.Previous(var SelfItData:_IIterator);
+begin
+  _TRB_TreeIt_Previous(_TRB_TreeIterator(SelfItData._Data0));
+end;
+
+class function _TRBTreeBaseIterator.IteratorTraits():TIteratorTraits;
+begin
+  result:=itBidirectionalTag;
+end;
+
+
+{$endif } // __RB_Tree_inc_pas_

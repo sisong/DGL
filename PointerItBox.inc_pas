@@ -1,0 +1,235 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// _TPointerItBoxµÄÊµÏÖ
+// Create by HouSisong, 2005.04.14
+//------------------------------------------------------------------------------
+
+{$ifndef  __PointerItBox_inc_pas_}
+{$define  __PointerItBox_inc_pas_}
+
+//PointerItBox.inc_h ; PointerItBox.inc_pas
+
+
+{$I DGLIntf.inc_pas}
+
+
+{ _IPointerItBox }
+
+procedure _IPointerItBox._SetPointer(const aPointer : _TNudePointerType);
+begin
+  self._ObjIteratorClass:=_TPointerItBox_Obj;
+  _TNudePointerType(self._Data0):=aPointer;
+end;
+
+procedure _IPointerItBox.SetPointer(const aPointerItBox : _IPointerItBox);
+begin
+  self._ObjIteratorClass:=aPointerItBox._ObjIteratorClass;
+  _TNudePointerType(self._Data0):=_TNudePointerType(aPointerItBox._Data0);
+end;
+
+procedure _IPointerItBox.SetPointerNil();
+begin
+  self._ObjIteratorClass:=_TPointerItBox_Obj;
+  self._Data0:=0;
+end;
+
+procedure _IPointerItBox.SetPointer(const aPointer : _TNudePointerType);
+begin
+  self._ObjIteratorClass:=_TPointerItBox_Obj;
+  _TNudePointerType(self._Data0):=aPointer;
+end;
+
+procedure _IPointerItBox.SetPointer(const aPointer : _TNudePointerType;const Step:integer);
+begin
+  self._ObjIteratorClass:=_TPointerItBox_Obj;
+  self._Data0:= integer(aPointer)+Step*(sizeof(_ValueType)) ;
+end;
+
+function  _IPointerItBox.getPointer():_TNudePointerType;
+begin
+  result:=_TNudePointerType(self._Data0);
+end;
+
+procedure _IPointerItBox.SetValue(const aValue: _ValueType);
+begin
+  {$ifdef _DGL_ObjValue}
+  _Assign(_TNudePointerType(Self._Data0)^,aValue);
+  {$else}
+  _TNudePointerType(Self._Data0)^:=aValue;
+  {$endif}
+end;
+function  _IPointerItBox.GetValue(): _ValueType;
+begin
+  result:=_TNudePointerType(Self._Data0)^;
+end;
+function  _IPointerItBox.GetNextValue(const Step:integer): _ValueType;
+begin
+  result:=_TNudePointerType(Self._Data0+Step*sizeof(_ValueType))^;
+end;
+procedure _IPointerItBox.SetNextValue(const Step:integer;const aValue:_ValueType);
+begin
+  {$ifdef _DGL_ObjValue}
+  _Assign(_TNudePointerType(Self._Data0+Step*sizeof(_ValueType))^,aValue);
+  {$else}
+  _TNudePointerType(Self._Data0+Step*sizeof(_ValueType))^:=aValue;
+  {$endif}
+end;
+function  _IPointerItBox.IsEqual(const Iterator:_IIterator):boolean;
+begin
+  result:=(Self._Data0=Iterator._Data0);
+end;
+function  _IPointerItBox.Distance(const Iterator:_IIterator):integer;
+begin
+  result:=(Iterator._Data0-Self._Data0) div sizeof(_ValueType);
+end;
+procedure _IPointerItBox.Assign (const Iterator:_IIterator);
+begin
+  Self._ObjIteratorClass:=Iterator._ObjIteratorClass;
+  Self._Data0:=Iterator._Data0;
+end;
+procedure _IPointerItBox.Next();
+begin
+  inc(PByte(Self._Data0),sizeof(_ValueType));
+end;
+procedure _IPointerItBox.Next(const Step:integer);
+begin
+  inc(PByte(Self._Data0),Step*sizeof(_ValueType));
+end;
+procedure _IPointerItBox.Previous();
+begin
+  dec(PByte(Self._Data0),sizeof(_ValueType));
+end;
+function  _IPointerItBox.Clone():_IIterator;
+begin
+  result._ObjIteratorClass:=self._ObjIteratorClass;
+  result._Data0:=self._Data0;
+end;
+function  _IPointerItBox.Clone(const NextStep:integer):_IIterator;
+begin
+  result._ObjIteratorClass:=self._ObjIteratorClass;
+  result._Data0:=self._Data0+NextStep*sizeof(_ValueType);
+end;
+
+function _IPointerItBox.IteratorTraits():TIteratorTraits;
+begin
+  result:=itRandomAccessTag;
+end;
+
+
+{ _TPointerItBox_Obj }
+
+class procedure _TPointerItBox_Obj.ItCreate(var SelfItData:_IIterator;const aPointer : _TNudePointerType);
+begin
+  SelfItData._ObjIteratorClass:=_TPointerItBox_Obj;
+  _TNudePointerType(SelfItData._Data0):=aPointer;
+end;
+
+
+class procedure _TPointerItBox_Obj.SetValue(const SelfItData:_IIterator;const aValue: _ValueType);
+begin
+  {$ifdef _DGL_ObjValue}
+  _Assign(_TNudePointerType(SelfItData._Data0)^,aValue);
+  {$else}
+  _TNudePointerType(SelfItData._Data0)^:=aValue;
+  {$endif}
+end;
+
+class function  _TPointerItBox_Obj.GetValue(const SelfItData:_IIterator): _ValueType;
+begin
+  result:=_TNudePointerType(SelfItData._Data0)^;
+end;
+
+class function  _TPointerItBox_Obj.GetNextValue(const SelfItData:_IIterator;const Step:integer): _ValueType;
+begin
+  result:=_TNudePointerType(integer(_TNudePointerType(SelfItData._Data0))+Step*(sizeof(_ValueType)))^;
+end;
+
+class procedure _TPointerItBox_Obj.SetNextValue(const SelfItData:_IIterator;const Step:integer;const Value:_ValueType);
+begin
+  {$ifdef _DGL_ObjValue}
+  _Assign(_TNudePointerType(integer(_TNudePointerType(SelfItData._Data0))+Step*(sizeof(_ValueType)))^,Value);
+  {$else}
+  _TNudePointerType(integer(_TNudePointerType(SelfItData._Data0))+Step*(sizeof(_ValueType)))^:=Value;
+  {$endif}
+end;
+
+class function  _TPointerItBox_Obj.IsEqual(const SelfItData:_IIterator;const Iterator:_IIterator):boolean;
+begin
+  result:=(_TNudePointerType(SelfItData._Data0)=_TNudePointerType(Iterator._Data0));
+end;
+
+class function  _TPointerItBox_Obj.Distance(const SelfItData:_IIterator;const Iterator:_IIterator):integer;
+begin
+  result:=( integer(_TNudePointerType(Iterator._Data0)) - integer(_TNudePointerType(SelfItData._Data0)) )
+     div (sizeof(_ValueType));
+end;
+
+class procedure _TPointerItBox_Obj.Assign (var SelfItData:_IIterator;const Iterator:_IIterator);
+begin
+  SelfItData._ObjIteratorClass:=Iterator._ObjIteratorClass;
+  _TNudePointerType(SelfItData._Data0):=_TNudePointerType(Iterator._Data0);
+end;
+
+class procedure _TPointerItBox_Obj.Next(var SelfItData:_IIterator);
+begin
+  inc(PByte(SelfItData._Data0),(sizeof(_ValueType)));
+end;
+
+class procedure _TPointerItBox_Obj.Next(var SelfItData:_IIterator;const Step:integer);
+begin
+  inc(PByte(_TNudePointerType(SelfItData._Data0)),Step*(sizeof(_ValueType)));
+end;
+
+class procedure _TPointerItBox_Obj.Previous(var SelfItData:_IIterator);
+begin
+  dec(PByte(_TNudePointerType(SelfItData._Data0)),(sizeof(_ValueType)));
+end;
+
+class function  _TPointerItBox_Obj.Clone(const SelfItData:_IIterator):_IIterator;
+begin
+  result._ObjIteratorClass:=SelfItData._ObjIteratorClass;
+  result._Data0:=SelfItData._Data0;
+end;
+
+class function  _TPointerItBox_Obj.Clone(const SelfItData:_IIterator;const NextStep:integer):_IIterator;
+begin
+  result._ObjIteratorClass:=SelfItData._ObjIteratorClass;
+  result._Data0:=SelfItData._Data0;
+  inc(PByte(_TNudePointerType(result._Data0)),NextStep*(sizeof(_ValueType)));
+end;
+
+class function _TPointerItBox_Obj.IteratorTraits():TIteratorTraits;
+begin
+  result:=itRandomAccessTag;
+end;
+
+function PointerBox(const aPointer : _TNudePointerType):_IVectorIterator; overload;
+begin
+  result._ObjIteratorClass:=_TPointerItBox_Obj;
+  _TNudePointerType(result._Data0):=aPointer;
+end;
+
+function PointerBox(const aPointer : _TNudePointerType;const NextStep:integer):_IVectorIterator; overload;
+begin
+  result._ObjIteratorClass:=_TPointerItBox_Obj;
+  _TNudePointerType(result._Data0):=aPointer;
+  inc(PByte(_TNudePointerType(result._Data0)),NextStep*(sizeof(_ValueType)));
+end;
+
+{$endif } //  __PointerItBox_inc_pas_

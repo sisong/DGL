@@ -1,0 +1,664 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+       
+//------------------------------------------------------------------------------
+// DGL库中的接口(interface)的声明
+// Create by HouSisong, 2004.08.31
+//------------------------------------------------------------------------------
+
+//DGLIntf.inc_h ; DGLIntf.inc_pas
+
+{$ifndef  __DGLIntf_inc_h_}
+{$define  __DGLIntf_inc_h_}
+
+  {$I DGLCfg.inc_h}   //
+
+  type
+    _PValueType      = ^_ValueType;
+    _TValueDArray = array of _ValueType;
+
+   //如果_DGL_Compare和_DGL_Compare_Value中有一个没有定义,而另一个定义了,那么使他们等价
+  {$ifdef _DGL_Compare}
+    {$ifndef _DGL_Compare_Value}
+    {$define _DGL_Compare_Value}
+      type
+        _TIsEqual_Value = function (const a,b: _ValueType):boolean;
+        _TIsLess_Value  = function (const a,b: _ValueType):boolean;
+      const
+        _IsEqual_Value :_TIsEqual_Value  = _IsEqual;
+        _IsLess_Value  :_TIsLess_Value   = _IsLess;
+    {$endif}
+  {$else}
+    {$ifdef _DGL_Compare_Value}
+      {$define _DGL_Compare}
+      type
+        _TIsEqual_Value = function (const a,b: _ValueType):boolean;
+        _TIsLess_Value  = function (const a,b: _ValueType):boolean;
+      const
+        _IsEqual       :_TIsEqual_Value  = _IsEqual_Value;
+        _IsLess        :_TIsLess_Value   = _IsLess_Value;
+    {$endif}
+  {$endif}
+
+  //如果_DGL_ObjValue和_DGL_ObjValue_Value中有一个没有定义,而另一个定义了,那么使他们等价
+  {$ifdef _DGL_ObjValue}
+    {$ifndef _DGL_ObjValue_Value}
+    {$define _DGL_ObjValue_Value}
+      type
+        _TFree_Value           = procedure (Value: _ValueType);
+        _TCopyCreateNew_Value  = function  (const Value: _ValueType):_ValueType;
+        _TCreateNew_Value      = function  ():_ValueType;
+        _TAssign_Value         = procedure (DestValue:_ValueType;const SrcValue: _ValueType);
+      const
+        _Free_Value          :_TFree_Value           = _Free;
+        _CopyCreateNew_Value :_TCopyCreateNew_Value  = _CopyCreateNew;
+        _CreateNew_Value     :_TCreateNew_Value      = _CreateNew;
+        _Assign_Value        :_TAssign_Value         = _Assign;
+    {$endif}
+  {$else}
+    {$ifdef _DGL_ObjValue_Value}
+      {$define _DGL_ObjValue}
+      type
+        _TFree_Value           = procedure (Value: _ValueType);
+        _TCopyCreateNew_Value  = function  (const Value: _ValueType):_ValueType;
+        _TCreateNew_Value      = function  ():_ValueType;
+        _TAssign_Value         = procedure (DestValue:_ValueType;const SrcValue: _ValueType);
+      const
+        _Free                :_TFree_Value           = _Free_Value;
+        _CopyCreateNew       :_TCopyCreateNew_Value  = _CopyCreateNew_Value;
+        _CreateNew           :_TCreateNew_Value      = _CreateNew_Value;
+        _Assign              :_TAssign_Value         = _Assign_Value;
+    {$endif}
+  {$endif}
+
+
+  {$ifdef __DGL_KeyType_Is_ValueType}
+        type
+          //预处理使Key和Value完全等价
+          _KeyType         = _ValueType;  //_ValueType==_KeyType
+          _PKeyType        = _PValueType;
+          _TKeyArrayType   = _TValueDArray;
+
+
+           type
+             _TIsEqual_Key_Value = function (const a,b: _ValueType):boolean;
+             _TIsLess_Key_Value  = function (const a,b: _ValueType):boolean;
+          {$ifdef _DGL_Compare}
+            {$define _DGL_Compare_Key}
+              const
+                _IsEqual_Key   :_TIsEqual_Key_Value  = _IsEqual;
+                _IsLess_Key    :_TIsLess_Key_Value   = _IsLess;
+          {$else}
+            {$ifdef _DGL_Compare_Value}
+              {$define _DGL_Compare_Key}
+                const
+                  _IsEqual_Key   :_TIsEqual_Key_Value  = _IsEqual_Value;
+                  _IsLess_Key    :_TIsLess_Key_Value   = _IsLess_Value;
+            {$endif}
+          {$endif}
+
+          type
+            _TFree_Key_Value           = procedure (Key: _KeyType);
+            _TCopyCreateNew_Key_Value  = function  (const Key: _KeyType):_KeyType;
+            _TCreateNew_Key_Value      = function  ():_KeyType;
+            _TAssign_Key_Value         = procedure (DestValue:_ValueType;const SrcValue: _ValueType);
+          {$ifdef _DGL_ObjValue}
+            {$define _DGL_ObjValue_Key}
+              const
+                _Free_Key            :_TFree_Key_Value           = _Free;
+                _CopyCreateNew_Key   :_TCopyCreateNew_Key_Value  = _CopyCreateNew;
+                _CreateNew_Key       :_TCreateNew_Key_Value      = _CreateNew;
+                _Assign_Key          :_TAssign_Key_Value         = _Assign;
+          {$else}
+            {$ifdef _DGL_ObjValue_Value}
+              {$define _DGL_ObjValue_Key}
+                const
+                  _Free_Key            :_TFree_Key_Value           = _Free_Value;
+                  _CopyCreateNew_Key   :_TCopyCreateNew_Key_Value  = _CopyCreateNew_Value;
+                  _CreateNew_Key       :_TCreateNew_Key_Value      = _CreateNew_Value;
+                  _Assign_Key          :_TAssign_Key_Value         = _Assign_Value;
+            {$endif}
+          {$endif}
+  {$endif}
+
+  {$ifndef  _DGL_Compare}
+    function _IsEqual(const Value0,Value1:_ValueType):boolean; {$ifdef _DGL_Inline} inline; {$endif} //todo: Warning inline on if _ValueType if "object" then error!!!
+    function _IsLess(const Value0,Value1:_ValueType):boolean; {$ifdef _DGL_Inline} inline; {$endif}  //todo: Warning inline on if _ValueType if "object" then error!!!
+  {$endif}
+  {$ifndef  _DGL_Compare_Value}
+    function _IsEqual_Value(const Value0,Value1:_ValueType):boolean; {$ifdef _DGL_Inline} inline; {$endif}  //todo: Warning inline on if _ValueType if "object" then error!!!
+    function _IsLess_Value(const Value0,Value1:_ValueType):boolean; {$ifdef _DGL_Inline} inline; {$endif}   //todo: Warning inline on if _ValueType if "object" then error!!!
+  {$endif}
+
+type
+  TGenerateFunction         = function (): _ValueType;
+  TGenerateFunctionOfObject = function (): _ValueType of object;
+  TTansfromFunction         = function (const Value: _ValueType): _ValueType;
+  TTansfromFunctionOfObject = function (const Value: _ValueType): _ValueType of object;
+  TTansfromBinaryFunction         = function (const Value0,Value1: _ValueType): _ValueType;
+  TTansfromBinaryFunctionOfObject = function (const Value0,Value1: _ValueType): _ValueType of object;
+  TVisitProc         = procedure (const Value: _ValueType);
+  TVisitProcOfObject = procedure (const Value: _ValueType) of object;
+  TTestFunction         = function (const Value:_ValueType):Boolean;
+  TTestFunctionOfObject = function (const Value:_ValueType):Boolean Of Object;
+  TTestBinaryFunction         = function (const Value0,Value1:_ValueType):Boolean;
+  TTestBinaryFunctionOfObject = function (const Value0,Value1:_ValueType):Boolean Of Object;
+
+  TRandomGenerateFunction         = function (const Range: Integer):integer; //0<=result<Range
+  TRandomGenerateFunctionOfObject = function (const Range: Integer):integer Of Object;
+
+
+type
+  TIteratorTraitsType = (_DGL_itTraits0,_DGL_itTraits1,_DGL_itTraits2,
+                         _DGL_itTraits3,_DGL_itTraits4);
+  TIteratorTraits    = set of TIteratorTraitsType;
+const
+  itTrivialTag       = [];
+  itInputTag         = itTrivialTag + [_DGL_itTraits0];
+  itOutputTag        = itTrivialTag + [_DGL_itTraits1];
+  itForwardTag       = itInputTag + [_DGL_itTraits2];
+  itBidirectionalTag = itForwardTag + [_DGL_itTraits3];
+  itRandomAccessTag  = itBidirectionalTag + [_DGL_itTraits4];
+
+
+type
+
+  //迭代器(iterator)的统一说明
+  //----------------------------------------------------------------------------
+  // 作用描述: 用来遍历容器里面的元素
+  // 主要方法：Value属性：用来读写迭代器引用的值
+  //           IsEqual方法：判断两个迭代器是否指向同一个位置
+  //           Distance方法: 返回自身位置减去传入的迭代器指向位置的差值
+  //           Assign方法：使自身与传入的迭代器指向同一个容器和引用位置
+  //           Next方法：指向下一个位置
+  //           Previous方法：指向上一个位置
+  //           Clone方法：创建一个新的迭代器，与自己指向同一个位置
+  //           GetSelfObj方法：返回接口存在的原始对象(self指针)，内部使用
+  //           Items属性: 根据偏移量快速的访问值(对于随机迭代器才有常数时间)
+  // 使用方式：
+  // 注意事项: 如果实现了单向链表，则其迭代器不会实现Previous方法,会触发异常
+  //           Distance方法在某些迭代器中的实现 时间复杂度可能为O(n);
+  // 作    者: HouSisong ，2004.08.31
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  //迭代器分成_IIterator结构和_DGL_TObjIterator类来实现是为了优化用纯接口(+类实现)实现迭代器的创建和销毁的开销
+  //实际测试中速度大幅提升!  2005.10.13
+          _DGL_TObjIterator = class;
+          _DGL_TObjIteratorClass = class of _DGL_TObjIterator;
+  _IIterator = object
+  private
+    _ObjIteratorClass : _DGL_TObjIteratorClass;
+    _Data0 : integer;
+    _Data1 : integer;
+    _Data2 : integer;
+    //如果库有需要可以继续扩展
+    //_InfData : IInterface;
+    //_DataArray : array[0..2] of integer;
+  public
+    function  IteratorTraits():TIteratorTraits;          {$ifdef _DGL_Inline} inline; {$endif}
+    procedure SetIteratorNil();                          {$ifdef _DGL_Inline} inline; {$endif}
+    procedure SetValue(const aValue: _ValueType);        {$ifdef _DGL_Inline} inline; {$endif}
+    function  GetValue(): _ValueType;                           {$ifdef _DGL_Inline} inline; {$endif}
+    function  GetNextValue(const Step:integer): _ValueType;     {$ifdef _DGL_Inline} inline; {$endif}
+    procedure SetNextValue(const Step:integer;const aValue:_ValueType);         {$ifdef _DGL_Inline} inline; {$endif}
+
+    property  Value: _ValueType read GetValue write SetValue; 
+    property  NextValue[const Index:integer]: _ValueType read GetNextValue write SetNextValue;
+    function  IsEqual(const Iterator:_IIterator):boolean;  //{$ifdef _DGL_Inline} inline; {$endif}
+    function  Distance(const Iterator:_IIterator):integer;   //{$ifdef _DGL_Inline} inline; {$endif}
+    procedure Assign (const Iterator:_IIterator);  //{$ifdef _DGL_Inline} inline; {$endif}
+    procedure Next();overload;   {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Next(const Step:integer);overload;  {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Previous();  {$ifdef _DGL_Inline} inline; {$endif}
+    function  Clone():_IIterator; overload;   {$ifdef _DGL_Inline} inline; {$endif}
+    function  Clone(const NextStep:integer):_IIterator;overload;  {$ifdef _DGL_Inline} inline; {$endif}
+  end;
+
+          _DGL_TObjIterator = class(TObject)
+          public
+            class function  IteratorTraits():TIteratorTraits; virtual;  abstract;
+            class procedure SetValue(const SelfItData:_IIterator;const aValue: _ValueType); virtual; abstract;
+            class function  GetValue(const SelfItData:_IIterator): _ValueType; virtual; abstract;
+            class function  GetNextValue(const SelfItData:_IIterator;const Step:integer): _ValueType; virtual; abstract;
+            class procedure SetNextValue(const SelfItData:_IIterator;const Step:integer;const aValue:_ValueType); virtual; abstract;
+            class function  IsEqual(const SelfItData:_IIterator;const Iterator:_IIterator):boolean; virtual; abstract;
+            class function  Distance(const SelfItData:_IIterator;const Iterator:_IIterator):integer; virtual; abstract;
+            class procedure Assign (var SelfItData:_IIterator;const Iterator:_IIterator); virtual; abstract;
+            class procedure Next(var SelfItData:_IIterator);overload; virtual; abstract;
+            class procedure Next(var SelfItData:_IIterator;const Step:integer);overload; virtual; abstract;
+            class procedure Previous(var SelfItData:_IIterator);  virtual; abstract;
+            class function  Clone(const SelfItData:_IIterator):_IIterator;overload; virtual; abstract;
+            class function  Clone(const SelfItData:_IIterator;const NextStep:integer):_IIterator;overload; virtual; abstract;
+            class function  Map_GetKey(const SelfItData:_IIterator): _KeyType; virtual; abstract;
+          end;
+
+
+
+  //容器(Container)的统一说明
+  //----------------------------------------------------------------------------
+  // 作用描述: 用来保存和组织多个数据,是抽象出的存储概念，和实现无关
+  // 主要方法：ItBegin方法：返回指向容器里第一个元素的 迭代器
+  //           ItEnd方法：返回指向容器里最后一个元素的后面一个位置的 迭代器
+  //           Clear方法：清空容器中的所有数据
+  //           Size方法：容器中的元素个数
+  //           IsEmpty方法：容器是否为空,返回值等价于(0=Size());
+  //           GetSelfObj方法：返回接口存在的原始对象(self指针)，内部使用
+  //           Erase方法：  删除容器中值等于参数Value的元素，返回删除的元素个数
+  //           Erase方法：  从容器中删除迭代器指向的元素
+  //           Insert方法： 在容器指定位置插入一个或多个元素
+  //           Assign方法: 整个容器清空重新赋值
+  //           Clone方法：创建一个新的容器，并拥有和自身一样的元素
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong ，2004.08.31
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  _IContainer = interface
+    function  ItBegin(): _IIterator;
+    function  ItEnd(): _IIterator;
+    procedure Clear();
+    function  Size(): Integer;
+    function  IsEmpty(): Boolean;
+    function  EraseValue(const Value:_ValueType):integer; overload;
+    procedure Erase(const ItPos:_IIterator);  overload;
+    procedure Erase(const ItBegin,ItEnd: _IIterator);  overload;
+    procedure Insert(const Value:_ValueType); overload;
+    procedure Insert(const ItPos:_IIterator;const Value:_ValueType); overload;
+    procedure Insert(const ItPos:_IIterator;const num:integer;const Value:_ValueType); overload;
+    procedure Insert(const ItPos:_IIterator;const ItBegin,ItEnd:_IIterator);overload;
+    procedure Assign(const num:integer;const Value: _ValueType);overload;
+    procedure Assign(const ItBegin,ItEnd:_IIterator);overload;
+    function  Clone():_IContainer;
+    procedure CloneToInterface(out NewContainer_Interface); //NewContainer:=_IContainer.Clone();
+
+    function  GetSelfObj():TObject;
+  end;
+
+  //序列容器(SerialContainer)的统一说明
+  //----------------------------------------------------------------------------
+  // 作用描述: 元素按顺序储存的容器
+  // 主要方法：(参见_IContainer)
+  //           PushBack方法：在容器后部插入一个或多个元素
+  //           PopBack方法： 弹出最后一个元素
+  //           Back方法： 返回最后一个元素
+  //           PushFront方法：在容器的最前面插入一个元素
+  //           PopFront方法： 弹出第一个元素
+  //           Front方法： 返回第一个元素
+  //           IsEquals方法：判断两个容器中的元素是否完全相等
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong ，2004.09.09
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  _ISerialContainer = interface(_IContainer)
+    procedure PushBack(const Value: _ValueType); overload;
+    procedure PushBack(const num:integer;Value: _ValueType); overload;
+    procedure PushBack(const ItBegin,ItEnd: _IIterator); overload;
+    procedure PopBack();
+    function  GetBackValue():_ValueType;
+    procedure SetBackValue(const aValue:_ValueType);
+    property  Back: _ValueType read GetBackValue write SetBackValue;
+
+    procedure PushFront(const Value: _ValueType);overload ;
+    procedure PushFront(const num:integer;Value: _ValueType); overload;
+    procedure PushFront(const ItBegin,ItEnd: _IIterator); overload;
+    procedure PopFront();
+    function  GetFrontValue():_ValueType;
+    procedure SetFrontValue(const aValue:_ValueType);
+    property  Front: _ValueType read GetFrontValue write SetFrontValue;
+    function  IsEquals(const AContainer: _IContainer): Boolean;
+    function  IsLess(const AContainer: _IContainer): Boolean;
+    procedure Resize(const num:integer); overload;
+    procedure Resize(const num:integer;const Value:_ValueType); overload;
+  end;
+
+  //向量(Vector)的统一说明
+  //----------------------------------------------------------------------------
+  // 作用描述: 用线性的内存空间(数组)来组织数据，容器的一个具体实现
+  // 主要方法：IndexOf方法：返回元素在容器中的位置
+  //           Items属性：以序号的方式快速的访问容器中的元素，时间复杂度O(1)
+  //           Reserve方法: 容器预留一些空间(减少动态分配)
+  //           Resize方法: 改变容器大小
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong ，2004.08.31
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  _IVector = interface(_ISerialContainer)
+    function  GetItemValue(const Index: Integer): _ValueType;
+    procedure SetItemValue(const Index: Integer;const Value: _ValueType);
+
+    property  Items[const Index: Integer]: _ValueType read GetItemValue write SetItemValue;
+    function  IndexOf(const Value: _ValueType): Integer;
+    procedure InsertByIndex(const Index: Integer;const Value: _ValueType);
+    function  NewIterator(const Index: Integer):_IIterator;
+    procedure Reserve(const ReserveSize: integer);
+    procedure EraseByIndex(const Index: integer); overload;
+  end;
+
+  //链表(List)的统一说明
+  //----------------------------------------------------------------------------
+  // 作用描述: 数据以数据接点串连的方式组织，容器的一个具体实现
+  // 主要方法：Unique方法：若相邻元素相同，只留下一个
+  //           Splice方法：将AContainer内的元素转移到自己的Pos处
+  //           Merge方法： 将AContainer内的已序元素转移到已序的自己，并且自己仍保持有序
+  //           Reverse方法: 将元素反序
+  // 使用方式：
+  // 注意事项: 作为参数的:_IList的实际类型必须和自身的类类型一致!
+  // 作    者: HouSisong ，2004.08.31
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  _IList = interface(_ISerialContainer)
+    procedure Unique(); overload;
+    procedure Unique(const TestBinaryFunction:TTestBinaryFunction); overload;
+    procedure Unique(const TestBinaryFunction:TTestBinaryFunctionOfObject); overload;
+    procedure Splice(const ItPos:_IIterator; AList:_IList); overload; //全部转移
+    procedure Splice(const ItPos:_IIterator; AList:_IList;const ACItPos:_IIterator); overload;//转移ACItPos一个
+    procedure Splice(const ItPos:_IIterator; AList:_IList;const ACItBegin,ACItEnd:_IIterator); overload;
+    procedure Reverse();
+
+    function  EraseValueIf(const TestFunction:TTestFunction):integer; overload;
+    function  EraseValueIf(const TestFunction:TTestFunctionOfObject):integer; overload;
+    procedure Sort(); overload;
+    procedure Sort(const TestBinaryFunction:TTestBinaryFunction); overload;
+    procedure Sort(const TestBinaryFunction:TTestBinaryFunctionOfObject); overload;
+    procedure Merge(AList:_IList); overload;
+    procedure Merge(AList:_IList;const TestBinaryFunction:TTestBinaryFunction); overload;
+    procedure Merge(AList:_IList;const TestBinaryFunction:TTestBinaryFunctionOfObject);overload;
+  end;
+
+
+  //单向链表(SList)的统一说明
+  //----------------------------------------------------------------------------
+  // 作用描述: 数据以数据接点单向串连的方式组织，容器的一个具体实现
+  // 主要方法：
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong ，2006.10.22
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  _ISList = interface(_ISerialContainer)
+  end;
+
+
+
+  //队列(Deque)的统一说明
+  //----------------------------------------------------------------------------
+  // 作用描述: 与Vector相仿并能够在前端也快速插入和删除元素，容器的一个具体实现
+  // 主要方法：
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong ，2004.08.31
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  _IDeque = interface(_IVector)
+  end;
+
+  //对堆栈(Stack)的统一说明
+  //----------------------------------------------------------------------------
+  // 作用描述: 容器配接器的一种，一端开口，先进后出队列
+  // 主要方法：Push方法：压入一个元素
+  //           Pop方法：弹出元素
+  //           Top方法：返回开口处的当前值
+  //           Clear方法：清空容器中的数据
+  //           Size方法：返回容器中的元素个数
+  //           IsEmpty方法：判断容器是否为空
+  //           IsEquals方法：判断两个容器中的元素是否完全相等
+  //           Clone方法：创建一个新的容器，并拥有和自身一样的元素
+  //           Assign方法: 整个容器清空重新赋值
+  //           GetSelfObj方法：返回接口存在的原始对象(self指针)，内部使用
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong ，2004.08.31
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  _IStack = interface
+    procedure Push(const Value: _ValueType);
+    procedure Pop();
+    function  GetTopValue():_ValueType;
+    procedure SetTopValue(const aValue:_ValueType);
+    property  Top: _ValueType read GetTopValue write SetTopValue;
+    procedure Clear();
+    function  Size(): Integer;
+    function  IsEmpty(): Boolean;
+    function  IsEquals(const AContainer: _IStack): Boolean;
+    function  Clone():_IStack;
+    procedure Assign(const num:integer;const Value: _ValueType);overload;
+    procedure Assign(const ItBegin,ItEnd:_IIterator);overload;
+
+    function  GetSelfObj():TObject;
+  end;
+
+  //双端队列(Queue)的统一说明
+  //----------------------------------------------------------------------------
+  // 作用描述: 容器配接器的一种，两端开口
+  // 主要方法：Push方法：在容器后边压入一个元素
+  //           Pop方法：弹出最前面一个元素
+  //           Back方法：返回最后面元素的当前值
+  //           Front方法：返回最前面元素的当前值
+  //           Clear方法：清空容器中的数据
+  //           Size方法：返回容器中的元素个数
+  //           IsEmpty方法：判断容器是否为空
+  //           IsEquals方法：判断两个容器中的元素是否完全相等
+  //           Clone方法：创建一个新的容器，并拥有和自身一样的元素
+  //           Assign方法: 整个容器清空重新赋值
+  //           GetSelfObj方法：返回接口存在的原始对象(self指针)，内部使用
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong ，2004.08.31
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  _IQueue = interface
+    procedure Push(const Value: _ValueType);
+    procedure Pop();
+    function  GetBackValue():_ValueType;                                  
+    procedure SetBackValue(const aValue:_ValueType);                      
+    property  Back: _ValueType read GetBackValue write SetBackValue;
+    function  GetFrontValue():_ValueType;                                 
+    procedure SetFrontValue(const aValue:_ValueType);                     
+    property  Front: _ValueType read GetFrontValue write SetFrontValue;
+    procedure Clear();
+    function  Size(): Integer;
+    function  IsEmpty(): Boolean;
+    function  IsEquals(const AContainer: _IQueue): Boolean;
+    function  Clone():_IQueue;
+    procedure Assign(const num:integer;const Value: _ValueType);overload;
+    procedure Assign(const ItBegin,ItEnd:_IIterator);overload;
+
+    function  GetSelfObj():TObject;
+  end;
+
+  //优先级队列(PriorityQueue)的统一说明
+  //----------------------------------------------------------------------------
+  // 作用描述: 容器配接器的一种
+  // 主要方法：Push方法：向容器中压入一个元素
+  //           Pop方法：弹出最优先的一个元素
+  //           Top方法：返回最优先的值
+  //           Clear方法：清空容器中的数据
+  //           Size方法：返回容器中的元素个数
+  //           IsEmpty方法：判断容器是否为空
+  //           IsEquals方法：判断两个容器中的元素是否完全相等
+  //           Clone方法：创建一个新的容器，并拥有和自身一样的元素
+  //           Assign方法: 整个容器清空重新赋值
+  //           GetSelfObj方法：返回接口存在的原始对象(self指针)，内部使用
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong ，2005.03.26
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  _IPriorityQueue = interface
+    procedure Push(const Value: _ValueType);
+    procedure Pop();
+    function  GetTopValue():_ValueType;
+    procedure SetTopValue(const aValue:_ValueType);
+    property  Top: _ValueType read GetTopValue write SetTopValue;
+    procedure Clear();
+    function  Size(): Integer;
+    function  IsEmpty(): Boolean;
+    function  IsEquals(const AContainer: _IPriorityQueue): Boolean;
+    function  Clone():_IPriorityQueue;
+    procedure Assign(const num:integer;const Value: _ValueType);overload;
+    procedure Assign(const ItBegin,ItEnd:_IIterator);overload;
+
+    function  GetSelfObj():TObject;
+  end;
+
+  //Set,MultiSet的统一说明
+  //----------------------------------------------------------------------------
+  // 作用描述: 元素集合 (Set不允许有重复元素,MultiSet允许有重复元素)
+  // 主要方法：(参见_IContainer的说明)
+  //           Count方法: 统计某元素的个数
+  //           Find方法: 查找某个元素的第一次出现位置
+  //           LowerBound方法: 返回某值的第一个可安插位置
+  //           UpperBound方法: 返回某值的最后一个可安插位置
+  //           EqualRange方法: 返回某值的可安插的第一个和最后一个位置
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong ，2004.09.08
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  _ISet = interface(_IContainer)
+    function  Count(const Value:_ValueType):integer;
+    function  Find(const Value:_ValueType):_IIterator;
+    function  LowerBound(const Value:_ValueType):_IIterator;
+    function  UpperBound(const Value:_ValueType):_IIterator;
+    procedure EqualRange(const Value:_ValueType;out ItBegin,ItEnd:_IIterator);
+  end;
+
+  _IMultiSet = interface(_ISet)
+  end;
+  
+  //Map迭代器(Map Iterator)的统一说明
+  //----------------------------------------------------------------------------
+  // 作用描述: 用来遍历map容器里面的元素
+  // 主要方法：(参见对迭代器的统一说明)
+  //           Key属性：用来访问(只读)迭代器引用的键值
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong ，2004.09.09
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  _IMapIterator =object(_IIterator)
+    function  GetKey(): _KeyType;
+
+    property  Key: _KeyType read GetKey;
+  end;
+
+  //Map,MultiMap的统一说明
+  //----------------------------------------------------------------------------
+  // 作用描述: 键值/实值 映射 (Map不允许有键值重复,MultiMap允许有键值重复)
+  // 主要方法：ItBegin方法：返回指向容器里第一个元素的 迭代器
+  //           ItEnd方法：返回指向容器里最后一个元素的后面一个位置的 迭代器
+  //           Clear方法：清空容器中的所有数据
+  //           Size方法：容器中的元素个数
+  //           IsEmpty方法：容器是否为空,返回值等价于(0=Size());
+  //           IsEquals方法：判断两个容器中的元素是否完全相等
+  //           GetSelfObj方法：返回接口存在的原始对象(self指针)，内部使用
+  //           Erase方法：  删除容器中值等于参数Value的元素，返回删除的元素个数
+  //           Erase方法：  从容器中删除迭代器指向的元素
+  //           Insert方法： 在容器指定位置插入一个或多个元素
+  //           Assign方法: 整个容器清空重新赋值
+  //           Clone方法：创建一个新的容器，并拥有和自身一样的元素
+  //           Count方法: 统计某键值的个数
+  //           Find方法: 查找某键值的第一次出现位置
+  //           LowerBound方法: 返回某键值的第一个可安插位置
+  //           UpperBound方法: 返回某键值的最后一个可安插位置
+  //           EqualRange方法: 返回某键值的可安插的第一个和最后一个位置
+  //           Items属性：以Key为序号的方式访问容器中的元素
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong ，2004.09.09
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  _IMap = interface
+    function  GetItemValue(const Key: _KeyType): _ValueType;
+    procedure SetItemValue(const Key: _KeyType;const Value: _ValueType);
+
+    function  ItBegin(): _IMapIterator;
+    function  ItEnd(): _IMapIterator;
+    property  Items[const Key:_KeyType]: _ValueType read GetItemValue write SetItemValue;
+    procedure Clear();
+    function  Size(): Integer;
+    function  IsEmpty(): Boolean;
+    function  EraseValue(const Value:_ValueType):integer; overload;
+    function  EraseValue(const Key:_KeyType;const Value:_ValueType):integer; overload;
+    function  EraseKey(const Key:_KeyType):integer; overload;
+    procedure Erase(const ItPos:_IMapIterator);  overload;
+    procedure Erase(const ItBegin,ItEnd: _IMapIterator);  overload;
+    procedure Insert(const Key:_KeyType;const Value:_ValueType); overload;
+    procedure Insert(const ItBegin,ItEnd:_IMapIterator);overload;
+    procedure Insert(const num:integer;const Key:_KeyType;const Value:_ValueType); overload;
+    procedure Assign(const ItBegin,ItEnd:_IMapIterator);overload;
+    procedure Assign(const num:integer;const Key:_KeyType;const Value: _ValueType);overload;
+
+    function  Count(const Key:_KeyType):integer;
+    function  Find(const Key:_KeyType):_IMapIterator;
+    function  LowerBound(const Key:_KeyType):_IMapIterator;
+    function  UpperBound(const Key:_KeyType):_IMapIterator;
+    procedure EqualRange(const Key:_KeyType;out ItBegin,ItEnd:_IMapIterator);
+
+    function  Clone():_IMap;
+
+    function  GetSelfObj():TObject;
+  end;
+
+  _IMultiMap = interface(_IMap)
+  end;
+
+
+  /////////////////////////
+
+type
+  //迭代器类_TAbstractIterator
+  //----------------------------------------------------------------------------
+  // 作用描述: 迭代器类的虚基类，实现_IIterator接口
+  // 主要方法：参见接口单元对迭代器的说明
+  // 使用方式：
+  // 注意事项: 不要创建该类的实例
+  // 作    者: HouSisong, 2004.09.01
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  _TAbstractIterator = class(_DGL_TObjIterator)
+  //实现_IIterator接口
+  public
+    class function  IteratorTraits():TIteratorTraits; override;
+    class function  GetNextValue(const SelfItData:_IIterator;const Step:integer): _ValueType;override;//时间复杂度O(Step)
+    class procedure SetNextValue(const SelfItData:_IIterator;const Step:integer;const aValue:_ValueType); override;//时间复杂度O(Step)
+    class function  Distance(const SelfItData:_IIterator;const Iterator:_IIterator):integer; override;//时间复杂度O(Step)
+    class procedure Next(var SelfItData:_IIterator;const Step:integer); overload; override; //时间复杂度O(Step)
+    class function  Clone(const SelfItData:_IIterator):_IIterator;overload; override;
+    class function  Clone(const SelfItData:_IIterator;const NextStep:integer):_IIterator;overload; override; //时间复杂度O(NextStep)
+    class procedure Assign(var SelfItData:_IIterator;const Iterator: _IIterator); override;
+    class procedure ItCreate(var SelfItData:_IIterator);overload;virtual;
+    class procedure ItCreate(var SelfItData:_IIterator;const AIterator: _IIterator);overload;virtual;
+  end;
+  
+
+{$endif } // __DGLIntf_inc_h_

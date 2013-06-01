@@ -1,0 +1,130 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// _TStackµÄÊµÏÖ
+// Create by HouSisong, 2004.09.08
+//------------------------------------------------------------------------------
+
+
+{$ifndef  __Stack_inc_pas_}
+{$define  __Stack_inc_pas_}
+
+
+{$I DGLIntf.inc_pas}
+{$I Deque.inc_pas}
+
+{ _TStack }
+
+procedure _TStack.Assign(const ItBegin, ItEnd: _IIterator);
+begin
+  self.FBaseContainer.Assign(ItBegin, ItEnd);
+end;
+
+procedure _TStack.Assign(const num: integer; const Value: _ValueType);
+begin
+  self.FBaseContainer.Assign(num,Value);
+end;
+
+procedure _TStack.Clear;
+begin
+  FBaseContainer.Clear();
+end;
+
+function _TStack.Clone: _IStack;
+begin
+  result:=_TStack.Create(self);
+end;
+
+constructor _TStack.Create;
+begin
+  inherited Create();
+  FBaseContainer :=_TDefaultStackBaseContainer.Create();
+end;
+
+constructor _TStack.Create(const num: integer; const Value: _ValueType);
+begin
+  inherited Create();
+  FBaseContainer :=_TDefaultStackBaseContainer.Create(num,Value);
+end;
+
+constructor _TStack.Create(const num: integer);
+begin
+  inherited Create();
+  FBaseContainer :=_TDefaultStackBaseContainer.Create(num);
+end;
+
+constructor _TStack.Create(const AStack: _TStack);
+begin
+  inherited Create();
+  FBaseContainer :=_TDefaultStackBaseContainer.Create(AStack.FBaseContainer as _TDefaultStackBaseContainer);
+end;
+
+constructor _TStack.Create(const ItBegin, ItEnd: _IIterator);
+begin
+  inherited Create();
+  FBaseContainer :=_TDefaultStackBaseContainer.Create(ItBegin, ItEnd);
+end;
+
+destructor _TStack.Destroy;
+begin
+  FBaseContainer.Free();
+  inherited;
+end;
+
+function _TStack.GetSelfObj: TObject;
+begin
+  result:=self;
+end;
+
+function _TStack.IsEmpty: Boolean;
+begin
+  result:=FBaseContainer.IsEmpty;
+end;
+
+function _TStack.IsEquals(const AContainer: _IStack): Boolean;
+begin
+  result:=FBaseContainer.IsEquals((AContainer.GetSelfObj as _TStack).FBaseContainer as _TDefaultStackBaseContainer);
+end;
+
+procedure _TStack.Pop;
+begin
+  FBaseContainer.PopBack();
+end;
+
+procedure _TStack.Push(const Value: _ValueType);
+begin
+  FBaseContainer.PushBack(Value);
+end;
+
+function _TStack.Size: Integer;
+begin
+  result:=FBaseContainer.Size;
+end;
+
+function _TStack.GetTopValue: _ValueType;
+begin
+  result:=FBaseContainer.GetBackValue();
+end;
+
+procedure _TStack.SetTopValue(const aValue:_ValueType);
+begin
+  FBaseContainer.SetBackValue(aValue);
+end;
+
+
+{$endif } //  __Stack_inc_pas_

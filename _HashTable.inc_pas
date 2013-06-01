@@ -1,0 +1,755 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+        
+//------------------------------------------------------------------------------
+// _THashTableBase\_THashBaseIterator的实现
+// Create by HouSisong, 2004.03.05
+//------------------------------------------------------------------------------
+
+//_HashTable.inc_pas ; _HashTable.inc_h
+
+{$ifndef __HashTable_inc_pas_}
+{$define __HashTable_inc_pas_}
+
+{$I DGLIntf.inc_pas}
+
+
+{ _THashTableBase }
+
+procedure _THashTableBase.UniqueInsert(const Key: _HashKeyType;const Value: _HashValueType);
+begin
+  self.UniqueInsertNode(FindItem(Key).pPNode,Key,Value);
+end;
+
+procedure  _THashTableBase.DisposeNode(const PHashNode: _PHashNode);
+begin
+  {$ifdef _DGL_ObjValue_Key}
+  _Free_Key(PHashNode.Key);
+  {$endif}
+  {$ifdef _DGL_ObjValue_Value}
+    if not F_DGL_OnlySet then
+      _Free_Value(PHashNode.Value);
+  {$endif}
+
+  if F_DGL_OnlySet then
+    system.Dispose(_PHashNode_OnlySet(PHashNode))
+  else
+    system.Dispose(PHashNode);
+
+  //dec(testTHashNodeCount);
+end;
+
+
+
+function GetBigHashCapacityIndex(const Capacity:Cardinal;const CapacityIndex:Byte=_csDefaultHashCapacityIndex):Byte;
+var
+  i : integer;
+begin
+  Assert(Capacity<=_csHashCapacityList[high(_csHashCapacityList)]);
+  for i:=CapacityIndex to high(_csHashCapacityList) do
+  begin
+    if _csHashCapacityList[i]>=Capacity then
+    begin
+      result:=i;
+      exit;
+    end;
+  end;
+  result:=_csDefaultHashCapacityIndex;
+end;
+
+procedure _THashTableBase.Clear;
+var
+  i         : Cardinal;
+  PNode     : _PHashNode;
+  PNodeTemp : _PHashNode;
+begin
+  if (self.FCount>0) then
+  begin
+    for i:=low(self.FDataList) to high(self.FDataList) do
+    begin
+      PNode:=self.FDataList[i];
+      while (PNode<>nil) do
+      begin
+        PNodeTemp:=PNode.PNext;
+        DisposeNode(PNode);
+        PNode:=PNodeTemp;
+      end;
+    end;
+  end;
+  self.FCount:=0;
+
+  if FAlwaysReserveIndex=0 then
+  begin
+    FCapacityIndex:=_csDefaultHashCapacityIndex;
+    self.FCapacity:=_csHashCapacityList[FCapacityIndex];
+    self.FDataList:=nil;
+  end
+  else
+  begin
+    FCapacityIndex:=FAlwaysReserveIndex;
+    self.FCapacity:=_csHashCapacityList[FCapacityIndex];
+    i:=length(FDataList);
+    if FCapacity<i then
+      i:=FCapacity;
+    fillchar((@FDataList[0])^,i*sizeof(_PHashNode),0);
+  end;
+  setlength(self.FDataList,self.FCapacity);
+end;
+
+constructor _THashTableBase.Create(const IsOnlySet : boolean);
+begin
+  inherited Create;
+  self.F_DGL_OnlySet:=IsOnlySet;
+  self.Clear();
+end;
+
+destructor _THashTableBase.Destroy;
+begin
+  self.Clear();
+  inherited;
+end;
+
+function _THashTableBase.GetItemValue(const Key: _HashKeyType): _HashValueType;
+var
+  PHashNode: _PHashNode ;
+begin
+  PHashNode:=self.FindItem(Key).pPNode^;
+  if (PHashNode<>nil) then
+    result:=PHashNode.Value
+  else
+    raise EHashKeyRangeError.Create(csHashKey_Error);
+    //raise EHashKeyRangeError.Create();
+end;
+
+
+procedure _THashTableBase.SetCapacityIndex(const NewCapacityIndex: Byte);
+var
+  OldDataList : _TPHashNodeDArray;
+  pNode       : _PHashNode;
+  pNodeTemp   : _PHashNode;
+  i           : integer;
+
+  procedure   move_insert(pMoveNode : _PHashNode);
+  var
+    pPHashNode: _PPHashNode ;
+  begin
+    pPHashNode:=self.FindItem(pMoveNode.Key).pPNode;
+    pMoveNode.PNext:=pPHashNode^;
+    pPHashNode^:=pMoveNode;
+  end;
+begin
+  FCapacityIndex:=NewCapacityIndex;
+  self.FCapacity:=_csHashCapacityList[FCapacityIndex];
+
+  //setlength(OldDataList,length(self.FDataList));
+  //for i:=low(OldDataList) to high(OldDataList) do
+  //  OldDataList[i]:=self.FDataList[i];
+  //setlength(self.FDataList,0);
+  //setlength(self.FDataList,FCapacity);
+  OldDataList:=FDataList;
+  FDataList:=nil;
+  setlength(self.FDataList,FCapacity);
+
+  //
+  for i:=low(OldDataList) to high(OldDataList) do
+  begin
+    pNode:=OldDataList[i];
+    while (pNode<>nil) do
+    begin
+      pNodeTemp:=PNode.PNext;
+      move_insert(PNode);
+      PNode:=pNodeTemp;
+    end;
+  end;
+end;
+
+//找到返回节点指针
+//没有找到返回插入位置节点指针
+function _THashTableBase.FindItem(const Key: _HashKeyType):_TTagHashIterator;
+var
+  PNode : _PHashNode;
+begin                             //1103515245 or 41 or 1
+  result.ArrayIndex:=( {$ifdef _DGL_NotHashFunction}1*Cardinal
+       {$else}_HashValue{$endif}(Key)) mod self.FCapacity;
+  result.pPNode:=@self.FDataList[result.ArrayIndex];
+  PNode:=result.pPNode^;
+  if (PNode<>nil) then //节点还没有使用
+  begin
+    repeat
+      {$ifdef _DGL_Compare_Key}
+      if (_IsEqual_Key(Key,PNode.Key)) then  //找到
+      {$else}
+      if ((Key=PNode.Key)) then  //找到
+      {$endif}
+      begin
+        exit;
+      end;
+      result.pPNode:=@PNode.PNext;
+      PNode:=result.pPNode^;
+    until (PNode=nil);
+  end;
+end;
+
+
+procedure _THashTableBase.DeleteNode(const pPHashNode: _PPHashNode);
+var
+  ptmpNode : _PHashNode;
+begin
+  if (pPHashNode^<>nil) then
+  begin
+    ptmpNode:= (pPHashNode^).PNext;
+    DisposeNode(pPHashNode^);
+    pPHashNode^:=ptmpNode;
+    dec(self.FCount);
+  end
+  else
+    raise EHashKeyRangeError.Create(csHashKey_Error);
+    //raise EHashKeyRangeError.Create();
+end;
+
+procedure _THashTableBase.MultiInsert(const Key: _HashKeyType;const Value: _HashValueType);
+begin
+  self.MultiInsertNode(FindItem(Key).pPNode,Key,Value);
+end;
+
+procedure _THashTableBase.Swap(HastTable: _THashTableBase);
+var
+  tempi     : integer;
+  tempArray : _TPHashNodeDArray;
+begin
+  if self=HastTable then exit;
+  
+  Assert(F_DGL_OnlySet=HastTable.F_DGL_OnlySet);
+  //tempi:=FAlwaysReserveIndex; FAlwaysReserveIndex:=HastTable.FAlwaysReserveIndex; HastTable.FAlwaysReserveIndex:=tempi;
+
+  tempi:=FCount;  FCount:=HastTable.FCount; HastTable.FCount:=tempi;
+  tempi:=FCapacityIndex; FCapacityIndex:=HastTable.FCapacityIndex; HastTable.FCapacityIndex:=tempi;
+  tempi:=FCapacity; FCapacity:=HastTable.FCapacity; HastTable.FCapacity:=tempi;
+  tempArray:=FDataList; FDataList:=HastTable.FDataList; HastTable.FDataList:=tempArray;
+end;
+
+
+function _THashTableBase.ItBegin: _TTagHashIterator;
+var
+  i :integer;
+begin
+  for i:=low(self.FDataList) to high(self.FDataList) do
+  begin
+    if (self.FDataList[i]<>nil) then
+    begin
+      result.ArrayIndex:=i;
+      result.pPNode:=@self.FDataList[i];
+      exit;
+    end;
+  end;
+  result.ArrayIndex:=high(self.FDataList);
+  result.PPNode:=nil;
+end;
+
+function _THashTableBase.ItEnd: _TTagHashIterator;
+begin
+  result.ArrayIndex:=FCapacity-1;
+  result.pPNode:=nil;
+end;
+
+
+procedure _THashTableBase.SetAlwaysReserve(const aAlwaysReserveSize: Cardinal);
+begin
+  FAlwaysReserveIndex:=GetBigHashCapacityIndex(aAlwaysReserveSize);
+  self.Reserve(_csHashCapacityList[FAlwaysReserveIndex]);
+end;
+
+function _THashTableBase.getAlwaysReserveSize():Cardinal;
+begin
+  if FAlwaysReserveIndex=0 then
+    result:=0
+  else
+    result:=_csHashCapacityList[FAlwaysReserveIndex];
+end;
+
+procedure _THashTableBase.Reserve(const ReserveSize: Cardinal);
+begin
+  if ReserveSize>self.FCapacity then
+    self.SetCapacityIndex(GetBigHashCapacityIndex(ReserveSize,FCapacityIndex));
+end;
+
+function _THashTableBase.Size: Cardinal;
+begin
+  result:=self.FCount;
+end;
+
+procedure _THashTableBase.MultiInsert(const Key: _HashKeyType);
+begin
+  self.MultiInsertNode(FindItem(Key).pPNode,Key);
+end;
+
+procedure _THashTableBase.UniqueInsert(const Key: _HashKeyType);
+begin
+  self.UniqueInsertNode(FindItem(Key).pPNode,Key);
+end;
+
+procedure _THashTableBase.UniqueInsertNode(pPHashNode: _PPHashNode;
+  const Key: _HashKeyType);
+begin
+  if (pPHashNode^=nil) then
+    self.MultiInsertNode(pPHashNode,Key)
+  else
+  begin   //replace key
+    {$ifdef _DGL_ObjValue_Key}
+    _Assign_Key(pPHashNode^.Key,Key);
+    {$else}
+    pPHashNode^.Key:=Key;
+    {$endif}
+  end;
+end;
+
+function _THashTableBase.Count(const Key: _HashKeyType): integer;
+var
+  ItBegin,ItEnd: _TTagHashIterator;
+begin
+  result:=self.CountRange(Key,ItBegin,ItEnd);
+end;
+
+procedure _THashTableBase.EqualRange(const Key: _HashKeyType; out ItBegin,
+  ItEnd: _TTagHashIterator);
+begin
+  self.CountRange(Key,ItBegin,ItEnd);
+end;
+
+
+function _DGL_Int_Min_HashTableBase(const x,y:integer):integer;  {$ifdef _DGL_Inline} inline; {$endif}
+begin
+  if x<y then
+    result:=x
+  else
+    result:=y;
+end;
+
+procedure _THashTableBase.Erase(const ItBegin, ItEnd: _IIterator);
+var
+  It0,It1:_TTagHashIterator;
+  tmp :_PHashNode;
+  i : integer;
+  MinIndex : integer;
+begin
+  It0:=_PtmpHashIt_Data(@ItBegin).FNodeIt;
+  if self.IsEndIt(It0) then exit;
+  It1:=_PtmpHashIt_Data(@ItEnd).FNodeIt;
+  while true do
+  begin
+    if It0.ArrayIndex=It1.ArrayIndex then
+    begin  //It1.pPNode<>nil
+      tmp:=It1.pPNode^;
+      while It0.pPNode^<>tmp do
+      begin
+        self.DeleteNode(It0.pPNode);
+      end;
+      DecCapacity();
+      exit;   //出口
+    end
+    else
+    begin
+      while (It0.pPNode^<>nil)  do
+        self.DeleteNode(It0.pPNode);
+      MinIndex:=_DGL_Int_Min_HashTableBase(high(self.FDataList),It1.ArrayIndex);
+      for i:=It0.ArrayIndex+1 to MinIndex do
+      begin
+        if self.FDataList[i]<>nil then
+        begin
+          It0.ArrayIndex:=i;
+          It0.pPNode:=@self.FDataList[i];
+        end;
+      end;
+
+    end;
+  end;
+end;
+
+procedure _THashTableBase.Erase(const ItPos: _IIterator);
+begin
+  self.DeleteNode(_PtmpHashIt_Data(@ItPos).FNodeIt.pPNode);
+  DecCapacity();
+end;
+
+
+function _THashTableBase.EraseKey(const Key: _HashKeyType): integer;
+var
+  pPHashNode: _PPHashNode ;
+begin
+  pPHashNode:=self.FindItem(Key).pPNode;
+  result:=0;
+  {$ifdef _DGL_Compare_Key}
+  while (pPHashNode^<>nil) and (_IsEqual_Key(pPHashNode^.Key,Key))  do
+  {$else}
+  while (pPHashNode^<>nil) and (pPHashNode^.Key=Key)  do
+  {$endif}
+  begin
+    self.DeleteNode(pPHashNode);
+    inc(result);
+  end;
+
+  DecCapacity();
+end;
+
+function _THashTableBase.EraseValue(const Value: _HashValueType): integer;
+var
+  pPNode : _PPHashNode;
+  i : integer;
+begin
+  result:=0;
+  for i:=low(self.FDataList) to high(self.FDataList) do
+  begin
+    if self.FDataList[i]<>nil then
+    begin
+      pPNode:=@self.FDataList[i];
+      while pPNode^<>nil do
+      begin
+        {$ifdef _DGL_Compare_Value}
+        if _IsEqual_Value(pPNode^.Value,Value) then
+        {$else}
+        if pPNode^.Value=Value then
+        {$endif}
+        begin
+          self.DeleteNode(pPNode);
+          inc(result);
+        end
+        else
+          pPNode:=@(pPNode^).PNext;
+      end;
+    end;
+  end;
+  DecCapacity();
+end;
+
+function  _THashTableBase.EraseValue(const Key: _HashKeyType;const Value: _HashValueType): integer;
+var
+  pPHashNode: _PPHashNode ;
+begin
+  pPHashNode:=self.FindItem(Key).pPNode;
+  result:=0;
+  while (pPHashNode^<>nil) and
+    {$ifdef _DGL_Compare_Key} (_IsEqual_Key(pPHashNode^.Key,Key)) {$else} (pPHashNode^.Key=Key) {$endif}
+    do
+  begin
+    if {$ifdef _DGL_Compare} (_IsEqual(pPHashNode^.Value,Value))
+    {$else} (pPHashNode^.Value=Value) {$endif} then
+    begin
+      self.DeleteNode(pPHashNode);
+      inc(result);
+    end
+    else
+      pPHashNode:=@(pPHashNode^).PNext;
+  end;
+
+  DecCapacity();
+end;
+
+
+function _THashTableBase.FindKey(const Key: _HashKeyType): _TTagHashIterator;
+begin
+  result:=self.FindItem(Key);
+  if result.pPNode^=nil then
+    result:=self.ItEnd;
+end;
+
+function _THashTableBase.LowerBound(const Key: _HashKeyType): _TTagHashIterator;
+begin
+  result:=FindKey(Key);
+end;
+
+function _THashTableBase.UpperBound(const Key: _HashKeyType): _TTagHashIterator;
+var
+  ItBegin: _TTagHashIterator;
+begin
+  self.EqualRange(Key,ItBegin,result);
+end;
+
+class procedure  _THashTableBase.Previous(const HashTable:_THashTableBase;var It: _TTagHashIterator);
+var
+  i     : integer;
+  tmppPNode : _PPHashNode;
+  tmpPNodeOld : _PHashNode;
+begin
+  if (It.pPNode<>nil) and (HashTable.FDataList[It.ArrayIndex]<>It.pPNode^) then
+  begin
+    //还在本节点(Node)
+    tmpPPNode:=@HashTable.FDataList[It.ArrayIndex];
+    tmppNodeOld:=It.pPNode^;
+    while tmppPNode^.PNext<>tmpPNodeOld do
+    begin
+      tmppPNode:=@tmppPNode^.PNext;
+    end;
+    It.pPNode:=tmppPNode;
+  end
+  else
+  begin
+    //跳到上一个节点(Node)寻找
+    for i:=(It.ArrayIndex-1) downto 0 do
+    begin
+      if (HashTable.FDataList[i]<>nil) then
+      begin
+        tmppPNode:=@HashTable.FDataList[i];
+        while tmppPNode^.PNext<>nil do
+        begin
+          tmppPNode:=@tmppPNode^.PNext;
+        end;
+        It.ArrayIndex:=i;
+        It.pPNode:=tmppPNode;
+        exit;
+      end;
+    end;
+    //raise EHashIteratorRangeError.Create(csHashIterator_Error);
+    Assert(false);
+  end;
+end;
+
+class procedure _THashTableBase.Next(const HashTable:_THashTableBase;var It: _TTagHashIterator);
+var
+  i     : integer;
+begin
+  Assert(It.pPNode<>nil);
+  
+  if (It.pPNode^.PNext<>nil) then
+  begin
+    It.pPNode:=@It.pPNode^.PNext;
+    exit;
+  end
+  else
+  begin
+    //跳到下一个节点(Node)寻找
+    for i:=(It.ArrayIndex+1) to HashTable.FCapacity-1 do
+    begin
+      if (HashTable.FDataList[i]<>nil) then
+      begin
+        It.ArrayIndex:=i;
+        It.pPNode:=@HashTable.FDataList[i];
+        exit;
+      end;
+    end;
+    It.ArrayIndex:=HashTable.FCapacity-1;
+    It.pPNode:=nil;
+  end;
+end;
+
+class function _THashTableBase.IsEndIt(
+  const It: _TTagHashIterator): boolean;
+begin
+  result:=(It.pPNode=nil);//or(It.pPNode^=nil);
+end;
+
+function _THashTableBase.CountRange(const Key: _HashKeyType; out ItBegin,
+  ItEnd: _TTagHashIterator): integer;
+begin
+  ItBegin:=self.LowerBound(Key);
+  if self.IsEndIt(ItBegin) then
+  begin
+    result:=0;
+    ItEnd:=ItBegin;
+    exit;
+  end;
+
+  ItEnd:=ItBegin;
+  self.Next(self,ItEnd);
+  result:=1;
+  {$ifdef _DGL_Compare_Key}
+  while (not self.IsEndIt(ItEnd) and (_IsEqual_Key(ItEnd.pPNode^.Key,Key))) do
+  {$else}
+  while (not self.IsEndIt(ItEnd) and (ItEnd.pPNode^.Key=Key)) do
+  {$endif}
+  begin
+    inc(result);
+    self.Next(self,ItEnd);
+  end;
+end;
+
+class function _THashTableBase.IsEqualIt(const It0,
+  It1: _TTagHashIterator): boolean;
+begin
+  result:=(It0.pPNode=It1.pPNode);// and (it0.ArrayIndex=it1.ArrayIndex);
+end;
+
+function _THashTableBase.FindValue(
+  const Value: _HashValueType): _TTagHashIterator;
+begin
+  result:=self.ItBegin;
+  while not self.IsEndIt(result) do
+  begin
+    {$ifdef _DGL_Compare_Value}
+    if _IsEqual_Value(result.pPNode^.Value,Value) then exit;
+    {$else}
+    if result.pPNode^.Value=Value then exit;
+    {$endif}
+    self.Next(self,result);
+  end;
+end;
+
+function _THashTableBase.getNewNode(const Key: _HashKeyType;const Value: _HashValueType): _PHashNode;
+begin
+  result:=getNewNode(Key);
+  try
+    {$ifdef _DGL_ObjValue_Key}
+      result.Key:=_CopyCreateNew_Key(Key);
+    {$else}
+      result.Key:=Key;
+    {$endif}
+
+    if (not F_DGL_OnlySet) then
+    begin
+      {$ifdef _DGL_ObjValue_Value}
+        result.Value:=_CopyCreateNew_Value(Value);
+      {$else}
+        result.Value:=Value;
+      {$endif}
+    end;
+  except
+    self.DisposeNode(result);
+    raise;
+  end;
+end;
+
+function _THashTableBase.getNewNode(const Key: _HashKeyType): _PHashNode;
+begin
+  //asm int 3 end;
+  if F_DGL_OnlySet then
+    system.New(_PHashNode_OnlySet(result))
+  else
+    system.New(_PHashNode(result));
+
+  try
+    {$ifdef _DGL_ObjValue_Key}
+      result.Key:=_CopyCreateNew_Key(Key);
+    {$else}
+      result.Key:=Key;
+    {$endif}
+  except
+    self.DisposeNode(result);
+    raise;
+  end;
+end;
+
+procedure _THashTableBase.UniqueInsertNode(pPHashNode: _PPHashNode;
+    const Key: _HashKeyType;const Value: _HashValueType);
+begin
+  if (pPHashNode^<>nil) then   //replace
+    {$ifdef _DGL_ObjValue_Value}
+    _Assign_Value((pPHashNode^)^.Value,Value)
+    {$else}
+    (pPHashNode^)^.Value:=Value
+    {$endif}
+  else          //new
+    self.MultiInsertNode(pPHashNode,Key,Value);
+end;
+
+procedure _THashTableBase.MultiInsertNode(pPHashNode: _PPHashNode;
+  const Key: _HashKeyType; const Value: _HashValueType);
+var
+  pHashNode : _PHashNode;
+begin
+  pHashNode:=getNewNode(Key,Value);
+  pHashNode.PNext:=pPHashNode^;
+  pPHashNode^:=pHashNode;
+
+  //inc(testTHashNodeCount);
+
+  inc(self.FCount);
+  if (self.FCount=self.FCapacity) then
+  begin
+    self.SetCapacityIndex(FCapacityIndex+1);
+  end;
+end;
+
+procedure _THashTableBase.MultiInsertNode(pPHashNode: _PPHashNode;
+  const Key: _HashKeyType);
+var
+  pHashNode : _PHashNode;
+begin
+  pHashNode:=getNewNode(Key);
+  pHashNode.PNext:=pPHashNode^;
+  pPHashNode^:=pHashNode;
+
+  //inc(testTHashNodeCount);
+
+  inc(self.FCount);
+  if (self.FCount=self.FCapacity) then
+  begin
+    self.SetCapacityIndex(FCapacityIndex+1);
+  end;
+end;
+
+procedure _THashTableBase.DecCapacity;
+begin
+  if (self.FCount*4<self.FCapacity) and (self.FCount>_csHashCapacityList[_csDefaultHashCapacityIndex]) then
+  begin
+    if ((FCapacityIndex - 1)>=self.FAlwaysReserveIndex) and (FCapacityIndex>_csDefaultHashCapacityIndex) then
+      self.SetCapacityIndex(FCapacityIndex-1);
+  end;
+end;
+
+{ _THashBaseIterator }
+
+class function _THashBaseIterator.Map_GetKey(const SelfItData:_IIterator): _HashKeyType;
+begin
+  result:=_PtmpHashIt_Data(@SelfItData).FNodeIt.pPNode^.Key;
+end;
+
+class function _THashBaseIterator.GetValue(const SelfItData:_IIterator): _HashValueType;
+begin
+  result:=_PtmpHashIt_Data(@SelfItData).FNodeIt.pPNode^.Value;
+end;
+
+class function _THashBaseIterator.IsEqual(const SelfItData:_IIterator;const Iterator:_IIterator): boolean;
+begin
+  result:=(_PtmpHashIt_Data(@Iterator).FNodeIt.pPNode=_PtmpHashIt_Data(@SelfItData).FNodeIt.pPNode);
+end;
+
+class procedure _THashBaseIterator.Next(var SelfItData:_IIterator);
+begin
+  _PtmpHashIt_Data(@SelfItData).FBase.Next(
+    _PtmpHashIt_Data(@SelfItData).FBase,
+    _PtmpHashIt_Data(@SelfItData).FNodeIt);
+end;
+
+class procedure _THashBaseIterator.SetValue(const SelfItData:_IIterator;const Value: _HashValueType);
+begin
+  _PtmpHashIt_Data(@SelfItData).FNodeIt.pPNode^.Value:=Value;
+end;
+
+
+class procedure _THashBaseIterator.Previous(var SelfItData:_IIterator);
+begin
+  _PtmpHashIt_Data(@SelfItData).FBase.Previous(
+    _PtmpHashIt_Data(@SelfItData).FBase,
+    _PtmpHashIt_Data(@SelfItData).FNodeIt);
+end;
+
+class procedure _THashBaseIterator.ItCreate(var SelfItData:_IIterator;const base: _THashTableBase;
+  const NodeIt:_TTagHashIterator);
+begin
+  SelfItData._ObjIteratorClass:=_THashBaseIterator;
+  _PtmpHashIt_Data(@SelfItData).FBase:=base;
+  _PtmpHashIt_Data(@SelfItData).FNodeIt:=NodeIt;
+end;
+
+
+
+class function _THashBaseIterator.IteratorTraits():TIteratorTraits;
+begin
+  result:=itBidirectionalTag;
+end;
+
+
+{$endif } // __HashTable_inc_pas_

@@ -1,0 +1,117 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// DGL库的算法的实现 处理_PValueType函数
+// Create by HouSisong, 2005.10.13
+//------------------------------------------------------------------------------
+//_Algorithms_Base_Private_PValueType.inc_pas
+
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+        procedure __DGL_QuickSort(ItBegin:_PValueType_Iterator;Right:integer;
+            const TestBinaryFunction:TTestBinaryFunctionOfObject);overload;
+          type  _QuickSort_TTestBinaryFunction=TTestBinaryFunctionOfObject;
+{$else}
+        procedure __DGL_QuickSort(ItBegin:_PValueType_Iterator;Right:integer;
+            const TestBinaryFunction:TTestBinaryFunction);overload;
+          type  _QuickSort_TTestBinaryFunction=TTestBinaryFunctionOfObject;
+{$endif}
+          type  _QuickSort_PValueArray=_PValueType_Iterator;
+          type  _QuickSort_ValueType=_ValueType;
+            {$I _Pointer_QuickSort_Base.inc_pas} //QuickSort procedure
+        //end;
+
+        
+{$ifdef  _DGL_Algorithms_Object_Function}
+class procedure _TAlgorithms.Sort(const ItBegin,ItEnd:_PValueType_Iterator;const TestBinaryFunction:TTestBinaryFunctionOfObject);
+{$else}
+class procedure _TAlgorithms.Sort(const ItBegin,ItEnd:_PValueType_Iterator;const TestBinaryFunction:TTestBinaryFunction);
+{$endif}
+var
+  Right : integer;
+begin
+  Right:=((integer(ItEnd)-integer(ItBegin)) div sizeof(_ValueType))  - 1 ;
+  if Right>0 then
+    __DGL_QuickSort(ItBegin,Right,TestBinaryFunction);
+end;
+
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class function _TAlgorithms.IsSorted(const ItBegin,ItEnd:_PValueType_Iterator;const TestBinaryFunction:TTestBinaryFunctionOfObject):boolean;
+{$else}
+class function _TAlgorithms.IsSorted(const ItBegin,ItEnd:_PValueType_Iterator;const TestBinaryFunction:TTestBinaryFunction):boolean;
+{$endif}
+var
+  It : _PValueType_Iterator;
+  Itp : _PValueType_Iterator;
+begin
+  if ItBegin=ItEnd then
+  begin
+    result:=true;
+    exit;
+  end;
+
+  It:=ItBegin;
+  Itp:=ItBegin;
+  inc(integer(Itp),sizeof(_ValueType));
+  while (not (ItP=ItEnd)) do
+  begin
+    if TestBinaryFunction(ItP[0],It[0]) then
+    begin
+      result:=false;
+      exit;
+    end;
+    inc(integer(It),sizeof(_ValueType));
+    inc(integer(Itp),sizeof(_ValueType));
+  end;
+  result:=true;
+end;
+
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class function _TAlgorithms.LowerBound(const ItBegin,ItEnd:_PValueType_Iterator;const Value:_ValueType;const TestBinaryFunction:TTestBinaryFunctionOfObject):_PValueType_Iterator;
+{$else}
+class function _TAlgorithms.LowerBound(const ItBegin,ItEnd:_PValueType_Iterator;const Value:_ValueType;const TestBinaryFunction:TTestBinaryFunction):_PValueType_Iterator;
+{$endif}
+var
+  left,LowerBound : integer;
+  m : integer;
+  Count : integer;
+begin
+  Count:=longword(integer(ItEnd)-integer(ItBegin)) div sizeof(_ValueType);
+  left:=-1;
+  LowerBound:=Count;
+  while (left+1<>LowerBound) do
+  begin
+    m:=(left+LowerBound) div 2;
+    if TestBinaryFunction(ItBegin[m],Value) then
+      left:=m
+    else
+      LowerBound:=m;
+  end;
+
+  Assert(LowerBound>=0);
+  if (LowerBound>=Count) then// or (LowerBound<0) then
+    result:=ItEnd
+  else
+  begin
+    result:=@ItBegin[LowerBound];
+  end;
+end;
+
+//_Algorithms_Base_Private_PValueType.inc_pas

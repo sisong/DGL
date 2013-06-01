@@ -1,0 +1,302 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// _THashMap\_THashMultiMapµÄÊµÏÖ
+// Create by HouSisong, 2004.09.11
+//------------------------------------------------------------------------------
+//HashMap.inc_h , HashMap.inc_pas
+
+{$ifndef __HashMap_inc_pas_}
+{$define __HashMap_inc_pas_}
+
+
+{$I DGLIntf.inc_pas}
+{$I _HashTable.inc_pas}
+                               
+
+{ _THashMap_Base }
+
+function  _THashMap_Base.GetSelfObj():TObject;
+begin
+  result:=self;
+end;
+
+function  _THashMap_Base.IsEmpty(): Boolean;
+begin
+  result:=FHashTable.Size()=0;
+end;
+
+function  _THashMap_Base.getAlwaysReserveSize():integer;
+begin
+  result:=self.FHashTable.AlwaysReserveSize;
+end;
+procedure _THashMap_Base.setAlwaysReserveSize(const aAlwaysReserveSize:integer);
+begin
+  self.FHashTable.AlwaysReserveSize:=aAlwaysReserveSize;
+end;
+
+procedure _THashMap_Base.Clear;
+begin
+  self.FHashTable.Clear();
+end;
+
+function _THashMap_Base.Count(const Key: _HashKeyType): integer;
+begin
+  result:=self.FHashTable.Count(Key);
+end;
+
+constructor _THashMap_Base.Create;
+begin
+  inherited Create();
+  self.FHashTable:=_THashTableBase.Create(false);
+end;
+
+destructor _THashMap_Base.Destroy;
+begin
+  self.FHashTable.Free();
+  inherited;
+end;
+
+procedure _THashMap_Base.EqualRange(const Key: _HashKeyType; out ItBegin,
+  ItEnd: _IMapIterator);
+var
+  ItBeginNode,ItEndNode :_TTagHashIterator;
+begin
+  self.FHashTable.EqualRange(Key,ItBeginNode,ItEndNode);
+  _THashMapIterator.ItCreate(_IIterator(ItBegin),self.FHashTable,ItBeginNode);
+  _THashMapIterator.ItCreate(_IIterator(ItEnd),self.FHashTable,ItEndNode);
+end;
+
+procedure _THashMap_Base.Erase(const ItBegin, ItEnd: _IMapIterator);
+begin
+  self.FHashTable.Erase(ItBegin,ItEnd);
+end;
+
+function _THashMap_Base.EraseValue(const Value: _HashValueType): integer;
+begin
+  result:=self.FHashTable.EraseValue(Value);
+end;
+
+function  _THashMap_Base.EraseValue(const Key:_HashKeyType;const Value:_HashValueType):integer;
+begin
+  result:=self.FHashTable.EraseValue(Key,Value);
+end;
+
+
+function  _THashMap_Base.EraseKey(const Key:_HashKeyType):integer;
+begin
+  result:=self.FHashTable.EraseKey(Key);
+end;
+
+procedure _THashMap_Base.Erase(const ItPos: _IMapIterator);
+begin
+  self.FHashTable.Erase(ItPos);
+end;
+
+function _THashMap_Base.Find(const Key: _HashKeyType): _IMapIterator;
+begin
+  _THashMapIterator.ItCreate(_IIterator(result),
+      self.FHashTable, self.FHashTable.FindKey(Key));
+end;
+
+function _THashMap_Base.GetItemValue(const Key: _HashKeyType): _HashValueType;
+begin
+  result:=self.FHashTable.GetItemValue(Key);
+end;
+
+
+function _THashMap_Base.ItBegin: _IMapIterator;
+begin
+  _THashMapIterator.ItCreate(_IIterator(result),
+      self.FHashTable, self.FHashTable.ItBegin);
+end;
+
+function _THashMap_Base.ItEnd: _IMapIterator;
+begin
+  _THashMapIterator.ItCreate(_IIterator(result),
+      self.FHashTable, self.FHashTable.ItEnd);
+end;
+
+function _THashMap_Base.LowerBound(const Key: _HashKeyType): _IMapIterator;
+begin
+  _THashMapIterator.ItCreate(_IIterator(result),
+      self.FHashTable, self.FHashTable.LowerBound(Key));
+end;
+
+procedure _THashMap_Base.Reserve(const ReserveSize: integer);
+begin
+  self.FHashTable.Reserve(ReserveSize);
+end;
+
+function _THashMap_Base.Size: Integer;
+begin
+  result:=self.FHashTable.Size();
+end;
+
+function _THashMap_Base.UpperBound(const Key: _HashKeyType): _IMapIterator;
+begin
+  _THashMapIterator.ItCreate(_IIterator(result),
+      self.FHashTable, self.FHashTable.UpperBound(Key));
+end;
+////////////////////////////////////////////////////////////////////////////////////
+
+ { _THashMap }
+
+procedure _THashMap.Assign(const num: integer; const Key: _HashKeyType;
+  const Value: _HashValueType);
+begin
+  self.FHashTable.Clear();
+  if num>0 then
+    self.FHashTable.UniqueInsert(Key,Value);
+end;
+
+procedure _THashMap.Assign(const ItBegin,ItEnd:_IMapIterator);
+begin
+  self.FHashTable.Clear();
+  self.Insert(ItBegin,ItEnd);
+end;
+
+function _THashMap.Clone: _IMap;
+begin
+  result:=_IMap(_THashMap.Create(self));
+end;
+
+constructor _THashMap.Create(const ItBegin, ItEnd: _IMapIterator);
+begin
+  inherited Create();
+  self.Insert(ItBegin, ItEnd);
+end;
+
+constructor _THashMap.Create(const AMap: _THashMap);
+begin
+  inherited Create();
+  self.Insert(AMap.ItBegin,AMap.ItEnd);
+end;
+
+
+procedure _THashMap.Insert(const Key: _HashKeyType; const Value: _HashValueType);
+begin
+  self.FHashTable.UniqueInsert(Key,Value);
+end;
+
+procedure _THashMap.Insert(const ItBegin, ItEnd: _IMapIterator);
+var
+  It :_IMapIterator;
+begin
+  It:=_IMapIterator(ItBegin.Clone());
+  while (not It.IsEqual(ItEnd)) do
+  begin
+    self.FHashTable.UniqueInsert(It.Key,It.Value);
+    It.Next();
+  end;
+end;
+
+procedure _THashMap.Insert(const num: integer;
+  const Key: _HashKeyType; const Value: _HashValueType);
+begin
+  if num>0 then
+    self.FHashTable.UniqueInsert(Key,Value);
+end;
+
+procedure _THashMap.SetItemValue(const Key: _HashKeyType; const Value: _HashValueType);
+begin
+  self.FHashTable.UniqueInsert(Key,Value);
+end;
+
+constructor _THashMap.Create;
+begin
+  inherited Create();
+end;
+
+{ _THashMultiMap }
+
+procedure _THashMultiMap.Assign(const num: integer; const Key: _HashKeyType;
+  const Value: _HashValueType);
+begin
+  self.FHashTable.Clear();
+  self.Insert(num,Key,Value);
+end;
+
+procedure _THashMultiMap.Assign(const ItBegin,ItEnd:_IMapIterator);
+begin
+  self.FHashTable.Clear();
+  self.Insert(ItBegin,ItEnd);
+end;
+
+
+function _THashMultiMap.Clone: _IMap;
+begin
+  result:=_IMultiMap(_THashMultiMap.Create(self));
+end;
+
+procedure _THashMultiMap.SetItemValue(const Key: _HashKeyType; const Value: _HashValueType);
+begin
+  self.FHashTable.MultiInsert(Key,Value);
+end;
+
+constructor _THashMultiMap.Create(const ItBegin, ItEnd: _IMapIterator);
+begin
+  inherited Create();
+  self.Insert(ItBegin, ItEnd);
+end;
+
+constructor _THashMultiMap.Create(const AMultiMap: _THashMultiMap);
+begin
+  inherited Create();  
+  self.Insert(AMultiMap.ItBegin(),AMultiMap.ItEnd);
+end;
+
+constructor _THashMultiMap.Create(const num: integer; const Key: _HashKeyType;
+  const Value: _HashValueType);
+begin
+  inherited Create();
+  self.Assign(num,Key,Value);
+end;
+
+constructor _THashMultiMap.Create;
+begin
+  inherited Create();
+end;
+
+procedure _THashMultiMap.Insert(const Key: _KeyType; const Value: _ValueType);
+begin
+  self.FHashTable.MultiInsert(Key,Value);
+end;
+
+procedure _THashMultiMap.Insert(const num: integer; const Key: _HashKeyType; const Value: _HashValueType);
+var
+  i : integer;
+begin
+  for i:=0 to num-1 do
+    self.FHashTable.MultiInsert(Key,Value);
+end;
+
+procedure _THashMultiMap.Insert(const ItBegin,ItEnd: _IMapIterator);
+var
+  It :_IMapIterator;
+begin
+  It:=_IMapIterator(ItBegin.Clone());
+  while (not It.IsEqual(ItEnd)) do
+  begin
+    self.FHashTable.MultiInsert(It.Key,It.Value);
+    It.Next();
+  end;
+end;
+
+
+{$endif } // __HashMap_inc_pas_

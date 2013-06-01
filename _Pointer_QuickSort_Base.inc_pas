@@ -1,0 +1,62 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// DGL库的指针QuickSort算法的实现 处理_PValueType函数
+// Create by HouSisong, 2006.10.25
+//------------------------------------------------------------------------------
+//_Pointer_QuickSort_Base.inc_pas
+
+  //procedure __DGL_QuickSort(ItBegin:_QuickSort_PValueArray;Right:integer;
+  //        const TestBinaryFunction:_QuickSort_TTestBinaryFunction); overload;
+    procedure _Swap(It:_QuickSort_PValueArray;const Index0,Index1:integer); {$ifdef _DGL_Inline} inline; {$endif} 
+    var
+      tmp : _QuickSort_ValueType;
+    begin
+      tmp:=It[Index0];
+      It[Index0]:=It[Index1];
+      It[Index1]:=tmp;
+    end;
+  var
+    i,j : integer;
+  begin
+
+    _Swap(ItBegin,0,random(Right+1));
+    i:=0;
+    j:=Right+1;
+    while true do
+    begin
+      repeat
+        inc(i)
+      until not((i<=Right) and (TestBinaryFunction(ItBegin[i],ItBegin[0])));
+      repeat
+        dec(j)
+      until not(TestBinaryFunction(ItBegin[0],ItBegin[j]));
+      if i>j then break;
+
+      _Swap(ItBegin,i,j);
+    end;
+    _Swap(ItBegin,0,j);
+
+
+    if j>1 then
+      __DGL_QuickSort(ItBegin,j-1,TestBinaryFunction);
+    inc(j);
+    dec(Right,j);
+    if Right>0 then
+      __DGL_QuickSort(@ItBegin[j],Right,TestBinaryFunction);
+  end;

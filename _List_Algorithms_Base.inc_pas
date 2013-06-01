@@ -1,0 +1,204 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// DGL库的List算法的实现
+// Create by HouSisong, 2006.10.25
+//------------------------------------------------------------------------------
+//_List_Algorithms_Base.inc_pas ;
+
+
+
+{$ifdef _DGL_Sys_Cmp_}
+function  _TList.EraseValue(const Value: _ValueType): integer;
+{$endif}
+{$ifdef _DGL_Proc_Cmp_}
+function  _TList.EraseValueIf(const TestFunction:TTestFunction):integer;
+{$endif}
+{$ifdef _DGL_ObjProc_Cmp_}
+function  _TList.EraseValueIf(const TestFunction:TTestFunctionOfObject):integer;
+{$endif}
+var
+  PNode : _PListNode;
+  PtmpNode : _PListNode;
+begin
+  PNode := self.FItEndNode.pNext;
+  result:=0;
+  while PNode<>@self.FItEndNode do
+  begin
+    {$ifdef _DGL_Sys_Cmp_}
+      {$ifdef _DGL_Compare}
+        if (_IsEqual(PNode.Data,Value)) then
+      {$else}
+        if PNode.Data=Value then
+      {$endif}
+    {$else}
+      if (TestFunction(PNode.Data)) then
+    {$endif}
+    begin
+      PtmpNode:=PNode.pNext;
+      self.ErasePPos(PNode);
+      PNode:=PtmpNode;
+      inc(result);
+    end
+    else
+      PNode:=PNode.pNext;
+  end;
+end;         
+
+
+{$ifdef _DGL_Sys_Cmp_}
+procedure _TList.Merge(AList:_IList);
+{$endif}
+{$ifdef _DGL_Proc_Cmp_}
+procedure _TList.Merge(AList:_IList;const TestBinaryFunction:TTestBinaryFunction);
+{$endif}
+{$ifdef _DGL_ObjProc_Cmp_}
+procedure _TList.Merge(AList:_IList;const TestBinaryFunction:TTestBinaryFunctionOfObject);
+{$endif}
+var
+  List : _TList;
+  ItA,ItAEnd : _PListNode;
+  ItB,ItBEnd : _PListNode;
+  temp : _PListNode;
+begin
+  List:=AList.GetSelfObj() as _TList;
+
+  ItB:=List.FItEndNode.pNext;
+  ItBEnd:=@List.FItEndNode;
+  ItA:=self.FItEndNode.pNext;
+  ItAEnd:=@self.FItEndNode;
+
+  while ( (ItA<>ItAEnd) and (ItB<>ItBEnd) ) do
+  begin
+    {$ifdef _DGL_Sys_Cmp_}
+      {$ifdef _DGL_Compare}
+        if _IsLess(ItB.Data , ItA.Data) then
+      {$else}
+        if (ItB.Data < ItA.Data) then
+      {$endif}
+    {$else}
+      if TestBinaryFunction(ItB.Data , ItA.Data) then
+    {$endif}
+    begin
+      temp := ItB.pNext;
+      self.Transfer(ItA, ItB, temp);
+      ItB := temp;
+    end
+    else
+       ItA:=ItA.pNext;
+  end;
+
+  if (ItB<>ItBEnd) then
+    Transfer(ItA, ItB, ItBEnd);
+
+end;
+
+
+{$ifdef _DGL_Sys_Cmp_}
+procedure _TList.Unique;
+{$endif}
+{$ifdef _DGL_Proc_Cmp_}
+procedure _TList.Unique(const TestBinaryFunction:TTestBinaryFunction);
+{$endif}
+{$ifdef _DGL_ObjProc_Cmp_}
+procedure _TList.Unique(const TestBinaryFunction:TTestBinaryFunctionOfObject);
+{$endif}
+var
+  tmpPNode : _PListNode;
+  pNode : _PListNode;
+begin
+  pNode:=self.FItEndNode.pNext;
+  if PNode=@self.FItEndNode then exit;
+  tmpPNode:= pNode.pNext;
+  while tmpPNode<>@self.FItEndNode do
+  begin
+    {$ifdef _DGL_Sys_Cmp_}
+      {$ifdef _DGL_Compare}
+        if (_IsEqual(PNode.Data,tmpPNode.Data)) then
+      {$else}
+        if PNode.Data=tmpPNode.Data then
+      {$endif}
+    {$else}
+      if (TestBinaryFunction(PNode.Data,tmpPNode.Data)) then
+    {$endif}
+      self.ErasePPos(PNode);
+    PNode:=tmpPNode;
+    tmpPNode:=pNode.pNext;
+  end;
+end;
+
+
+{$ifndef _DGL_Sys_Cmp_}
+
+{$ifdef _DGL_Proc_Cmp_}
+procedure _TList.Sort(const TestBinaryFunction:TTestBinaryFunction);
+  type TCmpObj = _TList_TestBinaryFunction;
+{$endif}
+{$ifdef _DGL_ObjProc_Cmp_}
+procedure _TList.Sort(const TestBinaryFunction:TTestBinaryFunctionOfObject);
+  type TCmpObj = _TList_TestBinaryFunctionOfObject;
+{$endif}
+  type  _QuickSort_TTestBinaryFunction=TTestBinaryFunction_PListNode;
+  type  _QuickSort_PValueArray=_PPListNodeArray;
+  procedure __DGL_QuickSort(ItBegin:_QuickSort_PValueArray;Right:integer;
+          const TestBinaryFunction:_QuickSort_TTestBinaryFunction); overload;
+    type  _QuickSort_ValueType=_PListNode;
+            {$I _Pointer_QuickSort_Base.inc_pas} //QuickSort procedure
+  //end;
+var
+  CmpObj : TCmpObj;
+  PNodeArray : array of _PListNode;
+  ListSize,i : integer;
+  It : _PListNode;
+begin
+  ListSize:=self.Size();
+  if ListSize<=1 then exit;
+
+  //copy node address
+  setlength(PNodeArray,ListSize);
+  It:=self.FItEndNode.pNext;
+  for i:=0 to ListSize-1 do
+  begin
+    PNodeArray[i]:=It;
+    It:=It.PNext;
+  end;
+
+  //sort
+  //CmpObj  is object
+    CmpObj.TestBinaryFunction:=TestBinaryFunction;
+    __DGL_QuickSort(@PNodeArray[0],ListSize-1,CmpObj.TestBinaryFunction_PListNode);
+
+  //reset link
+  PNodeArray[0].pPrevious:=_PListNode(@FItEndNode);
+  PNodeArray[0].pNext:=PNodeArray[1];
+  FItEndNode.pNext:=PNodeArray[0];
+
+  PNodeArray[ListSize-1].pPrevious:=PNodeArray[ListSize-2];
+  PNodeArray[ListSize-1].pNext:=_PListNode(@FItEndNode);
+  FItEndNode.pPrevious:=PNodeArray[ListSize-1];
+
+  for i:=1 to ListSize-2 do
+  begin
+    PNodeArray[i].pPrevious:=PNodeArray[i-1];
+    PNodeArray[i].pNext:=PNodeArray[i+1];;
+  end;
+
+end;
+
+{$endif}
+

@@ -1,0 +1,58 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// DGL库的算法的声明
+// Create by HouSisong, 2004.09.01
+//------------------------------------------------------------------------------
+
+//Algorithms.inc_h ; Algorithms.inc_pas
+
+{$ifndef  __Algorithms_inc_h_}
+{$define  __Algorithms_inc_h_}
+
+{$I DGLIntf.inc_h}
+{$I PointerItBox.inc_h}
+
+  type
+    __private_Algorithms_PValueType_Iterators=array [0..maxint div (sizeof(_ValueType))-1] of _ValueType;
+    _PValueType_Iterator = ^__private_Algorithms_PValueType_Iterators;
+
+type                             
+  _TAlgorithms = class(TObject)
+  public
+  //todo: private
+    class procedure SwapValue(const It0,It1:_PValueType_Iterator);overload;  {$ifdef _DGL_Inline} inline; {$endif}
+    class procedure SwapValue(const It:_PValueType_Iterator;const Index0,Index1: integer);overload;   {$ifdef _DGL_Inline} inline; {$endif}
+    class procedure SwapValue(const It0:_PValueType_Iterator;const Index0: integer;const It1:_PValueType_Iterator;const Index1: integer);overload; {$ifdef _DGL_Inline} inline; {$endif}
+    class procedure Sort(const ItBegin,ItEnd:_PValueType_Iterator); overload;
+    class procedure Sort(const ItBegin,ItEnd:_PValueType_Iterator;const TestBinaryFunction:TTestBinaryFunction); overload;
+    class procedure Sort(const ItBegin,ItEnd:_PValueType_Iterator;const TestBinaryFunction:TTestBinaryFunctionOfObject); overload;
+    class function  IsSorted(const ItBegin,ItEnd:_PValueType_Iterator):boolean; overload;
+    class function  IsSorted(const ItBegin,ItEnd:_PValueType_Iterator;const TestBinaryFunction:TTestBinaryFunction):boolean; overload;
+    class function  IsSorted(const ItBegin,ItEnd:_PValueType_Iterator;const TestBinaryFunction:TTestBinaryFunctionOfObject):boolean; overload;
+    class function  LowerBound(const ItBegin,ItEnd:_PValueType_Iterator;const Value:_ValueType):_PValueType_Iterator; overload;
+    class function  LowerBound(const ItBegin,ItEnd:_PValueType_Iterator;const Value:_ValueType;const TestBinaryFunction:TTestBinaryFunction):_PValueType_Iterator; overload;
+    class function  LowerBound(const ItBegin,ItEnd:_PValueType_Iterator;const Value:_ValueType;const TestBinaryFunction:TTestBinaryFunctionOfObject):_PValueType_Iterator; overload;
+  public
+      {$I _Algorithms_Base.inc_h}
+    {$define _DGL_VectorItType}
+      {$I _Algorithms_Base.inc_h}
+    {$undef  _DGL_VectorItType}
+  end;
+       
+{$endif } // __Algorithms_inc_h_

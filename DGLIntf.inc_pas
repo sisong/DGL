@@ -1,0 +1,198 @@
+//------------------------------------------------------------------------------
+// Copyright (c) 2004
+// Delhi泛型库--DGL(The Delphi Generic Library)
+// Author: HouSisong
+//------------------------------------------------------------------------------
+// DGL库中的接口(interface)的声明的实现
+// Create by HouSisong, 2005.10.12
+//------------------------------------------------------------------------------
+
+//DGLIntf.inc_h
+//DGLIntf.inc_pas
+
+{$ifndef  __DGLIntf_inc_pas_}
+{$define  __DGLIntf_inc_pas_}
+
+
+  {$ifndef  _DGL_Compare}
+    function _IsEqual(const Value0,Value1:_ValueType):boolean;  {$ifdef _DGL_Inline} inline; {$endif}  //todo: Warning inline on if _ValueType if "object" then error!!!
+    begin
+      result:=(Value0=Value1);
+    end;
+    function _IsLess(const Value0,Value1:_ValueType):boolean;  {$ifdef _DGL_Inline} inline; {$endif}  //todo: Warning inline on   if _ValueType if "object" then error!!!
+    begin
+      result:=(Value0<Value1);
+    end;
+  {$endif}
+  {$ifndef  _DGL_Compare_Value}
+    function _IsEqual_Value(const Value0,Value1:_ValueType):boolean; {$ifdef _DGL_Inline} inline; {$endif}   //todo: Warning  inline on  if _ValueType if "object" then error!!!
+    begin
+      result:=(Value0=Value1);
+    end;
+    function _IsLess_Value(const Value0,Value1:_ValueType):boolean; {$ifdef _DGL_Inline} inline; {$endif}  //todo: Warning  inline on  if _ValueType if "object" then error!!!
+    begin
+      result:=(Value0<Value1);
+    end;
+  {$endif}
+
+
+{ _TAbstractIterator }
+
+class function _TAbstractIterator.Distance(const SelfItData:_IIterator;const Iterator: _IIterator): integer;
+var
+  It :_IIterator;
+begin
+  It:=SelfItData;
+  result:=0;
+  while (not self.IsEqual(It,Iterator)) do
+  begin
+    inc(result);
+    self.Next(It);
+  end;
+end;
+
+class function  _TAbstractIterator.GetNextValue(const SelfItData:_IIterator;const Step:integer): _ValueType;
+var
+  It: _IIterator;
+begin
+  It:=SelfItData;
+  self.Next(It,Step);
+  result:=self.GetValue(It);
+end;
+
+class procedure _TAbstractIterator.SetNextValue(const SelfItData:_IIterator;const Step:integer;const aValue:_ValueType);var
+  It: _IIterator;
+begin
+  It:=SelfItData;
+  Self.Next(It,Step);
+  Self.SetValue(It,aValue);
+end;
+
+class procedure _TAbstractIterator.Next(var SelfItData:_IIterator;const Step: integer);
+var
+  i : integer;
+begin
+  if Step>=0 then
+    for i:=0 to Step-1 do self.Next(SelfItData)
+  else
+    for i:=0 to (-Step)-1 do self.Previous(SelfItData);
+end;
+
+class function  _TAbstractIterator.Clone(const SelfItData:_IIterator;const NextStep:integer):_IIterator;
+begin
+  result:=SelfItData;
+  self.Next(result,NextStep);
+end;
+
+class function  _TAbstractIterator.Clone(const SelfItData:_IIterator):_IIterator;
+begin
+  result:=SelfItData;
+end;
+
+class procedure _TAbstractIterator.Assign(var SelfItData:_IIterator;const Iterator: _IIterator);
+begin
+  SelfItData:=Iterator;
+end;
+
+class procedure _TAbstractIterator.ItCreate(var SelfItData:_IIterator;const AIterator: _IIterator);
+begin
+  SelfItData:=AIterator;
+end;
+
+class procedure _TAbstractIterator.ItCreate(var SelfItData:_IIterator);
+begin
+  SelfItData.SetIteratorNil();
+end;
+
+class function _TAbstractIterator.IteratorTraits():TIteratorTraits;
+begin
+  result:=itTrivialTag;
+end;
+
+
+
+
+
+{ _IMapIterator }
+function _IMapIterator.GetKey(): _KeyType;
+begin
+  result:=self._ObjIteratorClass.Map_GetKey(self);
+end;
+
+{ _IIterator }
+
+procedure _IIterator.Assign(const Iterator: _IIterator);
+begin
+  self:=Iterator;
+end;
+
+function _IIterator.Clone: _IIterator;
+begin
+  result:=self;
+end;
+
+function _IIterator.Clone(const NextStep: integer): _IIterator;
+begin
+  result:=self;
+  result._ObjIteratorClass.Next(result,NextStep);
+end;
+
+function _IIterator.Distance(const Iterator: _IIterator): integer;
+begin
+  result:=self._ObjIteratorClass.Distance(self,Iterator);
+end;
+
+function _IIterator.GetNextValue(const Step: integer): _ValueType;
+begin
+  result:=self._ObjIteratorClass.GetNextValue(self,Step);
+end;                 
+
+function _IIterator.GetValue: _ValueType;
+begin
+  result:=self._ObjIteratorClass.GetValue(self);
+end;
+
+function _IIterator.IsEqual(const Iterator: _IIterator): boolean;
+begin
+  result:=self._ObjIteratorClass.IsEqual(self,Iterator);
+end;
+
+procedure _IIterator.Next(const Step: integer);
+begin
+  self._ObjIteratorClass.Next(self,Step);
+end;
+
+procedure _IIterator.Next;
+begin
+  self._ObjIteratorClass.Next(self);
+end;
+
+procedure _IIterator.Previous;
+begin
+  self._ObjIteratorClass.Previous(self);
+end;
+
+procedure _IIterator.SetNextValue(const Step: integer;const aValue: _ValueType);
+begin
+  self._ObjIteratorClass.SetNextValue(self,Step,aValue);
+end;
+
+procedure _IIterator.SetIteratorNil;
+begin
+  self._ObjIteratorClass:=nil;
+  self._Data0:=0;
+  self._Data1:=0;
+  self._Data2:=0;
+end;
+
+procedure _IIterator.SetValue(const aValue: _ValueType);
+begin
+  self._ObjIteratorClass.SetValue(self,aValue);
+end;
+
+function _IIterator.IteratorTraits():TIteratorTraits;
+begin
+  result:=_ObjIteratorClass.IteratorTraits();
+end;
+
+{$endif } // __DGLIntf_inc_pas_

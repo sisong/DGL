@@ -1,0 +1,125 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// _TVector的声明
+// Create by HouSisong, 2004.09.01
+//------------------------------------------------------------------------------
+
+{$ifndef  __Vector_inc_h_}
+{$define  __Vector_inc_h_}
+
+// Vector.inc_h ; Vector.inc_pas
+
+
+{$I DGLIntf.inc_h}
+{$I PointerItBox.inc_h}
+
+type
+  //_TVector
+  //----------------------------------------------------------------------------
+  // 作用描述: 实现_IVector接口
+  // 主要方法：参见_IVector接口的说明
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong , 2004.09.01
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  _TVector = class(TInterfacedObject,_IVector,_ISerialContainer,_IContainer)
+  private
+    FCount        : Integer;
+    FArrayLength  : integer;
+    FDataArray    : _TValueDArray;
+    FAlwaysReserveSize: integer;
+    procedure SetNewCapability(const NewCapability:integer);
+    class procedure ReCopy(PBegin,PEnd,PDest:_PValueType);
+    class procedure Copy(PBegin,PEnd,PDest:_PValueType);
+    class procedure Fill(PBegin,PEnd:_PValueType;const Value:_ValueType);
+  protected
+     procedure AlwaysReserve(const aAlwaysReserveSize: integer);    {$ifdef _DGL_Inline} inline; {$endif}
+   public
+     //实现_IVector接口
+    function  GetItemValue(const Index: Integer): _ValueType;               {$ifdef _DGL_Inline} inline; {$endif}
+    procedure SetItemValue(const Index: Integer;const Value: _ValueType);   {$ifdef _DGL_Inline} inline; {$endif}
+
+    property  Items[const Index: Integer]: _ValueType read GetItemValue write SetItemValue;
+    function  IndexOf(const Value: _ValueType): Integer;
+    procedure InsertByIndex(const Index: Integer;const Value: _ValueType);
+    function  NewIterator(const Index: Integer):_IIterator;                 {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Reserve(const ReserveSize: integer);
+    procedure EraseByIndex(const Index: integer); overload;
+  public
+    //实现_ISerialContainer接口
+    procedure PushBack(const Value: _ValueType); overload;                 {$ifdef _DGL_Inline} inline; {$endif}
+    procedure PushBack(const num:integer;Value: _ValueType); overload;     {$ifdef _DGL_Inline} inline; {$endif}
+    procedure PushBack(const ItBegin,ItEnd: _IIterator); overload;
+    procedure PopBack();                                                   {$ifdef _DGL_Inline} inline; {$endif}
+    procedure PushFront(const Value: _ValueType);overload ;                {$ifdef _DGL_Inline} inline; {$endif}
+    procedure PushFront(const num:integer;Value: _ValueType); overload;    {$ifdef _DGL_Inline} inline; {$endif}
+    procedure PushFront(const ItBegin,ItEnd: _IIterator); overload;
+    procedure PopFront();                                                  {$ifdef _DGL_Inline} inline; {$endif}
+    function  GetBackValue():_ValueType;                                   {$ifdef _DGL_Inline} inline; {$endif}
+    procedure SetBackValue(const aValue:_ValueType);                       {$ifdef _DGL_Inline} inline; {$endif}
+    property  Back: _ValueType read GetBackValue write SetBackValue;
+    function  GetFrontValue():_ValueType;                                  {$ifdef _DGL_Inline} inline; {$endif}
+    procedure SetFrontValue(const aValue:_ValueType);                      {$ifdef _DGL_Inline} inline; {$endif}
+    property  Front: _ValueType read GetFrontValue write SetFrontValue;
+    function  IsEquals(const AContainer: _IContainer): Boolean;
+    function  IsLess(const AContainer: _IContainer): Boolean;
+    procedure Resize(const num:integer); overload;                         {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Resize(const num:integer;const Value:_ValueType); overload;
+    procedure  PushBack(const ItBegin,ItEnd:_PValueType);  overload;
+    procedure  Insert(const ItPos:_IIterator; const ItBegin,ItEnd: _PValueType); overload;
+  public
+    //实现_IContainer接口
+    function  ItBegin(): _IIterator;                     {$ifdef _DGL_Inline} inline; {$endif}
+    function  ItEnd(): _IIterator;                       {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Clear();
+    function  Size(): Integer;                            {$ifdef _DGL_Inline} inline; {$endif}
+    function  IsEmpty(): Boolean;                         {$ifdef _DGL_Inline} inline; {$endif}
+    function  EraseValue(const Value:_ValueType):integer; overload;
+    procedure Erase(const ItPos:_IIterator);  overload;          //{$ifdef _DGL_Inline} inline; {$endif}
+    procedure Erase(const ItBegin,ItEnd: _IIterator);  overload;
+    procedure Insert(const Value:_ValueType); overload;          {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Insert(const ItPos:_IIterator;const Value:_ValueType); overload;
+    procedure Insert(const ItPos:_IIterator;const num:integer;const Value:_ValueType); overload;
+    procedure Insert(const ItPos:_IIterator;const ItBegin,ItEnd:_IIterator);overload;
+    procedure Assign(const num:integer;const Value: _ValueType);overload;
+    procedure Assign(const ItBegin,ItEnd:_IIterator);overload;
+    function  Clone():_IContainer;              {$ifdef _DGL_Inline} inline; {$endif}
+    procedure CloneToInterface(out NewContainer);  {$ifdef _DGL_Inline} inline; {$endif}
+    function  GetSelfObj():TObject;                      {$ifdef _DGL_Inline} inline; {$endif}
+  public
+    constructor Create(); overload;
+    constructor Create(const num:integer);overload;
+    constructor Create(const num:integer;const Value:_ValueType);overload;
+    constructor Create(const ItBegin,ItEnd:_IIterator);overload;
+    constructor Create(const AVector:_TVector);overload;
+    destructor Destroy(); override;
+  public
+    procedure Swap(AVector:_TVector);  {$ifdef _DGL_Inline} inline; {$endif}
+    property  AlwaysReserveSize:integer read FAlwaysReserveSize write AlwaysReserve;
+    function  UnSafe_GetVectorBufPointer(const Index:integer): _PValueType;  {$ifdef _DGL_Inline} inline; {$endif}
+  end;
+
+
+//type
+//  _TVectorIterator = _TPointerItBox_Obj;
+//  _IVectorIterator = _TPointerItBox; //在使用Vector时_VectorIterator和_IIterator等价，只是速度稍快一点
+
+{$endif } // __Vector_inc_h_

@@ -1,0 +1,309 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// _TSetIterator\_TSet\_TMultiSet的实现
+// Create by HouSisong, 2006.10.20
+//------------------------------------------------------------------------------
+
+//Set.inc_Pas ; Set.inc_h
+
+{$ifndef __Set_inc_pas_}
+{$define __Set_inc_pas_}
+
+
+  {$I DGLIntf.inc_pas}
+  {$I _RB_Tree.inc_pas}
+
+{_TSet_Base}
+
+
+function  _TSet_Base.GetSelfObj():TObject;
+begin
+  result:=self;
+end;
+
+function  _TSet_Base.IsEmpty(): Boolean;
+begin
+  result:=FRB_TRee.Size()=0;
+end;
+
+constructor _TSet_Base.Create;
+begin
+  inherited Create();
+  self.FRB_TRee:=_TRB_Tree.Create(true);
+end;
+
+
+procedure _TSet_Base.Clear;
+begin
+  self.FRB_TRee.Clear();
+end;
+
+function _TSet_Base.Count(const Value: _ValueType): integer;
+begin
+  result:=self.FRB_TRee.Count(Value);
+end;
+
+destructor _TSet_Base.Destroy;
+begin
+  self.FRB_TRee.Free();
+  inherited;
+end;
+
+procedure _TSet_Base.EqualRange(const Value: _ValueType; out ItBegin,
+  ItEnd: _IIterator);
+var
+  ItBeginNode,ItEndNode :_TRB_TreeIterator;
+begin
+  self.FRB_Tree.EqualRange(Value,ItBeginNode,ItEndNode);
+  _TSetIterator.ItCreate(_IIterator(ItBegin),ItBeginNode);
+  _TSetIterator.ItCreate(_IIterator(ItEnd),ItEndNode);
+end;
+
+procedure _TSet_Base.Erase(const ItPos: _IIterator);
+begin
+  self.FRB_TRee.Erase(_TRB_TreeIterator(ItPos._Data0));
+end;
+
+function _TSet_Base.EraseValue(const Value: _ValueType): integer;
+begin
+  result:=self.FRB_TRee.EraseKey(Value);
+end;
+
+procedure _TSet_Base.Erase(const ItBegin, ItEnd: _IIterator);
+begin
+  self.FRB_TRee.Erase(_TRB_TreeIterator(ItBegin._Data0), _TRB_TreeIterator(ItEnd._Data0));
+end;
+
+function _TSet_Base.Find(const Value: _ValueType): _IIterator;
+begin
+  _TSetIterator.ItCreate(result,self.FRB_TRee.FindKey(Value));
+end;
+function _TSet_Base.ItBegin: _IIterator;
+begin
+  _TSetIterator.ItCreate(result,self.FRB_TRee.ItBegin);
+end;
+
+function _TSet_Base.ItEnd: _IIterator;
+begin
+  _TSetIterator.ItCreate(result,self.FRB_TRee.ItEnd);
+end;
+
+function _TSet_Base.LowerBound(const Value: _ValueType): _IIterator;
+begin
+  _TSetIterator.ItCreate(result,self.FRB_TRee.LowerBound(Value));
+end;
+
+function _TSet_Base.Size: Integer;
+begin
+  result:=self.FRB_TRee.Size();
+end;
+
+function _TSet_Base.UpperBound(const Value: _ValueType): _IIterator;
+begin
+  _TSetIterator.ItCreate(result,self.FRB_TRee.UpperBound(Value));
+end;
+
+
+///////////////////////////
+
+{ _TSet }
+
+constructor _TSet.Create;
+begin
+  inherited Create();
+end;
+
+constructor _TSet.Create(const ItBegin,ItEnd: _IIterator);
+begin
+  inherited Create();
+  self.Insert(self.ItBegin,ItBegin,ItEnd);
+end;
+
+procedure _TSet.Assign(const num: integer; const Value: _ValueType);
+begin
+  self.FRB_TRee.Clear();
+  if num>0 then
+    self.FRB_TRee.UniqueInsert(Value);
+end;
+
+procedure _TSet.Assign(const ItBegin, ItEnd: _IIterator);
+begin
+  self.FRB_TRee.Clear();
+  self.Insert(self.ItBegin,ItBegin, ItEnd);
+end;
+
+function _TSet.Clone: _IContainer;
+begin
+  result:=_ISet(_TSet.Create(self));
+end;
+
+procedure _TSet.CloneToInterface(out NewContainer);
+begin
+  _ISet(NewContainer):=_TSet.Create(self);
+end;
+
+constructor _TSet.Create(const ASet: _TSet);
+begin
+  inherited Create();
+  self.Insert(self.ItBegin,ASet.ItBegin, ASet.ItEnd);
+end;
+
+
+procedure _TSet.Insert(const ItPos: _IIterator;
+  const Value: _ValueType);
+begin
+  self.FRB_TRee.UniqueInsert(Value);
+end;
+
+procedure _TSet.Insert(const Value: _ValueType);
+begin
+  self.FRB_TRee.UniqueInsert(Value);
+end;
+
+procedure _TSet.Insert(const ItPos, ItBegin, ItEnd: _IIterator);
+var
+  It :_IIterator;
+begin
+  It:=ItBegin.Clone();
+  while (not It.IsEqual(ItEnd)) do
+  begin
+    self.FRB_TRee.UniqueInsert(It.Value);
+    It.Next();
+  end;
+end;
+
+procedure _TSet.Insert(const ItPos: _IIterator; const num: integer;
+  const Value: _ValueType);
+begin
+  if num>0 then
+    self.FRB_TRee.UniqueInsert(Value);
+end;
+
+
+{ _TMultiSet }
+
+procedure _TMultiSet.Assign(const num: integer; const Value: _ValueType);
+var
+  i : integer;
+begin
+  self.FRB_Tree.Clear();
+  for i:=0 to num-1 do
+    self.FRB_TRee.MultiInsert(Value);
+end;
+
+procedure _TMultiSet.Assign(const ItBegin,ItEnd:_IIterator);
+begin
+  self.FRB_TRee.Clear();
+  Insert(self.ItBegin(),ItBegin,ItEnd);
+end;
+
+function _TMultiSet.Clone: _IContainer;
+begin
+  result:=_IMultiSet(_TMultiSet.Create(self));
+end;
+
+procedure _TMultiSet.CloneToInterface(out NewContainer);
+begin
+  _IMultiSet(NewContainer):=_TMultiSet.Create(self);
+end;
+
+procedure _TMultiSet.Insert(const Value: _ValueType);
+begin
+  self.FRB_TRee.MultiInsert(Value);
+end;
+
+procedure _TMultiSet.Insert(const ItPos, ItBegin, ItEnd: _IIterator);
+var
+  It :_IIterator;
+begin
+  It:=ItBegin.Clone();
+  while (not It.IsEqual(ItEnd)) do
+  begin
+    self.FRB_TRee.MultiInsert(It.Value);
+    It.Next();
+  end;
+end;
+
+procedure _TMultiSet.Insert(const ItPos: _IIterator; const num: integer;
+  const Value: _ValueType);
+var
+  i : integer;
+begin
+  for i:=0 to num-1 do
+    self.FRB_TRee.MultiInsert(Value);
+end;
+
+procedure _TMultiSet.Insert(const ItPos: _IIterator;const Value: _ValueType);
+begin
+  self.FRB_TRee.MultiInsert(Value);
+end;
+
+constructor _TMultiSet.Create(const num: integer;
+  const Value: _ValueType);
+begin
+  inherited Create();
+  self.Insert(self.ItBegin,num,Value);
+end;
+
+constructor _TMultiSet.Create;
+begin
+  inherited Create();
+end;
+
+constructor _TMultiSet.Create(const ItBegin, ItEnd: _IIterator);
+begin
+  inherited Create();
+  self.Insert(self.ItBegin,ItBegin,ItEnd);
+end;
+
+constructor _TMultiSet.Create(const ASet: _TMultiSet);
+begin
+  inherited Create();
+  self.Insert(self.ItBegin,Aset.ItBegin,ASet.ItEnd);
+end;
+
+{ _TSetIterator }
+
+class procedure _TSetIterator.ItCreate(var SelfItData:_IIterator;const NodeIt:_TRB_TreeIterator);
+begin
+  SelfItData._ObjIteratorClass:=_TSetIterator;
+  _TRB_TreeIterator(SelfItData._Data0):=NodeIt;
+end;
+
+class function _TSetIterator.Clone(const SelfItData:_IIterator): _IIterator;
+begin
+  result:=SelfItData;
+end;
+
+class procedure _TSetIterator.Assign(var SelfItData:_IIterator;const Iterator: _IIterator);
+begin
+  SelfItData:=Iterator;
+end;
+
+class function _TSetIterator.GetValue(const SelfItData:_IIterator): _ValueType;
+begin
+  result:=inherited Map_GetKey(SelfItData);
+end;
+
+class procedure _TSetIterator.SetValue(const SelfItData:_IIterator;const Value: _ValueType);
+begin
+  Assert(false); //key不能修改
+end;
+
+{$endif } // __Set_inc_pas_

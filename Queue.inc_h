@@ -1,0 +1,73 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// _TQueue的声明
+// Create by HouSisong, 2004.09.08
+//------------------------------------------------------------------------------
+
+{$ifndef  __Queue_inc_h_}
+{$define  __Queue_inc_h_}
+
+
+{$I DGLIntf.inc_h}
+{$I Deque.inc_h}
+//Queue.inc_h ; Queue.inc_pas
+
+  _TDefaultQueueBaseContainer = _TDeque; //默认使用_TDeque
+
+  //_TQueue
+  //----------------------------------------------------------------------------
+  // 作用描述: 实现_IQueue接口 ，内部使用_TDeque来实现
+  // 主要方法：参见_IQueue接口的说明
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong , 2004.09.08
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  _TQueue = class(TInterfacedObject,_IQueue)
+  private
+    FBaseContainer : _TDefaultQueueBaseContainer;
+  public
+    //实现_IQueue接口
+    procedure Push(const Value: _ValueType);  {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Pop();                           {$ifdef _DGL_Inline} inline; {$endif}
+    function  GetBackValue():_ValueType;                                   {$ifdef _DGL_Inline} inline; {$endif}
+    procedure SetBackValue(const aValue:_ValueType);                       {$ifdef _DGL_Inline} inline; {$endif}
+    property  Back: _ValueType read GetBackValue write SetBackValue;
+    function  GetFrontValue():_ValueType;                                  {$ifdef _DGL_Inline} inline; {$endif}
+    procedure SetFrontValue(const aValue:_ValueType);                      {$ifdef _DGL_Inline} inline; {$endif}
+    property  Front: _ValueType read GetFrontValue write SetFrontValue;
+    procedure Clear();                          {$ifdef _DGL_Inline} inline; {$endif}
+    function  Size(): Integer;                   {$ifdef _DGL_Inline} inline; {$endif}
+    function  IsEmpty(): Boolean;                 {$ifdef _DGL_Inline} inline; {$endif}
+    function  IsEquals(const AContainer: _IQueue): Boolean;   {$ifdef _DGL_Inline} inline; {$endif}
+    function  Clone():_IQueue;                                  {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Assign(const num:integer;const Value: _ValueType);overload;       {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Assign(const ItBegin,ItEnd:_IIterator);overload;         //todo: Warning inline on if _ValueType if "object" then error!!!
+    function  GetSelfObj():TObject;   {$ifdef _DGL_Inline} inline; {$endif}
+  public
+    constructor Create(); overload;
+    constructor Create(const num:integer);overload;
+    constructor Create(const num:integer;const Value:_ValueType);overload;
+    constructor Create(const ItBegin,ItEnd:_IIterator);overload;
+    constructor Create(const AQueue:_TQueue);overload;   
+    destructor  Destroy(); override;
+  end;
+
+{$endif }  // __Queue_inc_h_

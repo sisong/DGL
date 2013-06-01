@@ -1,0 +1,90 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// DGL库的算法的实现
+// Create by HouSisong, 2004.09.01
+//------------------------------------------------------------------------------
+//Algorithms.inc_pas ; Algorithms.inc_h
+
+{$ifndef  __Algorithms_inc_pas_}
+{$define  __Algorithms_inc_pas_}
+
+{$I DGLIntf.inc_pas}
+{$I PointerItBox.inc_pas}
+
+
+        function __DGL_System_Random(const Range: Integer):integer; {$ifdef _DGL_Inline} inline; {$endif}
+        begin
+          result:=Random(Range);
+        end;
+
+        
+    {$I _Algorithms_Base.inc_pas}
+{$define _DGL_VectorItType}
+    {$I _Algorithms_Base.inc_pas}
+{$undef _DGL_VectorItType}
+
+{$define _DGL_Algorithms_Object_Function}
+    {$I _Algorithms_Base_Private_PValueType.inc_pas}
+{$undef  _DGL_Algorithms_Object_Function}
+    {$I _Algorithms_Base_Private_PValueType.inc_pas}   
+
+class procedure _TAlgorithms.SwapValue(const It0,It1:_PValueType_Iterator);
+var
+  tmp : _ValueType;
+begin
+  tmp:=It0[0];
+  It0[0]:=It1[0];
+  It1[0]:=tmp;
+end;
+
+class procedure _TAlgorithms.SwapValue(const It0:_PValueType_Iterator;const Index0: integer;const It1:_PValueType_Iterator;const Index1: integer);
+var
+  tmp : _ValueType;
+begin
+  tmp:=It0[Index0];
+  It0[Index0]:=It1[Index1];
+  It1[Index1]:=tmp;
+end;
+
+class procedure _TAlgorithms.SwapValue(const It:_PValueType_Iterator;const Index0,Index1: integer);
+var
+  tmp : _ValueType;
+begin                           
+  tmp:=It[Index0];
+  It[Index0]:=It[Index1];
+  It[Index1]:=tmp;
+end;
+
+class procedure _TAlgorithms.Sort(const ItBegin,ItEnd:_PValueType_Iterator);
+begin
+  Sort(ItBegin,ItEnd,_IsLess);
+end;
+
+class function _TAlgorithms.LowerBound(const ItBegin,ItEnd:_PValueType_Iterator;const Value:_ValueType):_PValueType_Iterator;
+begin
+  result:=LowerBound(ItBegin,ItEnd,Value,_IsLess);
+end;
+
+class function _TAlgorithms.IsSorted(const ItBegin,ItEnd:_PValueType_Iterator):boolean;
+begin
+  result:=IsSorted(ItBegin,ItEnd,_IsLess);
+end;
+
+
+{$endif } // __Algorithms_inc_pas_

@@ -1,0 +1,183 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// _TPriorityQueueµÄÊµÏÖ
+// Create by HouSisong, 2005.03.26
+//------------------------------------------------------------------------------
+
+{$ifndef  __PriorityQueue_inc_pas_}
+{$define  __PriorityQueue_inc_pas_}
+
+
+{$I DGLIntf.inc_pas}
+{$I Vector.inc_pas}
+{$I Algorithms.inc_pas}
+
+{ _TPriorityQueue }
+
+function _TPriorityQueue.OtherCompareFunction_To_CompareFunction(const Value0,Value1:_ValueType):Boolean;
+begin
+  result:=self.FOtherCompareFunction(Value0,Value1);
+end;
+
+procedure _TPriorityQueue.Assign(const ItBegin, ItEnd: _IIterator);
+begin
+  self.FBaseContainer.Assign(ItBegin,ItEnd);
+  _TAlgorithms.MakeHeap(FBaseContainer.ItBegin,FBaseContainer.ItEnd,self.FCompareFunction);
+end;
+
+procedure _TPriorityQueue.Assign(const num: integer; const Value: _ValueType);
+begin
+  self.FBaseContainer.Assign(num,Value);
+  //dot need call _TAlgorithms.MakeHeap
+end;
+
+procedure _TPriorityQueue.Clear;
+begin
+  FBaseContainer.Clear();
+end;
+
+function _TPriorityQueue.Clone: _IPriorityQueue;
+begin
+  result:=_TPriorityQueue.Create(self);
+end;
+
+constructor _TPriorityQueue.Create;
+begin
+  inherited Create();
+  FBaseContainer :=_TDefaultPriorityQueueBaseContainer.Create();
+  self.FIsCompareFunctionUsedSelf:=true;
+  FOtherCompareFunction:=_IsLess;
+  FCompareFunction:=self.OtherCompareFunction_To_CompareFunction;
+end;
+
+constructor _TPriorityQueue.Create(const TestBinaryFunction:TTestBinaryFunction);
+begin
+  inherited Create();
+  FBaseContainer :=_TDefaultPriorityQueueBaseContainer.Create();
+  self.FIsCompareFunctionUsedSelf:=true;
+  FOtherCompareFunction:=TestBinaryFunction;
+  FCompareFunction:=self.OtherCompareFunction_To_CompareFunction;
+end;
+
+constructor _TPriorityQueue.Create(const TestBinaryFunction:TTestBinaryFunctionOfObject);
+begin
+  inherited Create();
+  FBaseContainer :=_TDefaultPriorityQueueBaseContainer.Create();
+  self.FIsCompareFunctionUsedSelf:=false;
+  FOtherCompareFunction:=nil;
+  FCompareFunction:=TestBinaryFunction;
+end;
+
+constructor _TPriorityQueue.Create(const AQueue: _TPriorityQueue);
+begin
+  inherited Create();
+  FBaseContainer :=_TDefaultPriorityQueueBaseContainer.Create(AQueue.FBaseContainer as _TDefaultPriorityQueueBaseContainer);
+  if AQueue.FIsCompareFunctionUsedSelf then
+  begin
+    self.FIsCompareFunctionUsedSelf:=true;
+    FOtherCompareFunction:=AQueue.FOtherCompareFunction;
+    FCompareFunction:=self.OtherCompareFunction_To_CompareFunction;
+  end
+  else
+  begin
+    self.FIsCompareFunctionUsedSelf:=false;
+    FOtherCompareFunction:=nil;
+    FCompareFunction:=AQueue.FCompareFunction;
+  end;
+end;
+
+constructor _TPriorityQueue.Create(const ItBegin,ItEnd: _IIterator);
+begin
+  inherited Create();
+  self.FIsCompareFunctionUsedSelf:=true;
+  FOtherCompareFunction:=_IsLess;
+  FCompareFunction:=self.OtherCompareFunction_To_CompareFunction;
+  FBaseContainer :=_TDefaultPriorityQueueBaseContainer.Create(ItBegin,ItEnd);
+  _TAlgorithms.MakeHeap(FBaseContainer.ItBegin,FBaseContainer.ItEnd,self.FCompareFunction);
+end;
+
+constructor _TPriorityQueue.Create(const ItBegin,ItEnd: _IIterator;const TestBinaryFunction:TTestBinaryFunction);
+begin
+  inherited Create();
+  self.FIsCompareFunctionUsedSelf:=true;
+  FOtherCompareFunction:=TestBinaryFunction;
+  FCompareFunction:=self.OtherCompareFunction_To_CompareFunction;
+  FBaseContainer :=_TDefaultPriorityQueueBaseContainer.Create(ItBegin,ItEnd);
+  _TAlgorithms.MakeHeap(FBaseContainer.ItBegin,FBaseContainer.ItEnd,self.FCompareFunction);
+end;
+
+constructor _TPriorityQueue.Create(const ItBegin,ItEnd: _IIterator;const TestBinaryFunction:TTestBinaryFunctionOfObject);
+begin
+  inherited Create();
+  self.FIsCompareFunctionUsedSelf:=false;
+  FOtherCompareFunction:=nil;
+  FCompareFunction:=TestBinaryFunction;
+  FBaseContainer :=_TDefaultPriorityQueueBaseContainer.Create(ItBegin,ItEnd);
+  _TAlgorithms.MakeHeap(FBaseContainer.ItBegin,FBaseContainer.ItEnd,self.FCompareFunction);
+end;
+
+destructor _TPriorityQueue.Destroy;
+begin
+  FBaseContainer.Free();
+  inherited;
+end;
+
+function _TPriorityQueue.GetTopValue: _ValueType;
+begin
+  result:=self.FBaseContainer.GetFrontValue();
+end;
+
+procedure _TPriorityQueue.SetTopValue(const aValue:_ValueType);
+begin
+  self.FBaseContainer.SetFrontValue(aValue);
+end;
+
+function _TPriorityQueue.GetSelfObj: TObject;
+begin
+  result:=self;
+end;
+
+function _TPriorityQueue.IsEmpty: Boolean;
+begin
+  result:=FBaseContainer.IsEmpty;
+end;
+
+function _TPriorityQueue.IsEquals(const AContainer: _IPriorityQueue): Boolean;
+begin
+  result:=FBaseContainer.IsEquals((AContainer.GetSelfObj as _TPriorityQueue).FBaseContainer as _TDefaultPriorityQueueBaseContainer);
+end;
+
+procedure _TPriorityQueue.Pop;
+begin
+  _TAlgorithms.PopHeap(FBaseContainer.ItBegin,FBaseContainer.ItEnd,self.FCompareFunction);
+  FBaseContainer.PopBack();
+end;
+
+procedure _TPriorityQueue.Push(const Value: _ValueType);
+begin
+  FBaseContainer.PushBack(Value);
+  _TAlgorithms.PushHeap(FBaseContainer.ItBegin,FBaseContainer.ItEnd,self.FCompareFunction);
+end;
+
+function _TPriorityQueue.Size: Integer;
+begin
+  result:=FBaseContainer.Size;
+end;
+
+{$endif }  // __PriorityQueue_inc_pas_

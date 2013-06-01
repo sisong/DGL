@@ -1,0 +1,182 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// _TList\_TListIterator的声明
+// Create by HouSisong, 2004.09.02
+//------------------------------------------------------------------------------
+
+{$ifndef  __List_inc_h_}
+{$define  __List_inc_h_}
+//List.inc_h , List.inc_pas
+
+
+{$I DGLIntf.inc_h}
+
+
+type
+  //链表的节点
+  _PListNode  = ^_TListNode;
+  _TListNodeBase = record
+    pNext      : _PListNode;
+    pPrevious  : _PListNode;
+  end;
+  _TListNode = record
+    pNext      : _PListNode;
+    pPrevious  : _PListNode;
+    Data       : _ValueType;
+  end;
+
+  /////////////////////////////
+  //_TList   
+  //----------------------------------------------------------------------------
+  // 作用描述: 实现IList接口
+  // 主要方法：参见IList接口的说明
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong , 2004.09.02
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+
+  _TList = class(TInterfacedObject,_IList,_ISerialContainer,_IContainer)
+  private
+    //使用双向循环链表
+    FItEndNode  : _TListNodeBase;
+    class function  NewNode(const Value:_ValueType):_PListNode;    {$ifdef _DGL_Inline} inline; {$endif}
+    class procedure DeleteNode(PNode:_PListNode); overload;     {$ifdef _DGL_Inline} inline; {$endif}
+    class procedure DeleteNode(PNodeBegin,PNodeEnd:_PListNode); overload;    {$ifdef _DGL_Inline} inline; {$endif}
+    class procedure Insert(const PNodePos:_PListNode;const Value:_ValueType); overload;   {$ifdef _DGL_Inline} inline; {$endif}
+    class procedure ErasePPos(const PNodePos:_PListNode); overload;
+    class procedure Transfer(const Position,ItBegin,ItEnd:_PListNode);//搬移
+  public
+    //实现_IList接口
+    procedure Unique();  overload;
+    procedure Unique(const TestBinaryFunction:TTestBinaryFunction); overload;
+    procedure Unique(const TestBinaryFunction:TTestBinaryFunctionOfObject); overload;
+    procedure Splice(const ItPos:_IIterator; AContainer:_IList); overload; //全部转移
+    procedure Splice(const ItPos:_IIterator; AContainer:_IList;const ACItPos:_IIterator); overload;//转移ACItPos一个
+    procedure Splice(const ItPos:_IIterator; AContainer:_IList;const ACItBegin,ACItEnd:_IIterator); overload;
+    procedure Reverse();
+
+    function  EraseValueIf(const TestFunction:TTestFunction):integer; overload;
+    function  EraseValueIf(const TestFunction:TTestFunctionOfObject):integer; overload;
+    procedure Sort(); overload;
+    procedure Sort(const TestBinaryFunction:TTestBinaryFunction); overload;
+    procedure Sort(const TestBinaryFunction:TTestBinaryFunctionOfObject); overload;
+    procedure Merge(AList:_IList);   overload;
+    procedure Merge(AList:_IList;const TestBinaryFunction:TTestBinaryFunction); overload;
+    procedure Merge(AList:_IList;const TestBinaryFunction:TTestBinaryFunctionOfObject); overload;
+  public
+    //实现_ISerialContainer接口
+    procedure PushBack(const Value: _ValueType); overload;             {$ifdef _DGL_Inline} inline; {$endif}
+    procedure PushBack(const num:integer;Value: _ValueType); overload;
+    procedure PushBack(const ItBegin,ItEnd: _IIterator); overload;
+    procedure PopBack();                                              {$ifdef _DGL_Inline} inline; {$endif}
+    procedure PushFront(const Value: _ValueType);overload ;           {$ifdef _DGL_Inline} inline; {$endif}
+    procedure PushFront(const num:integer;Value: _ValueType); overload;
+    procedure PushFront(const ItBegin,ItEnd: _IIterator); overload;
+    procedure PopFront();                                             {$ifdef _DGL_Inline} inline; {$endif}
+    function  GetBackValue():_ValueType;                                   {$ifdef _DGL_Inline} inline; {$endif}
+    procedure SetBackValue(const aValue:_ValueType);                       {$ifdef _DGL_Inline} inline; {$endif}
+    property  Back: _ValueType read GetBackValue write SetBackValue;
+    function  GetFrontValue():_ValueType;                                  {$ifdef _DGL_Inline} inline; {$endif}
+    procedure SetFrontValue(const aValue:_ValueType);                      {$ifdef _DGL_Inline} inline; {$endif}
+    property  Front: _ValueType read GetFrontValue write SetFrontValue;
+    function  IsEquals(const AContainer: _IContainer): Boolean;
+    function  IsLess(const AContainer: _IContainer): Boolean;
+    procedure Resize(const num:integer); overload;                    {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Resize(const num:integer;const Value:_ValueType); overload;
+  public
+    //实现_IContainer接口
+    function  ItBegin(): _IIterator;                               {$ifdef _DGL_Inline} inline; {$endif}
+    function  ItEnd(): _IIterator;                                 {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Clear();                                             {$ifdef _DGL_Inline} inline; {$endif}
+    function  Size(): Integer;                                     {$ifdef _DGL_Inline} inline; {$endif}
+    function  IsEmpty(): Boolean;                                  {$ifdef _DGL_Inline} inline; {$endif}
+    function  EraseValue(const Value:_ValueType):integer; overload;
+    procedure Erase(const ItPos:_IIterator);  overload;            //{$ifdef _DGL_Inline} inline; {$endif}
+    procedure Erase(const ItBegin,ItEnd: _IIterator);  overload;   //
+    procedure Insert(const Value:_ValueType); overload;             {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Insert(const ItPos:_IIterator;const Value:_ValueType); overload;    //{$ifdef _DGL_Inline} inline; {$endif}
+    procedure Insert(const ItPos:_IIterator;const num:integer;const Value:_ValueType); overload; //
+    procedure Insert(const ItPos:_IIterator;const ItBegin,ItEnd:_IIterator);overload;    //
+    procedure Assign(const num:integer;const Value: _ValueType);overload;
+    procedure Assign(const ItBegin,ItEnd:_IIterator);overload;         //
+    function  Clone():_IContainer;                {$ifdef _DGL_Inline} inline; {$endif}
+    procedure CloneToInterface(out NewContainer);  {$ifdef _DGL_Inline} inline; {$endif}
+    function  GetSelfObj():TObject;                                {$ifdef _DGL_Inline} inline; {$endif}
+  public
+    constructor Create(); overload;
+    constructor Create(const num:integer);overload;
+    constructor Create(const num:integer;const Value:_ValueType);overload;
+    constructor Create(const ItBegin,ItEnd:_IIterator);overload;
+    constructor Create(const AList:_TList);overload;
+    destructor Destroy(); override;
+  public
+    procedure Swap(AList:_TList);  {$ifdef _DGL_Inline} inline; {$endif}
+  end;
+
+  //_TListIterator
+  //----------------------------------------------------------------------------
+  // 作用描述: 实现_IIterator接口  _TList使用的专署迭代器
+  // 主要方法：参见_IIterator接口的说明
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong , 2004.09.06
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  _TListIterator = class(_TAbstractIterator)
+  private
+    //FPNode : _PListNode;   //_Data0
+  public
+    class procedure ItCreate(var SelfItData:_IIterator;const pNode : _PListNode);overload;    //{$ifdef _DGL_Inline} inline; {$endif}
+  public
+    class function  IteratorTraits():TIteratorTraits; override;
+    class procedure SetValue(const SelfItData:_IIterator;const Value: _ValueType); override;
+    class function  GetValue(const SelfItData:_IIterator): _ValueType;  override;
+    class function  IsEqual(const SelfItData:_IIterator;const Iterator:_IIterator):boolean; override;
+    class function  Distance(const SelfItData:_IIterator;const Iterator:_IIterator):integer; override;//时间复杂度O(n)
+    class procedure Next(var SelfItData:_IIterator); overload; override;
+    class procedure Next(var SelfItData:_IIterator; const Step:integer);overload; override;  //时间复杂度O(n)
+    class procedure Previous(var SelfItData:_IIterator); override;
+  end;
+
+
+  _IListIterator = object(_IIterator) //在使用_TList时_IListIterator和_IIterator等价，只是速度稍快一点
+  //_Data0 : _PListNode;
+  public
+    function  IteratorTraits():TIteratorTraits; {$ifdef _DGL_Inline} inline; {$endif}
+    procedure SetValue(const aValue: _ValueType); {$ifdef _DGL_Inline} inline; {$endif}
+    function  GetValue(): _ValueType; {$ifdef _DGL_Inline} inline; {$endif}
+    function  GetNextValue(const Step:integer): _ValueType; {$ifdef _DGL_Inline} inline; {$endif}
+    procedure SetNextValue(const Step:integer;const aValue:_ValueType);{$ifdef _DGL_Inline} inline; {$endif}
+
+    property  Value: _ValueType read GetValue write SetValue;
+    property  NextValue[const Index:integer]: _ValueType read GetNextValue write SetNextValue;
+    function  IsEqual(const Iterator:_IIterator):boolean; // {$ifdef _DGL_Inline} inline; {$endif}
+    //function  Distance(const Iterator:_IIterator):integer;//{$ifdef _DGL_Inline} inline; {$endif} //时间复杂度O(n)
+    procedure Assign (const Iterator:_IIterator); //{$ifdef _DGL_Inline} inline; {$endif}
+    procedure Next();overload;   {$ifdef _DGL_Inline} inline; {$endif}
+    //procedure Next(const Step:integer);overload;  {$ifdef _DGL_Inline} inline; {$endif} //时间复杂度O(n)
+    procedure Previous(); {$ifdef _DGL_Inline} inline; {$endif}
+    function  Clone():_IIterator; overload; {$ifdef _DGL_Inline} inline; {$endif}
+    function  Clone(const NextStep:integer):_IIterator;overload; {$ifdef _DGL_Inline} inline; {$endif}  //时间复杂度O(n)
+  end;
+
+{$endif } // __List_inc_h_

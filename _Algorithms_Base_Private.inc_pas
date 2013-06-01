@@ -1,0 +1,627 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com              
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// DGL库的算法的实现 处理类函数和普通函数
+// Create by HouSisong, 2005.10.13
+//------------------------------------------------------------------------------
+//_Algorithms_Base_Private.inc_pas
+
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class procedure _TAlgorithms.Tansfrom(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TansfromFunction:TTansfromFunctionOfObject);
+{$else}
+class procedure _TAlgorithms.Tansfrom(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TansfromFunction:TTansfromFunction);
+{$endif}
+var
+  It  :  {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+begin
+
+  It:=ItBegin;
+  while (not It.IsEqual(ItEnd)) do
+  begin
+    {$ifdef  _DGL_ObjValue}
+    _Assign(It.Value,TansfromFunction(It.Value));
+    {$else}
+    It.Value:=TansfromFunction(It.Value);
+    {$endif}
+    It.Next();
+  end;
+end;
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class procedure _TAlgorithms.Tansfrom(const ItBeginSrc,ItEndSrc,ItBeginDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TansfromFunction:TTansfromFunctionOfObject);
+{$else}
+class procedure _TAlgorithms.Tansfrom(const ItBeginSrc,ItEndSrc,ItBeginDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TansfromFunction:TTansfromFunction);
+{$endif}
+var
+  ItSrc  :  {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+  ItDest :  {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+begin
+  ItSrc:=ItBeginSrc;
+  ItDest:=ItBeginDest;
+  while (not ItSrc.IsEqual(ItEndSrc)) do
+  begin
+    {$ifdef  _DGL_ObjValue}
+    _Assign(ItDest.Value,TansfromFunction(ItSrc.Value));
+    {$else}
+    ItDest.Value:=TansfromFunction(ItSrc.Value);
+    {$endif}
+    ItSrc.Next();
+    ItDest.Next();
+  end;
+end;
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class procedure _TAlgorithms.Tansfrom(const ItBeginSrc0,ItEndSrc0,ItBeginSrc1,ItBeginDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TansfromFunction:TTansfromBinaryFunctionOfObject);
+{$else}
+class procedure _TAlgorithms.Tansfrom(const ItBeginSrc0,ItEndSrc0,ItBeginSrc1,ItBeginDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TansfromFunction:TTansfromBinaryFunction);
+{$endif}
+var
+  ItSrc0  :  {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+  ItSrc1  :  {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+  ItDest  :  {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+begin
+  ItSrc0:=ItBeginSrc0;
+  ItSrc1:=ItBeginSrc1;
+  ItDest:=ItBeginDest;
+  while (not ItSrc0.IsEqual(ItEndSrc0)) do
+  begin
+    {$ifdef  _DGL_ObjValue}
+    _Assign(ItDest.Value,TansfromFunction(ItSrc0.Value,ItSrc1.Value));
+    {$else}
+    ItDest.Value:=TansfromFunction(ItSrc0.Value,ItSrc1.Value);
+    {$endif}
+    ItSrc0.Next();
+    ItSrc1.Next();
+    ItDest.Next();
+  end;
+end;
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class procedure _TAlgorithms.ForEach(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const VisitProc:TVisitProcOfObject);
+{$else}
+class procedure _TAlgorithms.ForEach(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const VisitProc:TVisitProc);
+{$endif}
+var
+  It  :  {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+begin
+  It:=ItBegin;
+  while (not It.IsEqual(ItEnd)) do
+  begin
+    VisitProc(It.Value);
+    It.Next();
+  end;
+end;
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class function _TAlgorithms.FindIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunctionOfObject): {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+{$else}
+class function _TAlgorithms.FindIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunction): {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+{$endif}
+begin
+  result:=ItBegin;
+  while (not result.IsEqual(ItEnd)) do
+  begin
+    if TestFunction(result.Value) then
+      exit
+    else
+      result.Next();
+  end;
+end;
+
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class function _TAlgorithms.FindIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Value:_ValueType;const TestBinaryFunction:TTestBinaryFunctionOfObject): {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+{$else}
+class function _TAlgorithms.FindIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Value:_ValueType;const TestBinaryFunction:TTestBinaryFunction): {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+{$endif}
+begin
+  result:=ItBegin;
+  while (not result.IsEqual(ItEnd)) do
+  begin
+    if TestBinaryFunction(result.Value,Value) then
+      exit
+    else
+      result.Next();
+  end;
+end;
+
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class function _TAlgorithms.ReplaceIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunctionOfObject;const NewValue:_ValueType):integer;
+{$else}
+class function _TAlgorithms.ReplaceIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunction;const NewValue:_ValueType):integer;
+{$endif}
+var
+  It: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+begin
+  It:=ItBegin;
+  result:=0;
+  while (not It.IsEqual(ItEnd)) do
+  begin
+    if (TestFunction(It.Value)) then
+    begin
+      It.Value:=NewValue;
+      inc(result);
+    end;
+    It.Next();
+  end;
+end;
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class function _TAlgorithms.ReplaceCopyIf(const ItBeginSrc,ItEndSrc,ItBeginDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunctionOfObject;const NewValue:_ValueType):integer;
+{$else}
+class function _TAlgorithms.ReplaceCopyIf(const ItBeginSrc,ItEndSrc,ItBeginDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunction;const NewValue:_ValueType):integer;
+{$endif}
+var
+  ItSrc: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+  ItDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+begin
+  ItSrc:=ItBeginSrc;
+  ItDest:=ItBeginDest;
+  result:=0;
+  while (not ItSrc.IsEqual(ItEndSrc)) do
+  begin
+    if (TestFunction(ItSrc.Value)) then
+    begin
+      ItDest.Value:=NewValue;
+      inc(result);
+    end
+    else
+      ItDest.Value:=ItSrc.Value;
+    ItSrc.Next();
+    ItDest.Next();
+  end;
+end;
+
+
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class procedure _TAlgorithms.Generate(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const GenerateFunction:TGenerateFunctionOfObject);
+{$else}
+class procedure _TAlgorithms.Generate(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const GenerateFunction:TGenerateFunction);
+{$endif}
+var
+  It: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+begin
+  It:=ItBegin;
+  while (not It.IsEqual(ItEnd)) do
+  begin
+    It.Value:=GenerateFunction();
+    It.Next();
+  end;
+end;
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class procedure _TAlgorithms.Generate(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const N:integer;const GenerateFunction:TGenerateFunctionOfObject);
+{$else}
+class procedure _TAlgorithms.Generate(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const N:integer;const GenerateFunction:TGenerateFunction);
+{$endif}
+var
+  It: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+  i: integer;
+begin
+  It:=ItBegin;
+  for i:=0 to N-1 do
+  begin
+    It.Value:=GenerateFunction();
+    It.Next();
+  end;
+end;
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class function _TAlgorithms.RemoveIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunctionOfObject): {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+{$else}
+class function _TAlgorithms.RemoveIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunction): {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+{$endif}
+var
+  ItRead: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+begin
+  result:=FindIf(ItBegin,ItEnd,TestFunction);
+  if result.IsEqual(ItEnd) then exit;
+
+  ItRead:=result;
+  ItRead.Next;
+  while (not ItRead.IsEqual(ItEnd)) do
+  begin
+    if not TestFunction(ItRead.Value) then
+    begin
+      Result.Value:=ItRead.Value;
+      Result.Next;
+    end;
+    ItRead.Next();
+  end;
+end;
+
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class function _TAlgorithms.CountIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunctionOfObject):integer;
+{$else}
+class function _TAlgorithms.CountIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunction):integer;
+{$endif}
+var
+  It :  {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+begin
+  result:=0;
+  It:=ItBegin;
+  while (not It.IsEqual(ItEnd)) do
+  begin
+    if TestFunction(It.Value) then
+      inc(result);
+    It.Next();
+  end;
+end;
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class function _TAlgorithms.MinElement(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunctionOfObject): {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+{$else}
+class function _TAlgorithms.MinElement(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunction): {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+{$endif}
+var
+  It :  {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+begin
+  if ItBegin.IsEqual(ItEnd) then
+  begin
+    result:=ItEnd;
+    exit;
+  end;
+
+  result:=ItBegin;
+  It:=ItBegin;
+  It.Next;
+  while (not It.IsEqual(ItEnd)) do
+  begin
+    if TestBinaryFunction(It.Value,result.Value) then
+      result.Assign(It);
+    It.Next();
+  end;
+end;
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class function _TAlgorithms.MaxElement(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunctionOfObject): {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+{$else}
+class function _TAlgorithms.MaxElement(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunction): {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+{$endif}
+var
+  It :  {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+begin
+  if ItBegin.IsEqual(ItEnd) then
+  begin
+    result:=ItEnd;
+    exit;
+  end;
+
+  result:=ItBegin;
+  It:=ItBegin;
+  It.Next;
+  while (not It.IsEqual(ItEnd)) do
+  begin
+    if TestBinaryFunction(result.Value,It.Value) then
+      result.Assign(It);
+    It.Next();
+  end;
+end;
+
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class function _TAlgorithms.Search(const ItBegin,ItEnd,ItBeginSub,ItEndSub: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunctionOfObject): {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+{$else}
+class function _TAlgorithms.Search(const ItBegin,ItEnd,ItBeginSub,ItEndSub: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunction): {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+{$endif}
+  function IsEqualsSub(const ItBegin,ItEnd,ItBeginSub,ItEndSub: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ):boolean;
+  var
+    ItSrc,ItSub :  {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+  begin
+    ItSrc:=ItBegin;
+    ItSub:=ItBeginSub;
+
+    while not ItSub.IsEqual(ItEndSub) do
+    begin
+      if ItSrc.IsEqual(ItEnd) or
+       ( not TestBinaryFunction(ItSrc.Value,ItSub.Value) ) then
+      begin
+        result:=false;
+        exit;
+      end
+      else
+      begin
+        ItSrc.Next;
+        ItSub.Next;
+      end;
+    end;
+    result:=true;
+  end;
+
+begin
+  if ItBeginSub.IsEqual(ItEndSub) then
+  begin
+    result:=ItEnd;
+    exit;
+  end;
+
+  result:=FindIf(ItBegin,ItEnd,ItBeginSub.Value,TestBinaryFunction);
+  While (not result.IsEqual(ItEnd)) do
+  begin
+    // test if Equal
+    if IsEqualsSub(result,ItEnd,ItBeginSub,ItEndSub) then
+    begin
+      exit;
+    end;
+    result.Next();
+    result:=FindIf(result,ItEnd,ItBeginSub.Value,TestBinaryFunction);
+  end;
+end;
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class procedure _TAlgorithms.RandomShuffle(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const RandomGenerateFunction:TRandomGenerateFunctionOfObject);
+{$else}
+class procedure _TAlgorithms.RandomShuffle(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const RandomGenerateFunction:TRandomGenerateFunction);
+{$endif}
+var
+  It :  {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+  i,r,MaxStep : integer;
+begin
+  It:=ItBegin;
+  MaxStep:=ItBegin.Distance(ItEnd);
+  for i:=MaxStep downto 2 do
+  begin
+    r:=RandomGenerateFunction(i);
+    SwapValue(It,0,r);
+    It.Next();
+  end;
+end;
+
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+        procedure __DGL_QuickSort(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;Right:integer;
+            const TestBinaryFunction:TTestBinaryFunctionOfObject);overload;
+{$else}
+        procedure __DGL_QuickSort(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;Right:integer;
+            const TestBinaryFunction:TTestBinaryFunction);overload;
+{$endif}
+        var
+          i,j : integer;
+        begin
+          _TAlgorithms.SwapValue(ItBegin,0,random(Right+1));
+          i:=0;
+          j:=Right+1;
+          while true do
+          begin
+            repeat
+              inc(i)
+            until not((i<=Right) and (TestBinaryFunction(ItBegin.NextValue[i],ItBegin.Value)));
+            repeat                           
+              dec(j)
+            until not(TestBinaryFunction(ItBegin.Value,ItBegin.NextValue[j]));
+            if i>j then break;
+
+            _TAlgorithms.SwapValue(ItBegin,i,j);
+          end;
+          _TAlgorithms.SwapValue(ItBegin,0,j);
+          if j>1 then
+            __DGL_QuickSort(ItBegin,j-1,TestBinaryFunction);
+          inc(j);
+          dec(Right,j);
+          if Right>0 then
+            __DGL_QuickSort(ItBegin.Clone(j),Right,TestBinaryFunction);
+        end;
+
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class procedure _TAlgorithms.Sort(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunctionOfObject);
+{$else}
+class procedure _TAlgorithms.Sort(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunction);
+{$endif}
+var
+  Right: integer;
+begin
+  if (ItBegin._ObjIteratorClass=_TVectorIterator) then
+  begin
+    Sort(_PValueType_Iterator(ItBegin._Data0),_PValueType_Iterator(ItEnd._Data0),TestBinaryFunction);
+    exit;
+  end;
+
+  Right:=ItBegin.Distance(ItEnd)-1;
+  if Right>0 then
+    __DGL_QuickSort(ItBegin,Right,TestBinaryFunction);
+end;
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class function _TAlgorithms.IsSorted(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunctionOfObject):boolean;
+{$else}
+class function _TAlgorithms.IsSorted(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunction):boolean;
+{$endif}
+var
+  It :  {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+  Itp :  {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+begin
+  if (ItBegin._ObjIteratorClass=_TVectorIterator) then
+  begin
+    result:=IsSorted(_PValueType_Iterator(ItBegin._Data0),_PValueType_Iterator(ItEnd._Data0),TestBinaryFunction);
+    exit;
+  end;
+
+  if ItBegin.IsEqual(ItEnd) then
+  begin
+    result:=true;
+    exit;
+  end;
+
+  It:=ItBegin;
+  Itp:=ItBegin;
+  Itp.Next();
+  while (not ItP.IsEqual(ItEnd)) do
+  begin
+    if TestBinaryFunction(ItP.Value,It.Value) then
+    begin
+      result:=false;
+      exit;
+    end;
+    It.Next();
+    Itp.Next();
+  end;
+  result:=true;
+end;
+
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class function _TAlgorithms.BinarySearch(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Value:_ValueType;const TestBinaryFunction:TTestBinaryFunctionOfObject): {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+{$else}
+class function _TAlgorithms.BinarySearch(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Value:_ValueType;const TestBinaryFunction:TTestBinaryFunction): {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+{$endif}
+begin
+  result:=LowerBound(ItBegin,ItEnd,Value,TestBinaryFunction);
+  if not result.IsEqual(ItEnd) then
+  begin
+    if TestBinaryFunction(result.Value,Value)
+         or TestBinaryFunction(Value,result.Value) then
+      result.Assign(ItEnd);
+  end;
+end;
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class function _TAlgorithms.LowerBound(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Value:_ValueType;const TestBinaryFunction:TTestBinaryFunctionOfObject): {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+{$else}
+class function _TAlgorithms.LowerBound(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Value:_ValueType;const TestBinaryFunction:TTestBinaryFunction): {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+{$endif}
+var
+  left,LowerBound : integer;
+  m : integer;
+  Count : integer;                       
+begin
+  {todo：if (ItBegin._ObjIteratorClass=_TVectorIterator) then
+  begin
+    result._ObjIteratorClass:=_TVectorIterator;
+    _PValueType_Iterator(result._Data0):=
+                LowerBound(_PValueType_Iterator(ItBegin._Data0),_PValueType_Iterator(ItEnd._Data0),Value,TestBinaryFunction);
+    exit;
+  end; }
+
+  Count:=ItBegin.Distance(ItEnd);
+  left:=-1;
+  LowerBound:=Count;
+  while (left+1<>LowerBound) do
+  begin
+    m:=(left+LowerBound) div 2;
+    if TestBinaryFunction(ItBegin.GetNextValue(m),Value) then
+      left:=m
+    else
+      LowerBound:=m;
+  end;
+
+  if (LowerBound>=Count)  then //or (LowerBound<0)
+    result:=ItEnd
+  else
+  begin
+    result:={$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif}(ItBegin.Clone(LowerBound));
+  end;
+end;
+
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class procedure _TAlgorithms.PushHeap(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunctionOfObject);
+{$else}
+class procedure _TAlgorithms.PushHeap(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunction);
+{$endif}
+var
+  ip,isub : integer;
+begin
+  isub:=ItBegin.Distance(ItEnd)-1;
+  while true do
+  begin
+    if (isub<=0) then
+      break;
+    ip:=(isub-1) shr 1;//== div 2;
+    if not TestBinaryFunction(ItBegin.NextValue[ip],ItBegin.NextValue[isub]) then
+      break;
+    SwapValue(ItBegin,isub,ItBegin,ip);
+    isub:=ip;
+  end;
+end;
+
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class procedure _TAlgorithms.PopHeap(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunctionOfObject);
+{$else}
+class procedure _TAlgorithms.PopHeap(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunction);
+{$endif}
+var
+  ip,isub : integer;
+  Count   : integer;
+begin
+  Count:=ItBegin.Distance(ItEnd);
+  dec(Count);
+  if Count<=0 then exit;
+  SwapValue(ItBegin,0,ItBegin,Count);
+
+  ip:=0;
+  while true do
+  begin
+    isub:=ip*2+1;
+    if (isub>=Count) then
+      break;
+    if (isub+1<Count) then
+    begin
+      if (TestBinaryFunction(ItBegin.NextValue[isub],ItBegin.NextValue[isub+1])) then
+        inc(isub);
+    end;
+    
+    if not TestBinaryFunction(ItBegin.NextValue[ip],ItBegin.NextValue[isub]) then
+      break;
+    SwapValue(ItBegin,isub,ItBegin,ip);
+    ip:=isub;
+  end;
+end;
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class procedure _TAlgorithms.MakeHeap(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunctionOfObject);
+{$else}
+class procedure _TAlgorithms.MakeHeap(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunction);
+{$endif}
+var
+  It:  {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+begin
+  if ItBegin.IsEqual(ItEnd) then exit;
+
+  It:=ItBegin;
+  while true do
+  begin
+    It.Next;
+    PushHeap(ItBegin,It,TestBinaryFunction);
+    if It.IsEqual(ItEnd) then exit;
+  end;
+end;
+
+{$ifdef  _DGL_Algorithms_Object_Function}
+class procedure _TAlgorithms.SortHeap(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunctionOfObject);
+{$else}
+class procedure _TAlgorithms.SortHeap(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunction);
+{$endif}
+var
+  It:  {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
+begin
+  self.MakeHeap(ItBegin,ItEnd,TestBinaryFunction);
+  It:=ItEnd;
+  while (not It.IsEqual(ItBegin)) do
+  begin
+    PopHeap(ItBegin,It,TestBinaryFunction);
+    It.Previous();
+  end;
+end;
+
+//_Algorithms_Base_Private.inc_pas

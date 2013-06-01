@@ -1,0 +1,43 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// DGL库的引入包含文件 实现部分
+// Create by HouSisong, 2004.09.04
+//------------------------------------------------------------------------------
+
+//DGL.inc_pas
+
+  {$I DGLIntf.inc_pas}
+
+  {$I Algorithms.inc_pas}   //
+
+  {$I PointerItBox.inc_pas}
+
+  {$I Vector.inc_pas}
+  {$I Deque.inc_pas}
+  {$I List.inc_pas}
+
+  {$I Stack.inc_pas}
+  {$I Queue.inc_pas}   
+  {$I PriorityQueue.inc_pas}
+
+  {$I Set.inc_pas}
+  {$I Map.inc_pas}
+  {$I HashSet.inc_pas}
+  {$I HashMap.inc_pas}
+

@@ -1,0 +1,281 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// _TMap\_TMultiMapµÄÊµÏÖ
+// Create by HouSisong, 2006.10.20
+//------------------------------------------------------------------------------
+//Map.inc_h , Map.inc_pas
+
+{$ifndef __Map_inc_pas_}
+{$define __Map_inc_pas_}
+
+
+{$I DGLIntf.inc_pas}
+{$I _RB_Tree.inc_pas}
+                               
+
+{ _TMap_Base }
+
+function  _TMap_Base.GetSelfObj():TObject;
+begin
+  result:=self;
+end;
+
+function  _TMap_Base.IsEmpty(): Boolean;
+begin
+  result:=FRB_Tree.Size()=0;
+end;
+
+procedure _TMap_Base.Clear;
+begin
+  self.FRB_Tree.Clear();
+end;
+
+function _TMap_Base.Count(const Key: _KeyType): integer;
+begin
+  result:=self.FRB_Tree.Count(Key);
+end;
+
+constructor _TMap_Base.Create;
+begin
+  inherited Create();
+  self.FRB_Tree:=_TRB_Tree.Create(false);
+end;
+
+destructor _TMap_Base.Destroy;
+begin
+  self.FRB_Tree.Free();
+  inherited;
+end;
+
+procedure _TMap_Base.EqualRange(const Key: _KeyType; out ItBegin,
+  ItEnd: _IMapIterator);
+var
+  ItBeginNode,ItEndNode :_TRB_TreeIterator;
+begin
+  self.FRB_Tree.EqualRange(Key,ItBeginNode,ItEndNode);
+  _TMapIterator.ItCreate(_IIterator(ItBegin),ItBeginNode);
+  _TMapIterator.ItCreate(_IIterator(ItEnd),ItEndNode);
+end;
+
+procedure _TMap_Base.Erase(const ItBegin, ItEnd: _IMapIterator);
+begin
+  self.FRB_Tree.Erase(_TRB_TreeIterator(ItBegin._Data0),_TRB_TreeIterator(ItEnd._Data0));
+end;
+
+function _TMap_Base.EraseValue(const Value: _ValueType): integer;
+begin
+  result:=self.FRB_Tree.EraseValue(Value);
+end;
+
+function  _TMap_Base.EraseValue(const Key:_KeyType;const Value:_ValueType):integer;
+begin
+  result:=self.FRB_Tree.EraseValue(Key,Value);
+end;
+
+
+function  _TMap_Base.EraseKey(const Key:_KeyType):integer;
+begin
+  result:=self.FRB_Tree.EraseKey(Key);
+end;
+
+procedure _TMap_Base.Erase(const ItPos: _IMapIterator);
+begin
+  self.FRB_Tree.Erase(_TRB_TreeIterator(ItPos._Data0));
+end;
+
+function _TMap_Base.Find(const Key: _KeyType): _IMapIterator;
+begin
+  _TMapIterator.ItCreate(_IIterator(result), self.FRB_Tree.FindKey(Key));
+end;
+
+function _TMap_Base.GetItemValue(const Key: _KeyType): _ValueType;
+begin
+  result:=self.FRB_Tree.GetItemValue(Key);
+end;
+
+
+function _TMap_Base.ItBegin: _IMapIterator;
+begin
+  _TMapIterator.ItCreate(_IIterator(result),self.FRB_Tree.ItBegin);
+end;
+
+function _TMap_Base.ItEnd: _IMapIterator;
+begin
+  _TMapIterator.ItCreate(_IIterator(result),self.FRB_Tree.ItEnd);
+end;
+
+function _TMap_Base.LowerBound(const Key: _KeyType): _IMapIterator;
+begin
+  _TMapIterator.ItCreate(_IIterator(result),self.FRB_Tree.LowerBound(Key));
+end;
+
+function _TMap_Base.Size: Integer;
+begin
+  result:=self.FRB_Tree.Size();
+end;
+
+function _TMap_Base.UpperBound(const Key: _KeyType): _IMapIterator;
+begin
+  _TMapIterator.ItCreate(_IIterator(result), self.FRB_Tree.UpperBound(Key));
+end;
+////////////////////////////////////////////////////////////////////////////////////
+
+ { _TMap }
+
+procedure _TMap.Assign(const num: integer; const Key: _KeyType;const Value: _ValueType);
+begin
+  self.FRB_Tree.Clear();
+  if num>0 then
+    self.FRB_Tree.UniqueInsert(Key,Value);
+end;
+
+procedure _TMap.Assign(const ItBegin,ItEnd:_IMapIterator);
+begin
+  self.FRB_Tree.Clear();
+  self.Insert(ItBegin,ItEnd);
+end;
+
+function _TMap.Clone: _IMap;
+begin
+  result:=_IMap(_TMap.Create(self));
+end;
+
+constructor _TMap.Create(const ItBegin, ItEnd: _IMapIterator);
+begin
+  inherited Create();
+  self.Insert(ItBegin, ItEnd);
+end;
+
+constructor _TMap.Create(const AMap: _TMap);
+begin
+  inherited Create();
+  self.Insert(AMap.ItBegin,AMap.ItEnd);
+end;
+
+
+procedure _TMap.Insert(const Key: _KeyType; const Value: _ValueType);
+begin
+  self.FRB_Tree.UniqueInsert(Key,Value);
+end;
+
+procedure _TMap.Insert(const ItBegin, ItEnd: _IMapIterator);
+var
+  It :_IMapIterator;
+begin
+  It:=_IMapIterator(ItBegin.Clone());
+  while (not It.IsEqual(ItEnd)) do
+  begin
+    self.FRB_Tree.UniqueInsert(It.Key,It.Value);
+    It.Next();
+  end;
+end;
+
+procedure _TMap.Insert(const num: integer;
+  const Key: _KeyType; const Value: _ValueType);
+begin
+  if num>0 then
+    self.FRB_Tree.UniqueInsert(Key,Value);
+end;
+
+procedure _TMap.SetItemValue(const Key: _KeyType; const Value: _ValueType);
+begin
+  self.FRB_Tree.UniqueInsert(Key,Value);
+end;
+
+constructor _TMap.Create;
+begin
+  inherited Create();
+end;
+
+{ _TMultiMap }
+
+procedure _TMultiMap.Assign(const num: integer; const Key: _KeyType;
+  const Value: _ValueType);
+begin
+  self.FRB_Tree.Clear();
+  self.Insert(num,Key,Value);
+end;
+
+procedure _TMultiMap.Assign(const ItBegin,ItEnd:_IMapIterator);
+begin
+  self.FRB_Tree.Clear();
+  self.Insert(ItBegin,ItEnd);
+end;
+
+
+function _TMultiMap.Clone: _IMap;
+begin
+  result:=_IMultiMap(_TMultiMap.Create(self));
+end;
+
+procedure _TMultiMap.SetItemValue(const Key: _KeyType; const Value: _ValueType);
+begin
+  self.FRB_Tree.MultiInsert(Key,Value);
+end;
+
+constructor _TMultiMap.Create(const ItBegin, ItEnd: _IMapIterator);
+begin
+  inherited Create();
+  self.Insert(ItBegin, ItEnd);
+end;
+
+constructor _TMultiMap.Create(const AMultiMap: _TMultiMap);
+begin
+  inherited Create();  
+  self.Insert(AMultiMap.ItBegin(),AMultiMap.ItEnd);
+end;
+
+constructor _TMultiMap.Create(const num: integer; const Key: _KeyType;const Value: _ValueType);
+begin
+  inherited Create();
+  self.Assign(num,Key,Value);
+end;
+
+constructor _TMultiMap.Create;
+begin
+  inherited Create();
+end;
+
+procedure _TMultiMap.Insert(const Key: _KeyType; const Value: _ValueType);
+begin
+  self.FRB_Tree.MultiInsert(Key,Value);
+end;
+
+procedure _TMultiMap.Insert(const num: integer; const Key: _KeyType; const Value: _ValueType);
+var
+  i : integer;
+begin
+  for i:=0 to num-1 do
+    self.FRB_Tree.MultiInsert(Key,Value);
+end;
+
+procedure _TMultiMap.Insert(const ItBegin,ItEnd: _IMapIterator);
+var
+  It :_IMapIterator;
+begin
+  It:=_IMapIterator(ItBegin.Clone());
+  while (not It.IsEqual(ItEnd)) do
+  begin
+    self.FRB_Tree.MultiInsert(It.Key,It.Value);
+    It.Next();
+  end;
+end;
+
+
+{$endif } // __Map_inc_pas_

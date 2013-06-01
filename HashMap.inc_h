@@ -1,0 +1,120 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// _THashMap\_THashMultiMap的声明
+// Create by HouSisong, 2004.09.11
+//------------------------------------------------------------------------------
+//HashMap.inc_h , HashMap.inc_pas
+
+{$ifndef __HashMap_inc_h_}
+{$define __HashMap_inc_h_}
+
+
+{$I DGLIntf.inc_h}
+{$I _HashTable.inc_h}
+
+type
+  _THashMapIterator = _THashBaseIterator;
+
+type
+  _THashMap_Base = class(TInterfacedObject)
+  protected
+    FHashTable : _THashTableBase;
+  protected
+    function  getAlwaysReserveSize():integer;                           {$ifdef _DGL_Inline} inline; {$endif}
+    procedure setAlwaysReserveSize(const aAlwaysReserveSize:integer);   {$ifdef _DGL_Inline} inline; {$endif}
+  public
+    function  GetItemValue(const Key: _KeyType): _ValueType;            {$ifdef _DGL_Inline} inline; {$endif}
+
+    function  ItBegin(): _IMapIterator;                                {$ifdef _DGL_Inline} inline; {$endif}
+    function  ItEnd(): _IMapIterator;                                  {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Clear();                                                 {$ifdef _DGL_Inline} inline; {$endif}
+    function  Size(): Integer;                                         {$ifdef _DGL_Inline} inline; {$endif}
+    function  IsEmpty(): Boolean;                                      {$ifdef _DGL_Inline} inline; {$endif}
+    function  EraseValue(const Value:_ValueType):integer; overload;    {$ifdef _DGL_Inline} inline; {$endif}
+    function  EraseValue(const Key:_KeyType;const Value:_ValueType):integer; overload;   {$ifdef _DGL_Inline} inline; {$endif}
+    function  EraseKey(const Key:_KeyType):integer; overload;                           {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Erase(const ItPos:_IMapIterator);  overload;                              //{$ifdef _DGL_Inline} inline; {$endif}
+    procedure Erase(const ItBegin,ItEnd: _IMapIterator);  overload;                    //
+
+    function  Count(const Key:_KeyType):integer;                                {$ifdef _DGL_Inline} inline; {$endif}
+    function  Find(const Key:_KeyType):_IMapIterator;                           {$ifdef _DGL_Inline} inline; {$endif}
+    function  LowerBound(const Key:_KeyType):_IMapIterator;                     {$ifdef _DGL_Inline} inline; {$endif}
+    function  UpperBound(const Key:_KeyType):_IMapIterator;                     {$ifdef _DGL_Inline} inline; {$endif}
+    procedure EqualRange(const Key:_KeyType;out ItBegin,ItEnd:_IMapIterator);   {$ifdef _DGL_Inline} inline; {$endif}
+    function  GetSelfObj():TObject;                                     {$ifdef _DGL_Inline} inline; {$endif}
+  public
+    property  AlwaysReserveSize:integer read getAlwaysReserveSize write setAlwaysReserveSize;
+    procedure Reserve(const ReserveSize: integer);     {$ifdef _DGL_Inline} inline; {$endif}
+    constructor Create(); 
+    destructor  Destroy(); override;
+  end;
+
+  //----------------------------------------------------------------------------
+  // 作用描述: 底部利用_THashTableBase实现的Map
+  // 主要方法：(参见_IMap的说明)
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong , 2004.09.11
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  _THashMap  = class(_THashMap_Base,_IMap)
+  public
+    procedure SetItemValue(const Key: _KeyType;const Value: _ValueType);                  {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Insert(const Key:_KeyType;const Value:_ValueType); overload;                {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Insert(const ItBegin,ItEnd:_IMapIterator);overload;
+    procedure Insert(const num:integer;const Key:_KeyType;const Value:_ValueType); overload;  {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Assign(const ItBegin,ItEnd:_IMapIterator);overload;
+    procedure Assign(const num:integer;const Key:_KeyType;const Value: _ValueType);overload;   {$ifdef _DGL_Inline} inline; {$endif}
+    function  Clone():_IMap;                                                                   {$ifdef _DGL_Inline} inline; {$endif}
+    property  Items[const Key:_KeyType]: _ValueType read GetItemValue write SetItemValue;
+  public
+    constructor Create(); overload;
+    constructor Create(const ItBegin,ItEnd:_IMapIterator);overload;
+    constructor Create(const AMap:_THashMap);overload;
+  end;
+
+  //----------------------------------------------------------------------------
+  // 作用描述: 底部利用_THashTableBase实现的MultiMap
+  // 主要方法：(参见_IMultiMap的说明)
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong , 2004.09.11
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  _THashMultiMap  = class(_THashMap_Base,_IMultiMap,_IMap)  //not _IMap
+  public
+    procedure SetItemValue(const Key: _KeyType;const Value: _ValueType);                        {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Insert(const Key:_KeyType;const Value:_ValueType); overload;                      {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Insert(const ItBegin,ItEnd:_IMapIterator);overload;
+    procedure Insert(const num:integer;const Key:_KeyType;const Value:_ValueType); overload;    {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Assign(const ItBegin,ItEnd:_IMapIterator);overload;
+    procedure Assign(const num:integer;const Key:_KeyType;const Value: _ValueType);overload;    {$ifdef _DGL_Inline} inline; {$endif}
+    function  Clone():_IMap;                                                                    {$ifdef _DGL_Inline} inline; {$endif}
+    property  Items[const Key:_KeyType]: _ValueType read GetItemValue write SetItemValue;
+  public
+    constructor Create(); overload;
+    constructor Create(const ItBegin,ItEnd:_IMapIterator);overload;
+    constructor Create(const AMultiMap:_THashMultiMap);overload;
+    constructor Create(const num:integer;const Key:_HashKeyType;const Value: _HashValueType);overload;
+  end;
+
+
+{$endif } // __HashMap_inc_h_

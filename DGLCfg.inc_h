@@ -1,0 +1,34 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//DGLCfg.inc_h
+
+{$ifndef  __DGLCfg_inc_h_}
+{$define  __DGLCfg_inc_h_}
+
+const
+   DGL_Version = 1.27;
+
+   {$IFDEF CONDITIONALEXPRESSIONS}
+     {$IF Declared(CompilerVersion) and (CompilerVersion >= 17)}  //Delphi 2005
+        {$INLINE ON}
+        //{$INLINE AUTO}
+        {$DEFINE _DGL_Inline}  //uses as: {$ifdef _DGL_Inline} inline; {$endif}
+     {$IFEND}
+   {$ENDIF}
+
+{$endif} // __DGLCfg_inc_h_

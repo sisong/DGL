@@ -1,0 +1,138 @@
+                在Delphi中实现类型安全的容器
+          by HouSisong@gmail.com，2004.09.12   (2006.10.20更新)
+
+
+  最近都在使用Delphi,但Delphi中的容器和算法实在太缺乏了，又存在很多不一致，使用也很不方便。 
+  在构造一些容器和算法的时候,总是怀念C++的泛型和STL;所以就尝试在Delphi中编写泛型代码； 
+  其它现有的Deplhi容器和算法库实现中，主要的实现途径有利用Delphi中的array of const和variant(相当于弱类型,而且对结构的支持差，如Decal)；或者建立一套单根类体系作为容器中的元素(主要使用虚函数机制,如：左轻侯有篇文章也谈到过; 一般简单类型需要做打包拆包)；还有的实现是针对TObject、IInterface、String等做多套代码实现(如:DCL库)； 但他们相对于C++的STL来说缺陷也很明显，类型不安全,速度慢，代码重复等； 
+  DGL库克服了这些问题，库能够支持几乎所有基本类型、指针(包括类的指针)、Interface、结构(record)、Object结构(Delphi中已经不推荐使用)、类成员函数指针、类(class)的值语义(一般Delphi中不习惯使用类的值语义，所以不建议使用)等其它用户自定义类型，并且类型安全(速度当然没有问题啦)!
+
+
+库现在包括以下组件:
+<object>
+_IIterator    容器迭代器
+_IMapIterator Map迭代器
+(PointerBox函数可以将原生指针包装成一个与库兼容的迭代器)
+
+<接口interface>                     
+_ICollection        容器接口
+_ISerialContainer   序列容器的接口     
+_IVector            向量接口(容器的一种)
+_IList              链表接口(容器的一种)
+_IDeque             队列接口(容器的一种)
+_IStack             堆栈接口(一种容器配接器)
+_IQueue             双端队列接口(一种容器配接器)
+_IPriorityQueue     优先级队列
+
+_ISet               Set接口                       
+_IMultiSet          MultiSet接口        
+_IMap               Map接口                       
+_IMultiMap          MultiMap接口               
+
+<类class>
+_TAlgorithms        算法类(包括:拷贝、替换、删除、排序、搜索等算法)
+      
+_TVector            向量实现类        
+_TList              链表List的一个实现                   
+_TDeque             队列Deque的一个实现           
+_TStack             堆栈Stack     
+_TQueue             双端队列Queue  
+
+(_TRB_Tree     红黑树(库内部使用))
+_TSet           用红黑树实现的Set             
+_TMultiSet      用红黑树实现的MultiSet        
+_TMap           用红黑树实现的Map             
+_TMultiMap      用红黑树实现的MultiMap
+
+(_THashTableBase     Hash表(库内部使用))
+_THashSet           用Hash表实现的Set             
+_THashMultiSet      用Hash表实现的MultiSet        
+_THashMap           用Hash表实现的Map             
+_THashMultiMap      用Hash表实现的MultiMap
+
+
+实现原型举例:
+
+“模版”类的声明文件:UnitClassT.inc_h
+[code]
+//<template:_T,_T_IsEqual>
+type
+  TTest = class(TObject)
+  private
+    a : _T;
+  public
+    function GetA():_T;
+    fucntion IsEqual(ATest:TTest):bool;
+  end;
+[/code]
+“模版”类的实现文件:UnitClassT.inc_pas
+[code]
+  function TTest.GetA(): _T;
+  begin
+    result:=a;
+  end;
+
+  fucntion IsEqual(ATest:TTest):bool;
+  begin
+    result:=_T_IsEqual(a,ATest.a);
+  end;
+  [/code]
+ 
+//////////////////////////////////////
+使用的时候对“模版”类做pointer的特化
+
+[code]
+unit UnitTestPointer;
+
+interface
+
+type _T = Pointer;
+function _T_IsEqual(cosnt a,b:_T); 
+
+{$I UnitClassT.inc_h}
+
+type TTestPointer = TTest;  // TTestPointer定义给外部使用
+ 
+implementation
+
+{$I UnitClassT.inc_pas}
+
+function _T_IsEqual(cosnt a,b:_T);
+begin
+  result:=(a=b);
+end;
+
+end.
+[/code]
+
+
+使用的时候对“模版”类做double的特化
+[code]
+unit UnitTestDouble;
+
+interface
+
+type _T = double;
+{$I UnitClassT.inc_h}
+
+type TTestFloat = TTest;  // TTestFloat定义给外部使用
+
+function _T_IsEqual(cosnt a,b:_T);
+
+implementation
+
+function _T_IsEqual(cosnt a,b:_T);
+begin
+  result:=(a=b);
+end;
+
+{$I UnitClassT.inc_pas}
+
+end.
+[/code]
+
+（将类分成两个部分的原因是这样可以$Include更多的文件，形成组合；感觉象C++ ） 
+
+这里只对一个_T类型做了参数化，当然还可以对多个类型做特化；甚至参数化一些常量和其他函数(比如Hash值函数)，利用$define\$ifdef进行条件编译(主要用来优化或特殊处理)；用这种方法再加上接口(Interface,不是必须)；在Delphi中就可以实现通用\高效\易用的容器和算法库了； 
+
+

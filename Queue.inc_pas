@@ -1,0 +1,138 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// _TQueueµÄÊµÏÖ
+// Create by HouSisong, 2004.09.08
+//------------------------------------------------------------------------------
+
+{$ifndef  __Queue_inc_pas_}
+{$define  __Queue_inc_pas_}
+
+
+{$I DGLIntf.inc_pas}
+{$I Deque.inc_pas}
+
+{ _TQueue }
+
+procedure _TQueue.Assign(const ItBegin, ItEnd: _IIterator);
+begin
+  self.FBaseContainer.Assign(ItBegin,ItEnd);
+end;
+
+procedure _TQueue.Assign(const num: integer; const Value: _ValueType);
+begin
+  self.FBaseContainer.Assign(num,Value);
+end;
+
+function _TQueue.GetBackValue(): _ValueType;
+begin
+  result:=self.FBaseContainer.GetBackValue();
+end;
+
+procedure _TQueue.SetBackValue(const aValue:_ValueType);
+begin
+  self.FBaseContainer.SetBackValue(aValue);
+end;
+
+procedure _TQueue.Clear;
+begin
+  FBaseContainer.Clear();
+end;
+
+function _TQueue.Clone: _IQueue;
+begin
+  result:=_TQueue.Create(self);
+end;
+
+constructor _TQueue.Create;
+begin
+  inherited Create();
+  FBaseContainer :=_TDefaultQueueBaseContainer.Create();
+end;
+
+constructor _TQueue.Create(const num: integer; const Value: _ValueType);
+begin
+  inherited Create();
+  FBaseContainer :=_TDefaultQueueBaseContainer.Create(num,Value);
+end;
+
+constructor _TQueue.Create(const num: integer);
+begin
+  inherited Create();
+  FBaseContainer :=_TDefaultQueueBaseContainer.Create(num);
+end;
+
+constructor _TQueue.Create(const AQueue: _TQueue);
+begin
+  inherited Create();
+  FBaseContainer :=_TDefaultQueueBaseContainer.Create(AQueue.FBaseContainer as _TDefaultQueueBaseContainer);
+end;
+
+constructor _TQueue.Create(const ItBegin,ItEnd: _IIterator);
+begin
+  inherited Create();
+  FBaseContainer :=_TDefaultQueueBaseContainer.Create(ItBegin,ItEnd);
+end;
+
+destructor _TQueue.Destroy;
+begin
+  FBaseContainer.Free();
+  inherited;
+end;
+
+function _TQueue.GetFrontValue(): _ValueType;
+begin
+  result:=self.FBaseContainer.GetFrontValue();
+end;
+
+procedure _TQueue.SetFrontValue(const aValue: _ValueType);
+begin
+  self.FBaseContainer.SetFrontValue(aValue);
+end;
+
+function _TQueue.GetSelfObj: TObject;
+begin
+  result:=self;
+end;
+
+function _TQueue.IsEmpty: Boolean;
+begin
+  result:=FBaseContainer.IsEmpty;
+end;
+
+function _TQueue.IsEquals(const AContainer: _IQueue): Boolean;
+begin
+  result:=FBaseContainer.IsEquals((AContainer.GetSelfObj as _TQueue).FBaseContainer as _TDefaultQueueBaseContainer);
+end;
+
+procedure _TQueue.Pop;
+begin
+  FBaseContainer.PopFront();
+end;
+
+procedure _TQueue.Push(const Value: _ValueType);
+begin
+  FBaseContainer.PushBack(Value);
+end;
+
+function _TQueue.Size: Integer;
+begin
+  result:=FBaseContainer.Size;
+end;
+
+{$endif }  // __Queue_inc_pas_

@@ -1,0 +1,143 @@
+(*
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// _RB_Tree的实现
+// Create by HouSisong, 2006.10.20
+//------------------------------------------------------------------------------
+
+//_RB_Tree.inc_pas ; _RB_Tree.inc_h
+
+{$ifndef __RB_Tree_inc_h_}
+{$define __RB_Tree_inc_h_}
+
+type
+  _RB_Tree_ValueType = _ValueType;
+  _RB_Tree_KeyType = _KeyType;
+  _PRB_Tree_ValueType = ^_RB_Tree_ValueType;
+
+Type
+  _TRB_TreeColorType = (_rbRed=0,_rbBlack=1);
+
+  _PRB_TreeNode = ^_TRB_TreeNode;
+  _PRB_TreeNode_OnlySet = ^_TRB_TreeNode_OnlySet;
+    _TRB_TreeNode = record
+      Color   : _TRB_TreeColorType;
+      Parent  : _PRB_TreeNode;
+      Left    : _PRB_TreeNode;
+      Right   : _PRB_TreeNode;
+      Key     : _RB_Tree_KeyType;
+      Value   : _RB_Tree_ValueType;
+    end;
+  _TRB_TreeNode_OnlySet = record
+      Color   : _TRB_TreeColorType;
+      Parent  : _PRB_TreeNode;
+      Left    : _PRB_TreeNode;
+      Right   : _PRB_TreeNode;
+      Key     : _RB_Tree_KeyType;
+      //Value   : _RB_Tree_ValueType;   节约内存
+  end;
+
+  function  _RB_Tree_Minimum(const PNode:_PRB_TreeNode):_PRB_TreeNode; //max Left
+  function  _RB_Tree_Maximum(const PNode:_PRB_TreeNode):_PRB_TreeNode; //max right
+  procedure _RB_Tree_Rotate_Left(pNode:_PRB_TreeNode;var pNodeRoot:_PRB_TreeNode);
+  procedure _RB_Tree_Rotate_Right(pNode:_PRB_TreeNode;var pNodeRoot:_PRB_TreeNode);
+  procedure _RB_Tree_ReBalance(pNodeNew:_PRB_TreeNode;var pNodeRoot:_PRB_TreeNode);
+  function  _Rb_Tree_Rebalance_For_Erase(ePosNode:_PRB_TreeNode;var TreeRoot,MostLeftNode,MostRightNode:_PRB_TreeNode):_PRB_TreeNode;
+
+//====
+
+type
+  //_TRB_Tree内部维护的简易迭代器
+  _TRB_TreeIterator = record
+    Node : _PRB_TreeNode;
+  end;
+  procedure _TRB_TreeIt_Next(var it:_TRB_TreeIterator);
+  procedure _TRB_TreeIt_Previous(var it:_TRB_TreeIterator);
+
+const
+  csRBTreeKey_Error = 'RBTree Key is not within the valid range.';
+type
+  ERBTreeKeyRangeError = class(ERangeError);//uses SysUtils! //对不存在的元素进行删除或读取（写是合法的）时触发
+
+//////////////////////////////
+type
+  // 注意事项: 内部实现，外部不要直接使用
+  _TRB_Tree = class(TObject)
+  private
+    F_DGL_OnlySet : boolean;
+    function   getNewNode(const Key: _RB_Tree_KeyType;const Value: _RB_Tree_ValueType):_PRB_TreeNode; overload;
+    function   getNewNode(const Key: _RB_Tree_KeyType):_PRB_TreeNode; overload;
+    procedure  DisposeNode(PNode:_PRB_TreeNode);
+    procedure  DisposeAll(EraseNode: _PRB_TreeNode);
+    procedure privateAddNode(pNodeNew : _PRB_TreeNode;pNodePos, pNodeParent: _PRB_TreeNode; const Key: _RB_Tree_KeyType);overload;
+    procedure AddNode(pNodePos, pNodeParent: _PRB_TreeNode; const Key: _RB_Tree_KeyType;const Value:_RB_Tree_ValueType);overload;
+    procedure AddNode(pNodePos, pNodeParent: _PRB_TreeNode; const Key: _RB_Tree_KeyType);overload;
+    function  CountRange(const Key: _RB_Tree_KeyType; out ItBegin,ItEnd: _TRB_TreeIterator): integer;
+  private
+    FNodeCount    : integer;
+    FHeader       : _PRB_TreeNode;  //root:=FHeader.Parent;
+    procedure Inti();
+    function  FindInsertNodeParent(const Key: _RB_Tree_KeyType;const pIsInsertLeftNode:PBoolean=nil):_PRB_TreeNode;
+  public
+    constructor Create(const IsOnlySet : boolean) ;
+    destructor  Destroy; override;
+    procedure Clear;
+    procedure Swap(RBTree:_TRB_Tree);
+  public
+    function  ItBegin():_TRB_TreeIterator;
+    function  ItEnd():_TRB_TreeIterator;
+    function  IsEmpty():boolean;
+    function  Size():integer;
+    procedure UniqueInsert(const Key: _RB_Tree_KeyType;const Value: _RB_Tree_ValueType); overload;
+    procedure MultiInsert(const Key: _RB_Tree_KeyType;const Value: _RB_Tree_ValueType);overload;
+    procedure UniqueInsert(const Key: _RB_Tree_KeyType); overload;
+    procedure MultiInsert(const Key: _RB_Tree_KeyType);overload;
+
+    function  GetItemValue(const Key: _RB_Tree_KeyType): _RB_Tree_ValueType;
+    function  EraseValue(const Value: _RB_Tree_ValueType): integer;  overload;
+    function  EraseValue(const Key: _RB_Tree_KeyType;const Value: _RB_Tree_ValueType): integer;  overload;
+    function  EraseKey(const Key: _RB_Tree_KeyType): integer;  overload;
+    procedure Erase(const ItPos:_TRB_TreeIterator);  overload;
+    procedure Erase(const ItBegin,ItEnd: _TRB_TreeIterator);  overload;
+
+    function  Count(const Key:_RB_Tree_KeyType):integer;
+    function  FindKey(const Key:_RB_Tree_KeyType):_TRB_TreeIterator;
+    function  FindValue(const Value:_RB_Tree_ValueType):_TRB_TreeIterator;
+    function  LowerBound(const Key:_RB_Tree_KeyType):_TRB_TreeIterator;//==FindKey
+    function  UpperBound(const Key:_RB_Tree_KeyType):_TRB_TreeIterator;
+    procedure EqualRange(const Key:_RB_Tree_KeyType;out ItBegin,ItEnd:_TRB_TreeIterator);
+  end;
+
+
+  //RBTree Iterator
+  _TRBTreeBaseIterator = class(_TAbstractIterator)
+  private
+    //FNodeIt   : _TRB_TreeIterator;   //_Data0
+  public
+    class function  IteratorTraits():TIteratorTraits; override;
+    class procedure ItCreate(var SelfItData:_IIterator;const NodeIt:_TRB_TreeIterator);overload;     //{$ifdef _DGL_Inline} inline; {$endif}
+
+    class function    GetValue(const SelfItData:_IIterator): _ValueType;override;
+    class procedure   SetValue(const SelfItData:_IIterator;const Value: _ValueType); override;
+    class function    Map_GetKey(const SelfItData:_IIterator): _KeyType;override;
+
+    class procedure   Next(var SelfItData:_IIterator); overload; override;
+    class function    IsEqual(const SelfItData:_IIterator;const Iterator:_IIterator):boolean;override;
+    class procedure   Previous(var SelfItData:_IIterator); override;
+  end;
+
+
+{$endif } // __RB_Tree_inc_h_

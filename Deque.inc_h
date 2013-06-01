@@ -1,0 +1,210 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// _TDeque的声明
+// Create by HouSisong, 2004.09.02
+//------------------------------------------------------------------------------
+
+{$ifndef  __Deque_inc_h_}
+{$define  __Deque_inc_h_}
+
+{$I DGLIntf.inc_h}
+//Deque.inc_h; Deque.inc_pas       
+            
+const
+        __csDequeNodeCount = (1024*4) div sizeof(_ValueType);
+  csDequeNodeCount =__csDequeNodeCount + ord( not (boolean(__csDequeNodeCount)));
+  //csDequeNodeCount = max(1,(nodesize) div sizeof(_ValueType));
+
+type
+  //Deque节点  -- 类内部使用
+  _PPDequeNode = ^_PDequeNode;
+  _PDequeNode = ^_TEndPosDequeNode;
+  _PMemDequeNode = ^_TMemDequeNode;
+  _TMemDequeNode =  array [0..(csDequeNodeCount-1)] of _ValueType;
+  _TEndPosDequeNode =  array [0..(csDequeNodeCount)] of _ValueType;
+
+type
+  //Deque内部位置 -- 类内部使用
+  _TDequePos = record
+    PPNode       : _PPDequeNode;
+    PCurValue    : _PValueType;
+    PEndValue    : _PValueType;
+  end;
+  _PDequePos =^_TDequePos;
+  _TDequeIt=record
+    _it : Pointer;
+    Pos : _TDequePos;
+  end;
+  _PDequeIt = ^_TDequeIt;
+  
+    procedure _TDeque_IncPos(var Pos:_TDequePos); overload;        {$ifdef _DGL_Inline} inline; {$endif}
+    procedure _TDeque_DecPos(var Pos:_TDequePos);  overload;         {$ifdef _DGL_Inline} inline; {$endif}
+    procedure _TDeque_IncPos(var Pos:_TDequePos;const dxIndex:integer); overload;    {$ifdef _DGL_Inline} inline; {$endif}
+    function  _TDeque_Distance(const BeginPos, EndPos:_TDequePos):integer;            {$ifdef _DGL_Inline} inline; {$endif}
+
+type
+
+  _TPDequeNodeDArray = array of _PDequeNode;
+
+  //_TDeque
+  //----------------------------------------------------------------------------
+  // 作用描述: 实现_IDeque接口
+  // 主要方法：参见_IDeque接口的说明
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong , 2004.09.02
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+  _TDeque = class(TInterfacedObject,_IDeque,_IVector,_ISerialContainer,_IContainer)
+  private
+    FNodeArray      : _TPDequeNodeDArray; //节点列表
+    FFrontPos       : _TDequePos;  //前部写后位置
+    FEndPos         : _TDequePos;  //最后一个元素的下一个位置
+   // FCount          : integer;     //元素总数
+    class function NewNode():_PDequeNode;                   {$ifdef _DGL_Inline} inline; {$endif}
+    class procedure DeleteNode(var pNode:_PDequeNode);      {$ifdef _DGL_Inline} inline; {$endif}
+    function GetPos(const Index:integer):_TDequePos;      {$ifdef _DGL_Inline} inline; {$endif}
+    function GetAItemAddress(const ItemIndex:integer): _PValueType;     {$ifdef _DGL_Inline} inline; {$endif}
+    procedure ReCopy(PBegin,PEnd,PDest:_TDequePos);
+    procedure Copy(PBegin,PEnd,PDest:_TDequePos);
+    procedure Fill(PBegin,PEnd:_TDequePos;const Value:_ValueType);overload;
+    procedure Fill(PBegin,PEnd:_TDequePos;const ItSrcBegin:_IIterator);overload;
+    procedure ReduceCapabilityFront();              //{$ifdef _DGL_Inline} inline; {$endif}
+    procedure ReduceCapabilityBack();                //{$ifdef _DGL_Inline} inline; {$endif}
+    procedure ExtendCapabilityFront();               // {$ifdef _DGL_Inline} inline; {$endif}
+    procedure ExtendCapabilityBack();               //  {$ifdef _DGL_Inline} inline; {$endif}
+    procedure DestroyClear();
+    procedure _MiddleInsert(const ItPos, ItBegin, ItEnd: _IIterator;num: integer;const Value: _ValueType);
+   public
+     //实现_IVector接口
+    function  GetItemValue(const Index: Integer): _ValueType;                   {$ifdef _DGL_Inline} inline; {$endif}
+    procedure SetItemValue(const Index: Integer;const Value: _ValueType);       {$ifdef _DGL_Inline} inline; {$endif}
+    property  Items[const Index: Integer]: _ValueType read GetItemValue write SetItemValue;
+    function  IndexOf(const Value: _ValueType): Integer;
+    procedure InsertByIndex(const Index: Integer;const Value: _ValueType);
+    function  NewIterator(const Index: Integer):_IIterator;                     {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Reserve(const ReserveSize: integer);
+    procedure EraseByIndex(const Index: integer); overload;
+  public
+    //实现_ISerialContainer接口
+    procedure PushBack(const Value: _ValueType); overload;                      {$ifdef _DGL_Inline} inline; {$endif}
+    procedure PushBack(const num:integer;Value: _ValueType); overload;          {$ifdef _DGL_Inline} inline; {$endif}
+    procedure PushBack(const ItBegin,ItEnd: _IIterator); overload;
+    procedure PopBack();                                                        {$ifdef _DGL_Inline} inline; {$endif}
+    procedure PushFront(const Value: _ValueType);overload ;                     {$ifdef _DGL_Inline} inline; {$endif}
+    procedure PushFront(const num:integer;Value: _ValueType); overload;         {$ifdef _DGL_Inline} inline; {$endif}
+    procedure PushFront(const ItBegin,ItEnd: _IIterator); overload;
+    procedure PopFront();                                                       {$ifdef _DGL_Inline} inline; {$endif}
+    function  GetBackValue():_ValueType;                                   {$ifdef _DGL_Inline} inline; {$endif}
+    procedure SetBackValue(const aValue:_ValueType);                       {$ifdef _DGL_Inline} inline; {$endif}
+    property  Back: _ValueType read GetBackValue write SetBackValue;
+    function  GetFrontValue():_ValueType;                                  {$ifdef _DGL_Inline} inline; {$endif}
+    procedure SetFrontValue(const aValue:_ValueType);                      {$ifdef _DGL_Inline} inline; {$endif}
+    property  Front: _ValueType read GetFrontValue write SetFrontValue;
+    function  IsEquals(const AContainer: _IContainer): Boolean;
+    function  IsLess(const AContainer: _IContainer): Boolean;
+    procedure Resize(const num:integer); overload;
+    procedure Resize(const num:integer;const Value:_ValueType); overload;
+  public
+    //实现_IContainer接口
+    function  GetSelfObj():TObject;             {$ifdef _DGL_Inline} inline; {$endif}
+    function  ItBegin(): _IIterator;            {$ifdef _DGL_Inline} inline; {$endif}
+    function  ItEnd(): _IIterator;              {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Clear();
+    function  Size(): Integer;                  {$ifdef _DGL_Inline} inline; {$endif}
+    function  IsEmpty(): Boolean;               {$ifdef _DGL_Inline} inline; {$endif}
+    function  EraseValue(const Value:_ValueType):integer; overload;     {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Erase(const ItPos:_IIterator);  overload;                 //{$ifdef _DGL_Inline} inline; {$endif}
+    procedure Erase(const ItBegin,ItEnd: _IIterator);  overload;       //
+    procedure Insert(const Value:_ValueType); overload;                 {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Insert(const ItPos:_IIterator;const Value:_ValueType); overload;   //{$ifdef _DGL_Inline} inline; {$endif}
+    procedure Insert(const ItPos:_IIterator;const num:integer;const Value:_ValueType); overload;
+    procedure Insert(const ItPos:_IIterator;const ItBegin,ItEnd:_IIterator);overload;
+    procedure Assign(const num:integer;const Value: _ValueType);overload;
+    procedure Assign(const ItBegin,ItEnd:_IIterator);overload;
+    function  Clone():_IContainer; {$ifdef _DGL_Inline} inline; {$endif}
+    procedure CloneToInterface(out NewContainer);  {$ifdef _DGL_Inline} inline; {$endif}
+  public
+    procedure Swap(ADeque:_TDeque); {$ifdef _DGL_Inline} inline; {$endif}
+  public
+    constructor Create(); overload;
+    constructor Create(const num:integer);overload;
+    constructor Create(const num:integer;const Value:_ValueType);overload;
+    constructor Create(const ItBegin,ItEnd:_IIterator);overload;
+    constructor Create(const ADeque:_TDeque);overload;
+    destructor Destroy(); override;
+  end;
+               
+
+  //_TDequeIterator
+  //----------------------------------------------------------------------------
+  // 作用描述: 实现_IIterator接口
+  // 主要方法：参见_IIterator接口的说明
+  // 使用方式：
+  // 注意事项:
+  // 作    者: HouSisong , 2004.09.02
+  // [相关资料]: (如果有的话)
+  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
+  //----------------------------------------------------------------------------
+type
+  _TDequeIterator = class(_TAbstractIterator)
+  public
+    class procedure ItCreate(var SelfItData:_IIterator;const ADeque:_TDeque;const Index:integer=0);overload;//{$ifdef _DGL_Inline} inline; {$endif}
+    class procedure ItCreate(var SelfItData:_IIterator;const aDequePos:_TDequePos);overload; //{$ifdef _DGL_Inline} inline; {$endif}
+  public
+    class function  IteratorTraits():TIteratorTraits; override;
+    class procedure SetValue(const SelfItData:_IIterator;const aValue: _ValueType); override;
+    class function  GetValue(const SelfItData:_IIterator): _ValueType; override;
+    class function   GetNextValue(const SelfItData:_IIterator;const Step:integer): _ValueType; override;
+    class procedure  SetNextValue(const SelfItData:_IIterator;const Step:integer;const aValue: _ValueType); override;
+
+    class function  IsEqual(const SelfItData:_IIterator;const Iterator:_IIterator):boolean; override;
+    class function  Distance(const SelfItData:_IIterator;const Iterator:_IIterator):integer;override;//时间复杂度O(1)
+    class procedure Next(var SelfItData:_IIterator); override;
+    class procedure Next(var SelfItData:_IIterator;const Step:integer); override;
+    class procedure Previous(var SelfItData:_IIterator); override;
+  end;
+
+  _IDequeIterator = object(_IIterator) //在使用Deque时_DequeIterator和_IIterator等价，只是速度稍快一点
+  private
+    //PPNode       : _PPDequeNode;   //_Data0
+    //PCurValue    : _PValueType;    //_Date1
+    //PLastValue   : _PValueType;    //_Data2
+  public
+    function  IteratorTraits():TIteratorTraits; {$ifdef _DGL_Inline} inline; {$endif}
+    procedure SetValue(const aValue: _ValueType); {$ifdef _DGL_Inline} inline; {$endif}
+    function  GetValue(): _ValueType; {$ifdef _DGL_Inline} inline; {$endif}
+    function  GetNextValue(const Step:integer): _ValueType; {$ifdef _DGL_Inline} inline; {$endif}
+    procedure SetNextValue(const Step:integer;const aValue:_ValueType);{$ifdef _DGL_Inline} inline; {$endif}
+
+    property  Value: _ValueType read GetValue write SetValue;
+    property  NextValue[const Index:integer]: _ValueType read GetNextValue write SetNextValue;
+    function  IsEqual(const Iterator:_IIterator):boolean;  //{$ifdef _DGL_Inline} inline; {$endif}
+    function  Distance(const Iterator:_IIterator):integer;//{$ifdef _DGL_Inline} inline; {$endif}
+    procedure Assign (const Iterator:_IIterator); //{$ifdef _DGL_Inline} inline; {$endif}
+    procedure Next();overload;   {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Next(const Step:integer);overload;  {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Previous(); {$ifdef _DGL_Inline} inline; {$endif}
+    function  Clone():_IIterator; overload; {$ifdef _DGL_Inline} inline; {$endif}
+    function  Clone(const NextStep:integer):_IIterator;overload; {$ifdef _DGL_Inline} inline; {$endif}
+  end;
+
+
+{$endif } //  __Deque_inc_h_

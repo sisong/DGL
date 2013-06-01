@@ -1,0 +1,1305 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// _TDequeµÄÊµÏÖ
+// Create by HouSisong, 2004.09.02
+//------------------------------------------------------------------------------
+
+{$ifndef  __Deque_inc_pas_}
+{$define  __Deque_inc_pas_}              
+//Deque.inc_h , Deque.inc_pas
+
+{$I DGLIntf.inc_pas}
+
+
+{ _TDeque }
+const
+  csDeultCapability =8;
+  
+{$ifdef _DGL_ClassFunction_Specific}  //if TValueType=TNotifyEvent then do;
+    function _TDeque_Get_ClassFunction_Address(var Value):_PValueType;  {$ifdef _DGL_Inline} inline; {$endif}
+    begin
+      result:=@Value;
+    end;
+{$endif}
+
+function  _TDeque.GetSelfObj():TObject;
+begin
+  result:=self;
+end;
+
+function  _TDeque.IsEmpty(): Boolean;
+begin
+  result:=(self.FFrontPos.PCurValue=self.FEndPos.PCurValue);
+end;
+
+
+function _TDeque.GetBackValue: _ValueType;
+var
+  PValue : _PValueType;
+  FBackPos : _TDequePos;
+begin
+  Assert(self.FFrontPos.PCurValue<>self.FEndPos.PCurValue);
+  PValue:=FEndPos.PCurValue;
+  if Pointer(PValue)=Pointer(FEndPos.PPNode^) then
+  begin
+    FBackPos:=FEndPos;
+    _TDeque_DecPos(FBackPos);
+    PValue:=FBackPos.PCurValue;
+  end
+  else
+    Dec(PValue);
+  result:=PValue^;
+end;
+
+procedure _TDeque.SetBackValue(const aValue:_ValueType);
+var
+  PValue : _PValueType;
+  FBackPos : _TDequePos;
+begin
+  Assert(self.FFrontPos.PCurValue<>self.FEndPos.PCurValue);
+  PValue:=FEndPos.PCurValue;
+  if Pointer(PValue)=Pointer(FEndPos.PPNode^) then
+  begin
+    FBackPos:=FEndPos;
+    _TDeque_DecPos(FBackPos);
+    PValue:=FBackPos.PCurValue;
+  end
+  else
+    Dec(PValue);
+
+  {$ifdef _DGL_ObjValue}
+    _Assign(PValue^,aValue);
+  {$else}
+    PValue^:=aValue;
+  {$endif}
+end;
+
+{$ifdef  _DGL_ObjValue}
+procedure _Deque_Free_ObjValue(ADeque:_TDeque;PBegin,PEnd:_TDequePos);
+var
+  PValue : _PValueType;
+begin
+  while (PBegin.PCurValue<>PEnd.PCurValue) do
+  begin
+    PValue:=(PBegin.PCurValue);
+    _Free(PValue^);
+    PValue^:=_Null_Value;
+    _TDeque_IncPos(PBegin);
+  end;
+end;
+{$endif}
+
+procedure _TDeque.DestroyClear();
+var
+  i : integer;      
+begin
+  {$ifdef  _DGL_ObjValue}
+    _Deque_Free_ObjValue(self,FFrontPos,FEndPos);
+  {$endif}
+  for i:=low(FNodeArray) to high(FNodeArray) do
+    self.DeleteNode(FNodeArray[i]);
+  FNodeArray:=nil;
+  self.FFrontPos.PPNode:=nil;
+  self.FFrontPos.PCurValue:=nil;
+  self.FFrontPos.PEndValue:=nil;
+  self.FEndPos.PPNode:=nil;
+  self.FEndPos.PCurValue:=nil;
+  self.FEndPos.PEndValue:=nil;
+end;
+
+procedure _TDeque.Clear;
+begin
+  DestroyClear();
+  setlength(FNodeArray,csDeultCapability);
+  self.FFrontPos.PPNode:=@FNodeArray[csDeultCapability shr 1];
+  self.FEndPos.PPNode:=self.FFrontPos.PPNode;
+end;
+
+procedure _TDeque.Swap(ADeque:_TDeque);
+var
+  tmpNodeArray  : _TPDequeNodeDArray;
+  tmpPos  : _TDequePos;
+begin
+  if self=ADeque then exit;
+
+  tmpNodeArray:=FNodeArray;  FNodeArray:=ADeque.FNodeArray;  ADeque.FNodeArray:=tmpNodeArray;
+  tmpPos:=FFrontPos;  FFrontPos:=ADeque.FFrontPos;  ADeque.FFrontPos:=tmpPos;
+  tmpPos:=FEndPos;  FEndPos:=ADeque.FEndPos;  ADeque.FEndPos:=tmpPos;
+end;
+
+
+
+constructor _TDeque.Create(const num: integer; const Value: _ValueType);
+begin
+  inherited Create();
+  Clear();
+  self.PushBack(num,Value);
+end;
+
+constructor _TDeque.Create(const num: integer);
+{$ifdef  _DGL_ObjValue}
+var
+  _Default_Value : _ValueType;
+{$endif}
+begin
+  inherited Create();
+  Clear();
+  {$ifdef  _DGL_ObjValue}
+    _Default_Value:=_CreateNew();
+    self.PushBack(num,_Default_Value);
+    _Free(_Default_Value);
+  {$else}
+    self.PushBack(num,_NULL_Value);
+  {$endif}
+end;
+
+constructor _TDeque.Create;
+begin
+  inherited;
+  Clear();
+end;
+
+procedure _TDeque.Copy(PBegin, PEnd, PDest: _TDequePos);
+begin
+  while (PBegin.PCurValue<>PEnd.PCurValue) do
+  begin
+    {$ifdef  _DGL_ObjValue}
+      _Assign((PDest.PCurValue)^,(PBegin.PCurValue)^);
+    {$else}
+      (PDest.PCurValue)^:=(PBegin.PCurValue)^;
+    {$endif}
+    _TDeque_IncPos(PBegin);
+    _TDeque_IncPos(PDest);
+  end;
+end;
+
+constructor _TDeque.Create(const ADeque: _TDeque);
+begin
+  inherited Create();
+  Clear();
+  self.PushBack(ADeque.ItBegin,ADeque.ItEnd);
+end;
+
+constructor _TDeque.Create(const ItBegin, ItEnd: _IIterator);
+begin
+  inherited Create();
+  Clear();
+  self.PushBack(ItBegin, ItEnd);
+end;
+
+procedure _TDeque.Resize(const num: integer; const Value: _ValueType);
+var
+  i : integer;
+  OldCount : integer;
+begin
+  OldCount:=_TDeque_Distance(FFrontPos,FEndPos);
+  if num<OldCount then
+  begin
+    for i:=num to OldCount-1 do
+      PopBack();
+  end
+  else
+  begin
+    for i:=OldCount to num-1 do
+      PushBack(Value);
+  end;
+end;
+
+procedure _TDeque.Resize(const num:integer);
+{$ifdef  _DGL_ObjValue}
+var
+  _Default_Value : _ValueType;
+{$endif}
+begin
+  {$ifdef  _DGL_ObjValue}
+    _Default_Value:=_CreateNew();
+    self.Resize(num,_Default_Value);
+    _Free(_Default_Value);
+  {$else}
+    self.Resize(num,_NULL_Value);
+  {$endif}
+end;
+
+procedure _TDeque.EraseByIndex(const Index: integer);
+begin
+  Erase(NewIterator(Index));
+end;
+
+procedure _TDeque.InsertByIndex(const Index: Integer;const Value: _ValueType);
+begin
+  Insert(NewIterator(Index),Value);
+end;
+
+class procedure _TDeque.DeleteNode(var pNode: _PDequeNode);
+begin
+  if pNode<>nil then
+  begin
+    system.Dispose(_PMemDequeNode(pNode));
+    pNode:=nil;
+  end;
+end;
+
+destructor _TDeque.Destroy;
+begin
+  self.DestroyClear();
+  inherited;
+end;
+
+procedure _TDeque.Erase(const ItBegin, ItEnd: _IIterator);
+var
+  Index: integer;
+  BeginPos,EndPos,DestPos : _TDequePos;
+  num:integer;
+  i : integer;
+  EndIndex : integer;
+  OldCount : integer;
+begin
+  Index:=_TDeque_Distance(self.FFrontPos,_PDequeIt(@ItBegin).Pos);
+  EndIndex:=_TDeque_Distance(self.FFrontPos,_PDequeIt(@ItEnd).Pos);
+  num:=ItBegin.Distance(ItEnd);
+  if num<=0 then exit;
+
+  OldCount:=_TDeque_Distance(FFrontPos,FEndPos);
+  if Index=0 then
+  begin
+    for i:=0 to num-1 do self.PopFront();
+  end
+  else if (EndIndex)=OldCount then
+  begin
+    for i:=0 to num-1 do self.PopBack();
+  end
+  else
+  begin
+    if Index+(num  div 2)>=OldCount div 2 then
+    begin
+      DestPos:=self.GetPos(Index);
+      BeginPos:=DestPos;
+      _TDeque_IncPos(BeginPos,num);
+      self.Copy(BeginPos,FEndPos,DestPos);
+      for i:=0 to num-1 do self.PopBack();
+    end
+    else
+    begin
+      EndPos:=self.GetPos(Index);
+      DestPos:= self.FFrontPos;
+      _TDeque_IncPos(DestPos,num);
+      self.ReCopy(FFrontPos,EndPos,DestPos);
+      for i:=0 to num-1 do self.PopFront();
+    end;
+  end;
+end;
+
+procedure _TDeque.Erase(const ItPos: _IIterator);
+var
+  ItEnd : _IIterator;
+begin
+  ItEnd:=ItPos.Clone;
+  ItEnd.Next;
+  Erase(ItPos,ItEnd);
+end;
+
+procedure _TDeque.Fill(PBegin, PEnd: _TDequePos; const Value: _ValueType);
+begin
+  while (PBegin.PCurValue<>PEnd.PCurValue) do
+  begin
+    {$ifdef  _DGL_ObjValue}
+    _Assign((PBegin.PCurValue)^,Value);
+    {$else}
+    (PBegin.PCurValue)^:=Value;
+    {$endif}
+    _TDeque_IncPos(PBegin);
+  end;
+end;
+
+function _TDeque.ItBegin: _IIterator;
+begin
+  _TDequeIterator.ItCreate(result,FFrontPos);
+end;
+
+function  _TDeque.NewIterator(const Index: Integer):_IIterator;
+begin
+  _TDequeIterator.ItCreate(result,self,Index);
+end;
+
+function _TDeque.GetFrontValue: _ValueType;
+begin
+  Assert(self.FFrontPos.PCurValue<>self.FEndPos.PCurValue);
+  result:=(FFrontPos.PCurValue)^;
+end;
+
+procedure _TDeque.SetFrontValue(const aValue:_ValueType);
+begin
+  Assert(self.FFrontPos.PCurValue<>self.FEndPos.PCurValue);
+  {$ifdef _DGL_ObjValue}
+    _Assign((FFrontPos.PCurValue)^,aValue);
+  {$else}
+    (FFrontPos.PCurValue)^:=aValue;
+  {$endif}
+end;
+
+function _TDeque.GetItemValue(const Index: Integer): _ValueType;
+begin
+  Assert(Index>=0);
+  Assert(Index<_TDeque_Distance(FFrontPos,FEndPos));
+  result:=self.GetAItemAddress(Index)^;
+end;
+
+function _TDeque.GetPos(const Index: integer): _TDequePos;
+begin
+  result:=FFrontPos;
+  _TDeque_IncPos(result,Index);
+end;
+
+function _TDeque.GetAItemAddress(const ItemIndex:integer): _PValueType;
+var
+  ValueIndex,NodeCount:integer;
+  ppNode : _PPDequeNode;
+begin
+  ValueIndex:=ItemIndex+(csDequeNodeCount) + (integer(FFrontPos.PCurValue)-integer(FFrontPos.PEndValue)) div (sizeof(_ValueType));
+  NodeCount:=ValueIndex div csDequeNodeCount;
+  ppNode:=_PPDequeNode(integer(FFrontPos.PPNode)+NodeCount*sizeof(_PPDequeNode));
+  ValueIndex:=ValueIndex-NodeCount*csDequeNodeCount;
+  result:={$ifdef _DGL_ClassFunction_Specific}_TDeque_Get_ClassFunction_Address{$else}@{$endif}(ppNode^[ValueIndex]);
+end;
+
+function _TDeque.IndexOf(const Value: _ValueType): Integer;
+var
+  i : integer;
+  Pos : _TDequePos;
+  OldCount : integer;
+begin
+  Pos:=self.FFrontPos;
+  OldCount:=_TDeque_Distance(FFrontPos,FEndPos);
+  for i:=0 to OldCount-1 do
+  begin
+    {$ifdef  _DGL_Compare}
+      if (_IsEqual(Value,(Pos.PCurValue)^)) then
+    {$else}
+      if Value=(Pos.PCurValue)^ then
+    {$endif}
+    begin
+      result:=i;
+      exit;
+    end;
+    _TDeque_IncPos(Pos);
+  end;
+  result:=-1;
+end;
+
+procedure _TDeque.Insert(const ItPos: _IIterator; const Value: _ValueType);
+var
+  Index: integer;
+begin
+  Index:=_TDeque_Distance(self.FFrontPos,_PDequeIt(@ItPos).Pos);
+  if Index=0 then
+    self.PushFront(Value)
+  else if (Index>=_TDeque_Distance(FFrontPos,FEndPos)) then
+    self.PushBack(Value)
+  else
+    Insert(ItPos,1,Value);
+end;
+
+procedure _TDeque.Insert(const Value:_ValueType);
+begin
+  self.PushBack(Value);
+end;
+
+procedure _TDeque.Insert(const ItPos: _IIterator; const num: integer;
+  const Value: _ValueType);
+var
+  Index: integer;
+begin
+  if num<=0 then exit;
+  
+  Index:=_TDeque_Distance(self.FFrontPos,_PDequeIt(@ItPos).Pos);
+  if Index=0 then
+    self.PushFront(num,Value)
+  else if (Index>=_TDeque_Distance(FFrontPos,FEndPos)) then
+    self.PushBack(num,Value)
+  else
+    _MiddleInsert(ItPos, ItPos, ItPos,num,Value);
+end;
+
+procedure _TDeque.Insert(const ItPos, ItBegin, ItEnd: _IIterator);
+var
+  Index: integer;
+begin
+  Index:=_TDeque_Distance(self.FFrontPos,_PDequeIt(@ItPos).Pos);
+  if Index=0 then
+    self.PushFront(ItBegin, ItEnd)
+  else if Index>=_TDeque_Distance(FFrontPos,FEndPos) then
+    self.PushBack(ItBegin, ItEnd)
+  else
+    _MiddleInsert(ItPos, ItBegin, ItEnd,0,_NULL_Value);
+end;
+
+procedure _TDeque._MiddleInsert(const ItPos, ItBegin, ItEnd: _IIterator;num: integer;const Value: _ValueType);
+var
+  Index: integer;
+  BeginPos,EndPos,DestPos : _TDequePos;
+  IsItInsert : boolean;
+{$ifdef  _DGL_ObjValue}
+var
+  _Default_Value : _ValueType;
+{$endif}
+begin
+  Index:=_TDeque_Distance(self.FFrontPos,_PDequeIt(@ItPos).Pos);
+  begin
+    IsItInsert:=(num=0);
+    if IsItInsert then
+      num:=ItBegin.Distance(ItEnd);
+    if Index >=_TDeque_Distance(self.FFrontPos,self.FEndPos) div 2 then
+    begin
+      {$ifdef  _DGL_ObjValue}
+        _Default_Value:=_CreateNew();
+        self.PushBack(num,_Default_Value);
+        _Free(_Default_Value);
+      {$else}
+        self.PushBack(num,_NULL_Value);
+      {$endif}
+      BeginPos:=self.GetPos(Index); //move begin
+      EndPos:=self.GetPos(_TDeque_Distance(FFrontPos,FEndPos)-num); //move end
+      DestPos:=self.GetPos(Index+num);   //move dest
+      self.ReCopy(BeginPos,EndPos,DestPos);
+      if IsItInsert  then
+        self.Fill(BeginPos,DestPos,ItBegin)
+      else
+        self.Fill(BeginPos,DestPos,Value);
+    end
+    else
+    begin
+      {$ifdef  _DGL_ObjValue}
+        _Default_Value:=_CreateNew();
+        self.PushFront(num,_Default_Value);
+        _Free(_Default_Value);
+      {$else}
+        self.PushFront(num,_NULL_Value);
+      {$endif}
+      BeginPos:=self.GetPos(num);//move bedin
+      EndPos:=self.GetPos(Index+num); //move end
+      self.Copy(BeginPos,EndPos,self.FFrontPos);
+      BeginPos:=self.GetPos(Index);
+      if IsItInsert  then
+        self.Fill(BeginPos,EndPos,ItBegin)
+      else
+        self.Fill(BeginPos,EndPos,Value);
+    end;
+  end;
+end;
+
+function _TDeque.ItEnd: _IIterator;
+begin
+  _TDequeIterator.ItCreate(result,self.FEndPos);
+end;
+
+class function _TDeque.NewNode: _PDequeNode;
+begin
+  system.New(_PMemDequeNode(result));
+end;
+
+procedure _TDeque.PopBack;
+var
+  PValue : _PValueType;
+begin
+  Assert(self.FFrontPos.PCurValue<>self.FEndPos.PCurValue);
+  PValue:=(self.FEndPos.PCurValue);
+  if longword(PValue)=longword(integer(FEndPos.PPNode^)) then
+  begin
+    _TDeque_DecPos(FEndPos);
+    PValue:=(self.FEndPos.PCurValue);
+    {$ifdef  _DGL_ObjValue}  _Free(PValue^); {$endif}
+    PValue^:=_NULL_Value;
+
+    ReduceCapabilityBack();
+  end
+  else
+  begin
+    dec(PValue);
+    {$ifdef  _DGL_ObjValue} _Free(PValue^); {$endif}
+    PValue^:=_NULL_Value;
+    FEndPos.PCurValue:=PValue;
+  end;
+end;
+
+procedure _TDeque.PopFront;
+var
+  PValue : _PValueType;
+begin
+  Assert(self.FFrontPos.PCurValue<>self.FEndPos.PCurValue);
+  PValue:=(self.FFrontPos.PCurValue);
+  {$ifdef  _DGL_ObjValue}
+    _Free(PValue^);
+  {$endif}
+  PValue^:=_NULL_Value;
+  inc(PValue);
+  if PValue<>FFrontPos.PEndValue then
+    FFrontPos.PCurValue:=PValue
+  else
+  begin
+    _TDeque_IncPos(FFrontPos);
+    ReduceCapabilityFront();
+  end;
+end;
+
+procedure _TDeque.PushFront(const num:integer;Value: _ValueType);
+var
+  i: integer;
+begin
+  for i:=0 to num-1 do
+    self.PushFront(Value);
+end;
+
+procedure _TDeque.PushFront(const ItBegin,ItEnd: _IIterator);
+var
+  i,num: integer;
+  It: _IIterator;
+begin
+  num:=ItBegin.Distance(ItEnd);
+  It:=ItBegin.Clone();
+  for i:=0 to num-1 do
+  begin
+    self.PushFront(It.Value);
+    It.Next();
+  end;
+end;
+
+procedure _TDeque.PushBack(const Value: _ValueType);
+var
+  PValue : _PValueType;
+begin                  
+  PValue:=FEndPos.PCurValue;
+  if longword(PValue)+sizeof(_ValueType)>=longword(FEndPos.PEndValue) then
+  begin
+    if longword(PValue)>=longword(FEndPos.PEndValue) then
+      ExtendCapabilityBack();
+    PValue:=FEndPos.PCurValue;
+    _TDeque_IncPos(self.FEndPos);
+  end
+  else
+    FEndPos.PCurValue:=_PValueType(longword(PValue)+sizeof(_ValueType)); //==  inc(FEndPos.PCurValue);
+
+
+  {$ifdef  _DGL_ObjValue}
+    PValue^:=_CopyCreateNew(Value);
+  {$else}
+    PValue^:=Value;
+  {$endif}
+end;
+
+procedure _TDeque.PushBack(const num:integer;Value: _ValueType);
+var
+  i: integer;
+begin
+  for i:=0 to num-1 do
+    self.PushBack(Value);
+end;
+
+procedure _TDeque.PushBack(const ItBegin,ItEnd: _IIterator);
+var
+  i,num: integer;
+  It: _IIterator;
+begin
+  num:=ItBegin.Distance(ItEnd);
+  It:=ItBegin.Clone();
+  for i:=0 to num-1 do
+  begin
+    self.PushBack(It.Value);
+    It.Next();
+  end;
+end;
+
+procedure _TDeque.PushFront(const Value: _ValueType);
+var
+  PValue : _PValueType;
+begin
+  PValue:=FFrontPos.PCurValue;
+  if ( Pointer(PValue)=Pointer(FFrontPos.PPNode^) ) then
+  begin
+    ExtendCapabilityFront();
+    _TDeque_DecPos(self.FFrontPos);
+    PValue:=FFrontPos.PCurValue;
+  end
+  else
+  begin
+    dec(PValue);
+    FFrontPos.PCurValue:=PValue;
+  end;
+    
+  {$ifdef  _DGL_ObjValue}
+    PValue^:=_CopyCreateNew(Value);
+  {$else}
+    PValue^:=Value;
+  {$endif}
+end;
+
+
+function _TDeque.IsEquals(const AContainer: _IContainer): Boolean;
+var
+  i : integer;
+  it : _IIterator;
+begin
+  if self.Size()<>AContainer.Size() then
+  begin
+    result:=false;
+    exit;
+  end;
+
+  it:=AContainer.ItBegin();
+  for i:=0 to _TDeque_Distance(FFrontPos,FEndPos)-1 do
+  begin
+    {$ifdef  _DGL_Compare}
+    if (not _IsEqual((self.GetAItemAddress(i))^,it.Value)) then
+    {$else}
+    if (not ((self.GetAItemAddress(i))^=it.Value)) then
+    {$endif}
+    begin
+      result:=false;
+      exit;
+    end
+    else
+      it.Next();
+  end;
+  result:=true;
+end;
+
+function _TDeque.IsLess(const AContainer: _IContainer): Boolean;
+var
+  i : integer;
+  selfSize,ACSize,MinSize : integer;
+  it : _IIterator;
+begin
+  selfSize:=_TDeque_Distance(FFrontPos,FEndPos);
+  ACSize:=AContainer.Size();
+  MinSize:=ACSize;
+  if selfSize<MinSize then MinSize:=selfSize;
+
+  it:=AContainer.ItBegin();
+  for i:=0 to MinSize-1 do
+  begin
+    {$ifdef  _DGL_Compare}
+    if (_IsLess(it.Value,(self.GetAItemAddress(i))^)) then
+    {$else}
+    if it.Value<(self.GetAItemAddress(i))^ then
+    {$endif}
+    begin
+      result:=false;
+      exit;
+    end
+    else
+      it.Next();
+  end;
+  result:=(selfSize<ACSize);
+end;
+
+
+procedure _TDeque.ReCopy(PBegin, PEnd, PDest: _TDequePos);
+begin
+  _TDeque_IncPos(PDest,_TDeque_Distance(PBegin,PEnd)-1);
+  _TDeque_DecPos(PBegin);
+  _TDeque_DecPos(PEnd);
+  while (PBegin.PCurValue<>PEnd.PCurValue) do
+  begin
+    {$ifdef  _DGL_ObjValue}
+      _Assign((PDest.PCurValue)^,(PEnd.PCurValue)^);
+    {$else}
+      (PDest.PCurValue)^:=(PEnd.PCurValue)^;
+    {$endif}
+
+    _TDeque_DecPos(PEnd);
+    _TDeque_DecPos(PDest);
+  end;
+end;
+
+function _TDeque.EraseValue(const Value: _ValueType): integer;
+var
+  iRead  : _TDequePos;
+  iWrite : _TDequePos;
+  fIndex : integer;
+  i  : integer;
+  {$ifdef _DGL_ObjValue}
+    tmpValue : _ValueType;
+  {$endif}
+begin
+  fIndex:=IndexOf(Value);
+  if fIndex<0 then
+  begin
+    result:=0;
+    exit;
+  end;
+
+  result:=1;
+  iWrite:=self.GetPos(fIndex);
+  iRead:=iWrite;
+  _TDeque_IncPos(iRead);
+  for i:=fIndex+1 to _TDeque_Distance(FFrontPos,FEndPos)-1 do
+  begin
+    {$ifdef  _DGL_Compare}
+    if (_IsEqual((iRead.PCurValue)^,Value)) then
+    {$else}
+    if ((iRead.PCurValue)^)=Value then
+    {$endif}
+    begin
+      inc(result);
+    end
+    else
+    begin
+      {$ifdef _DGL_ObjValue}
+        tmpValue:=(iWrite.PCurValue)^;
+      {$endif}
+
+      iWrite.PCurValue^:=iRead.PCurValue^;
+
+      {$ifdef _DGL_ObjValue} //swap
+        (iRead.PCurValue)^:= tmpValue;
+      {$endif}
+
+      _TDeque_incPos(iWrite);
+    end;
+    _TDeque_incPos(iRead);
+  end;
+  for i:=0 to result-1 do self.PopBack();
+end;
+
+procedure _TDeque.Reserve(const ReserveSize: integer);
+begin
+  //ok! do nothing
+end;
+
+procedure _TDeque.SetItemValue(const Index: Integer; const Value: _ValueType);
+begin
+  Assert(Index>=0);
+  Assert(Index<_TDeque_Distance(FFrontPos,FEndPos));
+  {$ifdef  _DGL_ObjValue}
+    _Assign((self.GetAItemAddress(Index))^,Value);
+  {$else}
+    (self.GetAItemAddress(Index))^:=Value;
+  {$endif}
+end;
+
+function _TDeque.Size: Integer;
+begin
+  result:=_TDeque_Distance(FFrontPos,FEndPos);
+end;
+
+procedure _TDeque_DecPos(var Pos: _TDequePos);
+var
+  PValue : _PValueType;
+begin
+  PValue:=Pos.PCurValue;
+  if Pointer(PValue)=Pointer(Pos.PPNode^) then
+  begin
+    dec(Pos.PPNode);
+    Assert(Pos.PPNode^<>nil);
+    Pos.PCurValue:={$ifdef _DGL_ClassFunction_Specific}_TDeque_Get_ClassFunction_Address{$else}@{$endif}(Pos.PPNode^[csDequeNodeCount-1]);
+    Pos.PEndValue:={$ifdef _DGL_ClassFunction_Specific}_TDeque_Get_ClassFunction_Address{$else}@{$endif}(Pos.PPNode^[csDequeNodeCount]);
+  end
+  else
+    Dec(Pos.PCurValue);
+end;
+
+procedure _TDeque_IncPos(var Pos: _TDequePos);
+begin
+  Inc(Pos.PCurValue);
+  if longword(Pos.PCurValue)>=longword(Pos.PEndValue) then
+  begin
+    inc(Pos.PPNode);
+    if (Pos.PPNode^<>nil) then
+    begin
+      Pos.PCurValue:={$ifdef _DGL_ClassFunction_Specific}_TDeque_Get_ClassFunction_Address{$else}@{$endif}(Pos.PPNode^[0]);
+      Pos.PEndValue:={$ifdef _DGL_ClassFunction_Specific}_TDeque_Get_ClassFunction_Address{$else}@{$endif}(Pos.PPNode^[csDequeNodeCount]);
+    end
+    else
+    begin
+      Pos.PCurValue:=nil;
+      Pos.PEndValue:=nil;
+    end;
+  end;
+end;
+
+procedure _TDeque_IncPos(var Pos: _TDequePos; const dxIndex: integer);
+var
+  nIndex,nodeCount : integer;
+  ValueIndex: integer;
+begin
+  ValueIndex:=(integer(Pos.PCurValue)-integer(Pos.PPNode^)) div (sizeof(_ValueType));
+  nIndex:=ValueIndex+dxIndex;
+  if nIndex>=0 then
+  begin
+    nodeCount:=(nIndex div csDequeNodeCount);
+    inc(Pos.PPNode,nodeCount);
+    if Pos.PPNode^<>nil then
+    begin
+      Pos.PCurValue:={$ifdef _DGL_ClassFunction_Specific}_TDeque_Get_ClassFunction_Address{$else}@{$endif}(Pos.PPNode^[(nIndex - nodeCount*csDequeNodeCount)]);
+      Pos.PEndValue:={$ifdef _DGL_ClassFunction_Specific}_TDeque_Get_ClassFunction_Address{$else}@{$endif}(Pos.PPNode^[csDequeNodeCount]);
+    end
+    else
+    begin
+      Assert((nIndex - nodeCount*csDequeNodeCount)=0);
+      Pos.PCurValue:=nil;
+      Pos.PEndValue:=nil;
+    end;
+  end
+  else
+  begin
+    nIndex:=(-nIndex)-1;
+    nodeCount:=((nIndex) div csDequeNodeCount);
+    dec(Pos.PPNode,nodeCount+1);
+    Assert(Pos.PPNode^<>nil);
+    Pos.PEndValue:={$ifdef _DGL_ClassFunction_Specific}_TDeque_Get_ClassFunction_Address{$else}@{$endif}(Pos.PPNode^[csDequeNodeCount]);
+    Pos.PCurValue:=_PValueType(integer(Pos.PEndValue)-((nIndex -nodeCount*csDequeNodeCount)+1)*sizeof(_ValueType));
+  end;
+end;
+
+function _TDeque_Distance(const BeginPos, EndPos: _TDequePos): integer;
+begin
+  result:=( (integer(EndPos.PPNode)-integer(BeginPos.PPNode) ) div (sizeof(_PPDequeNode)))*csDequeNodeCount
+          +( (integer(EndPos.PCurValue)-integer(EndPos.PPNode^))
+            -(integer(BeginPos.PCurValue)-integer(BeginPos.PPNode^)) )  div sizeof(_ValueType) ;
+end;
+
+procedure _TDeque.Fill(PBegin, PEnd: _TDequePos; const ItSrcBegin: _IIterator);
+var
+  It : _IIterator;
+begin
+  It:=ItSrcBegin.Clone();
+  while (PBegin.PCurValue<>PEnd.PCurValue) do
+  begin
+    {$ifdef  _DGL_ObjValue}
+    _Assign((PBegin.PCurValue)^,It.Value);
+    {$else}
+    (PBegin.PCurValue)^:=It.Value;
+    {$endif}
+    _TDeque_IncPos(PBegin);
+    It.Next();
+  end;
+end;
+
+procedure _TDeque.ExtendCapabilityFront;
+var
+  i : integer;
+  L : integer;
+  dL : integer;
+  aPPNode : _PPDequeNode;
+  OldBeginPPNode : _PPDequeNode;
+  OldFrontIndex,OldEndIndex : integer;
+begin
+  OldBeginPPNode:=@FNodeArray[0];
+  if longword(self.FFrontPos.PPNode)>longword(OldBeginPPNode) then
+  begin
+    aPPNode:=self.FFrontPos.PPNode;
+    if aPPNode^=nil then   //new node
+      aPPNode^:=self.NewNode();
+    dec(aPPNode);
+    if aPPNode^=nil then   //new node
+      aPPNode^:=self.NewNode();
+  end
+  else
+  begin
+    OldFrontIndex:=longword(integer(self.FFrontPos.PPNode)-integer(OldBeginPPNode)) div sizeof(_PPDequeNode);
+    OldEndIndex:=longword(integer(self.FEndPos.PPNode)-integer(OldBeginPPNode)) div sizeof(_PPDequeNode);
+
+    L:=length(self.FNodeArray);
+    Assert(L>=4);
+
+    dL:=(L shr 2) + csDeultCapability;
+    setlength(self.FNodeArray,L+dL);
+    for i:=L-1 downto 0 do
+      FNodeArray[i+dL]:=FNodeArray[i];
+    for i:=0 to dL-1 do
+      FNodeArray[i]:=nil;
+
+    FNodeArray[dL-1]:=self.NewNode();
+
+    self.FFrontPos.PPNode:=@FNodeArray[OldFrontIndex+dL];
+    self.FEndPos.PPNode:=@FNodeArray[OldEndIndex+dL];
+    Assert(FNodeArray[OldEndIndex+dL+1]=nil);
+  end;
+
+  if self.FFrontPos.PCurValue=nil then
+  begin
+    Assert(self.FFrontPos.PEndValue=nil);
+    Assert(self.FEndPos.PCurValue=nil);
+    self.FFrontPos.PCurValue:={$ifdef _DGL_ClassFunction_Specific}_TDeque_Get_ClassFunction_Address{$else}@{$endif}(self.FFrontPos.PPNode^[csDequeNodeCount shr 1]);
+    self.FFrontPos.PEndValue:={$ifdef _DGL_ClassFunction_Specific}_TDeque_Get_ClassFunction_Address{$else}@{$endif}(self.FFrontPos.PPNode^[csDequeNodeCount]);
+    self.FEndPos:=self.FFrontPos;
+  end;
+end;
+
+procedure _TDeque.ExtendCapabilityBack;
+var
+  L : integer;
+  dL : integer;
+  aPPNode,aTmpPPNode :_PPDequeNode;
+  OldBeginPPNode : _PPDequeNode;
+  OldFrontIndex,OldEndIndex : integer;
+begin
+
+  if (self.FFrontPos.PCurValue=nil)then
+    self.ExtendCapabilityFront();
+
+  L:=length(self.FNodeArray);
+  Assert(self.FEndPos.PPNode<>nil);
+
+  aPPNode:=@FNodeArray[L-1];
+  if longword(self.FEndPos.PPNode)+sizeof(_PPDequeNode)<longword(aPPNode) then
+  begin
+    aPPNode:=self.FEndPos.PPNode;
+    if aPPNode^=nil then
+    begin
+      aTmpPPNode:=aPPNode;
+      inc(aTmpPPNode);
+      if (aTmpPPNode^<>nil) then
+      begin  //swap node
+        aPPNode^:=aTmpPPNode^;
+        aTmpPPNode^:=nil;
+      end
+      else  //new node
+        aPPNode^:=self.NewNode();
+    end
+    else
+    begin
+      inc(aPPNode);
+      Assert(aPPNode^=nil);
+      aPPNode^:=self.NewNode();
+    end;
+  end
+  else
+  begin
+    OldBeginPPNode:=@FNodeArray[0];
+    OldFrontIndex:=longword(integer(self.FFrontPos.PPNode)-integer(OldBeginPPNode)) div sizeof(_PPDequeNode);
+    OldEndIndex:=longword(integer(self.FEndPos.PPNode)-integer(OldBeginPPNode)) div sizeof(_PPDequeNode);
+
+    dL:=(L shr 2) + csDeultCapability;
+    setlength(self.FNodeArray,L + dL);
+
+    self.FFrontPos.PPNode:=@FNodeArray[OldFrontIndex];
+    self.FEndPos.PPNode:=@FNodeArray[OldEndIndex];
+
+    aPPNode:=self.FEndPos.PPNode;
+    if aPPNode^=nil then
+      aPPNode^:=self.NewNode()
+    else
+    begin
+      inc(aPPNode);
+      Assert(aPPNode^=nil);
+      aPPNode^:=self.NewNode();
+    end;
+  end;
+
+  Assert(self.FFrontPos.PCurValue<>nil);
+  if FEndPos.PCurValue=nil then
+  begin
+    Assert(self.FEndPos.PPNode^<>nil);
+    Assert(self.FEndPos.PEndValue=nil);
+    self.FEndPos.PCurValue:={$ifdef _DGL_ClassFunction_Specific}_TDeque_Get_ClassFunction_Address{$else}@{$endif}(self.FEndPos.PPNode^[0]);
+    self.FEndPos.PEndValue:={$ifdef _DGL_ClassFunction_Specific}_TDeque_Get_ClassFunction_Address{$else}@{$endif}(self.FEndPos.PPNode^[csDequeNodeCount]);
+  end;
+end;
+
+procedure _TDeque.ReduceCapabilityFront;
+var
+  i : integer;
+  L : integer;
+  DelCount : integer;
+  OldBeginPPNode : _PPDequeNode;
+  OldFrontIndex,OldEndIndex : integer;
+begin
+  L:=length(self.FNodeArray);
+  OldBeginPPNode:=@FNodeArray[0];
+  OldFrontIndex:=longword(integer(self.FFrontPos.PPNode)-integer(OldBeginPPNode)) div sizeof(_PPDequeNode);
+  
+  if OldFrontIndex>=2 then  
+  begin
+    self.DeleteNode(FNodeArray[OldFrontIndex-2]);//hold 1 empty node: FNodeArray[OldFrontIndex-1] ;
+
+    DelCount:=OldFrontIndex-2-(csDeultCapability shr 1);
+    if DelCount*3>L then
+    begin
+      OldEndIndex:=longword(integer(self.FEndPos.PPNode)-integer(OldBeginPPNode)) div sizeof(_PPDequeNode);
+      for i:=0 to L-DelCount-1 do
+        FNodeArray[i]:=FNodeArray[i+DelCount];
+      //for i:=L-DelCount to L-1 do
+      //  FNodeArray[i]:=nil;
+      setlength(self.FNodeArray,L-DelCount);
+
+      self.FFrontPos.PPNode:=@FNodeArray[OldFrontIndex-DelCount];
+      self.FEndPos.PPNode:=@FNodeArray[OldEndIndex-DelCount];
+    end;
+  end;
+end;
+
+procedure _TDeque.ReduceCapabilityBack;
+var
+  L : integer;
+  DelCount : integer;
+  OldBeginPPNode : _PPDequeNode;
+  OldFrontIndex,OldEndIndex : integer;
+begin
+  OldBeginPPNode:=@FNodeArray[0];
+  OldEndIndex:=longword(integer(self.FEndPos.PPNode)-integer(OldBeginPPNode)) div sizeof(_PPDequeNode);
+  L:=length(self.FNodeArray);
+
+  Assert(FEndPos.PPNode^<>nil);
+  Assert(OldEndIndex+2<=L);
+  Assert( ((OldEndIndex+1<L)and(FNodeArray[OldEndIndex+1]=nil)) or ((OldEndIndex+2<L)and(FNodeArray[OldEndIndex+1]<>nil)and(FNodeArray[OldEndIndex+2]=nil))  );
+
+  if (FNodeArray[OldEndIndex+1]<>nil) then
+  begin
+    FNodeArray[OldEndIndex+2]:=FNodeArray[OldEndIndex+1];
+    FNodeArray[OldEndIndex+1]:=nil;
+  end;
+  if (OldEndIndex+2=L) or (OldEndIndex+3=L) then
+  begin
+    exit
+  end
+  else
+  begin
+    self.DeleteNode(FNodeArray[OldEndIndex+3]);//hold 1 empty node: FNodeArray[OldEndIndex+2] ;
+
+    OldFrontIndex:=longword(integer(self.FFrontPos.PPNode)-integer(OldBeginPPNode)) div sizeof(_PPDequeNode);
+
+    DelCount:=L-(OldEndIndex+3)-(csDeultCapability shr 1);
+    if DelCount*3>L then
+    begin
+      setlength(self.FNodeArray,L-DelCount);
+      self.FFrontPos.PPNode:=@FNodeArray[OldFrontIndex];
+      self.FEndPos.PPNode:=@FNodeArray[OldEndIndex];
+    end;
+  end;
+end;
+
+
+function  _TDeque.Clone():_IContainer;
+begin
+  result:=_IDeque(_TDeque.Create(self));
+end;
+
+procedure _TDeque.CloneToInterface(out NewContainer);
+begin
+  _IDeque(NewContainer):=_TDeque.Create(self);
+end;
+
+procedure _TDeque.Assign(const num:integer;const Value: _ValueType);
+begin
+  self.Clear();
+  self.PushBack(num,Value);
+end;
+
+procedure _TDeque.Assign(const ItBegin,ItEnd:_IIterator);
+begin
+  self.Clear();
+  self.PushBack(ItBegin,ItEnd);
+end;
+
+
+
+/////////////////////
+
+{ _TDequeIterator }
+
+class procedure _TDequeIterator.ItCreate(var SelfItData:_IIterator;const aDequePos:_TDequePos);
+begin
+  SelfItData._ObjIteratorClass:=_TDequeIterator;
+  _PDequeIt(@SelfItData).Pos:=aDequePos;
+end;
+
+class procedure _TDequeIterator.ItCreate(var SelfItData:_IIterator;const ADeque: _TDeque;const Index:integer);
+begin
+  SelfItData._ObjIteratorClass:=_TDequeIterator;
+  _PDequeIt(@SelfItData).Pos:=ADeque.GetPos(Index);
+end;
+
+class function _TDequeIterator.Distance(const SelfItData:_IIterator;const Iterator: _IIterator): integer;
+begin
+  result:=_TDeque_Distance(_PDequeIt(@SelfItData).Pos,_PDequeIt(@Iterator).Pos);
+end;
+
+class function _TDequeIterator.GetValue(const SelfItData:_IIterator): _ValueType;
+begin
+  result:=_PDequeIt(@SelfItData).Pos.PCurValue^;
+end;
+
+class function _TDequeIterator.IsEqual(const SelfItData:_IIterator;const Iterator: _IIterator): boolean;
+begin
+  result:=_PDequeIt(@SelfItData).Pos.PCurValue=_PDequeIt(@Iterator).Pos.PCurValue;
+end;
+
+class procedure _TDequeIterator.Next(var SelfItData:_IIterator);
+var
+  pPos : _PDequePos;
+  PValue : _PValueType;
+begin
+  pPos:=@_PDequeIt(@SelfItData).pos;
+  PValue:=ppos.PCurValue;
+  inc(PValue);
+  if longword(PValue)<longword(pPos.PEndValue) then
+    ppos.PCurValue:=PValue
+  else
+    _TDeque_IncPos(pPos^);
+end;
+
+class procedure _TDequeIterator.Next(var SelfItData:_IIterator;const Step:integer);
+begin
+  _TDeque_IncPos(_PDequeIt(@SelfItData).Pos,Step);
+end;
+
+class procedure _TDequeIterator.Previous(var SelfItData:_IIterator);
+var
+  pPos : _PDequePos;
+begin
+  pPos:=@_PDequeIt(@SelfItData).pos;
+  if Pointer(pPos.PCurValue)<>Pointer(pPos.PPNode^) then
+    dec(pPos.PCurValue)
+  else
+    _TDeque_DecPos(pPos^);
+end;
+
+class procedure _TDequeIterator.SetValue(const SelfItData:_IIterator;const aValue: _ValueType);
+begin
+    {$ifdef  _DGL_ObjValue}
+      _Assign(_PDequeIt(@SelfItData).Pos.PCurValue^,aValue);
+    {$else}
+      _PDequeIt(@SelfItData).Pos.PCurValue^:=aValue;
+    {$endif}
+end;
+
+class function _TDequeIterator.GetNextValue(const SelfItData:_IIterator;const Step:integer): _ValueType;
+var
+  nPos : _TDequePos;
+begin
+  nPos:=_PDequeIt(@SelfItData).Pos;
+  _TDeque_IncPos(nPos,Step);
+  result:=nPos.PCurValue^;
+end;
+
+class procedure  _TDequeIterator.SetNextValue(const SelfItData:_IIterator;const Step:integer;const aValue: _ValueType);
+var
+  nPos : _TDequePos;
+begin
+  nPos:=_PDequeIt(@SelfItData).Pos;
+  _TDeque_IncPos(nPos,Step);
+
+    {$ifdef  _DGL_ObjValue}
+      _Assign(nPos.PCurValue^,aValue);
+    {$else}
+      nPos.PCurValue^:=aValue;
+    {$endif}
+
+end;
+
+
+class function _TDequeIterator.IteratorTraits():TIteratorTraits;
+begin
+  result:=itRandomAccessTag;
+end;
+
+{ _IDequeIterator }
+
+procedure _IDequeIterator.SetValue(const aValue: _ValueType);
+begin
+    {$ifdef  _DGL_ObjValue}
+      _Assign(_PDequeIt(@Self).Pos.PCurValue^,aValue);
+    {$else}
+      _PDequeIt(@Self).Pos.PCurValue^:=aValue;
+    {$endif}
+end;
+function  _IDequeIterator.GetValue(): _ValueType;
+begin
+  result:=_PDequeIt(@Self).Pos.PCurValue^;
+end;
+function  _IDequeIterator.GetNextValue(const Step:integer): _ValueType;
+var
+  nPos : _TDequePos;
+begin
+  nPos:=_PDequeIt(@Self).Pos;
+  _TDeque_IncPos(nPos,Step);
+  result:=nPos.PCurValue^;
+end;
+procedure _IDequeIterator.SetNextValue(const Step:integer;const aValue:_ValueType);
+var
+  nPos : _TDequePos;
+begin
+  nPos:=_PDequeIt(@Self).Pos;
+  _TDeque_IncPos(nPos,Step);
+  
+    {$ifdef  _DGL_ObjValue}
+      _Assign(nPos.PCurValue^,aValue);
+    {$else}
+      nPos.PCurValue^:=aValue;
+    {$endif}
+end;
+function  _IDequeIterator.IsEqual(const Iterator:_IIterator):boolean;
+begin
+  result:=_PDequeIt(@Self).Pos.PCurValue=_PDequeIt(@Iterator).Pos.PCurValue;
+end;
+function  _IDequeIterator.Distance(const Iterator:_IIterator):integer;
+begin
+  result:=_TDeque_Distance(_PDequeIt(@Self).Pos,_PDequeIt(@Iterator).Pos);
+end;
+procedure _IDequeIterator.Assign (const Iterator:_IIterator);
+begin
+  Self._ObjIteratorClass:=Iterator._ObjIteratorClass;
+  _PDequeIt(@Self).Pos:=_PDequeIt(@Iterator).Pos;
+end;
+procedure _IDequeIterator.Next();
+var
+  pPos : _PDequePos;
+  PValue : _PValueType;
+begin
+  pPos:=@_PDequeIt(@Self).pos;
+  PValue:=ppos.PCurValue;
+  inc(PValue);
+  if longword(PValue)<longword(pPos.PEndValue) then
+    ppos.PCurValue:=PValue
+  else
+    _TDeque_IncPos(pPos^);
+end;
+procedure _IDequeIterator.Next(const Step:integer);
+begin
+  _TDeque_IncPos(_PDequeIt(@Self).Pos,Step);
+end;
+procedure _IDequeIterator.Previous();
+var
+  pPos : _PDequePos;
+begin
+  pPos:=@_PDequeIt(@Self).pos;
+  if Pointer(pPos.PCurValue)<>Pointer(pPos.PPNode^) then
+    dec(pPos.PCurValue)
+  else
+    _TDeque_DecPos(pPos^);
+end;
+function  _IDequeIterator.Clone():_IIterator;
+begin
+  result._ObjIteratorClass:=self._ObjIteratorClass;
+  _PDequeIt(@result).Pos:=_PDequeIt(@Self).Pos;
+end;
+function  _IDequeIterator.Clone(const NextStep:integer):_IIterator;
+begin
+  result._ObjIteratorClass:=self._ObjIteratorClass;
+  _PDequeIt(@result).Pos:=_PDequeIt(@Self).Pos;
+  _TDeque_IncPos(_PDequeIt(@result).Pos,NextStep);
+end;
+
+function _IDequeIterator.IteratorTraits():TIteratorTraits;
+begin
+  result:=itRandomAccessTag;
+end;
+
+
+{$endif } //  __Deque_inc_pas_

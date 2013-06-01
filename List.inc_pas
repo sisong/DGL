@@ -1,0 +1,677 @@
+(*
+ * DGL(The Delphi Generic Library)
+ *
+ * Copyright (c) 2004
+ * HouSisong@gmail.com
+ *
+ * This material is provided "as is", with absolutely no warranty expressed
+ * or implied. Any use is at your own risk.
+ *
+ * Permission to use or copy this software for any purpose is hereby granted
+ * without fee, provided the above notices are retained on all copies.
+ * Permission to modify the code and to distribute modified code is granted,
+ * provided the above notices are retained, and a notice that the code was
+ * modified is included with the above copyright notice.
+ *
+ *)
+
+//------------------------------------------------------------------------------
+// _TList\_TListIteratorµÄÊµÏÖ
+// Create by HouSisong, 2004.09.02
+//------------------------------------------------------------------------------
+
+{$ifndef  __List_inc_pas_}
+{$define  __List_inc_pas_}
+
+{$I DGLIntf.inc_pas}
+
+{ _TList }
+
+function  _TList.GetSelfObj():TObject;
+begin
+  result:=self;
+end;
+
+procedure _TList.Swap(AList:_TList);
+var
+  tmpNode  : _TListNodeBase;
+begin
+  if self=AList then exit;
+  
+  tmpNode:=FItEndNode;  FItEndNode:=AList.FItEndNode;  AList.FItEndNode:=tmpNode;
+end;
+
+function _TList.GetBackValue: _ValueType;
+begin
+  result:=self.FItEndNode.pPrevious.Data;
+end;
+
+procedure _TList.SetBackValue(const aValue:_ValueType);
+begin
+  {$ifdef _DGL_ObjValue}
+    _Assign(self.FItEndNode.pPrevious.Data,aValue);
+  {$else}
+    self.FItEndNode.pPrevious.Data:=aValue;
+  {$endif}
+end;
+
+procedure _TList.Clear;
+begin
+  self.DeleteNode(self.FItEndNode.pNext,@self.FItEndNode);
+  FItEndNode.pNext:=@FItEndNode;
+  FItEndNode.pPrevious:=@FItEndNode;
+end;
+
+constructor _TList.Create;
+begin
+  inherited Create();
+  self.FItEndNode.pNext:=@self.FItEndNode;
+  self.FItEndNode.pPrevious:=@self.FItEndNode;
+end;
+
+function _TList.Clone: _IContainer;
+begin
+  result:=_IList(_TList.Create(self));
+end;
+
+procedure _TList.CloneToInterface(out NewContainer);
+begin
+  _IList(NewContainer):=_TList.Create(self);
+end;
+
+constructor _TList.Create(const AList: _TList);
+begin
+  inherited Create();
+  self.FItEndNode.pNext:=@self.FItEndNode;
+  self.FItEndNode.pPrevious:=@self.FItEndNode;
+  self.Insert(self.ItBegin,AList.ItBegin,AList.ItEnd);
+end;
+
+constructor _TList.Create(const ItBegin, ItEnd: _IIterator);
+begin
+  inherited Create();
+  self.FItEndNode.pNext:=@self.FItEndNode;
+  self.FItEndNode.pPrevious:=@self.FItEndNode;
+  self.Insert(self.ItBegin,ItBegin, ItEnd);
+end;
+
+constructor _TList.Create(const num: integer; const Value: _ValueType);
+begin
+  inherited Create();
+  self.FItEndNode.pNext:=@self.FItEndNode;
+  self.FItEndNode.pPrevious:=@self.FItEndNode;
+  self.Insert(self.ItBegin,num,Value);
+end;
+
+destructor _TList.Destroy;
+begin
+  self.Clear();
+  inherited;
+end;
+
+
+procedure _TList.Erase(const ItPos: _IIterator);
+begin
+  ErasePPos(_PListNode(ItPos._Data0));
+end;
+
+function _TList.ItBegin: _IIterator;
+begin
+  _TListIterator.ItCreate(result,self.FItEndNode.pNext);
+end;
+
+function _TList.GetFrontValue: _ValueType;
+begin
+  result:=self.FItEndNode.pNext.Data;
+end;
+
+procedure _TList.SetFrontValue(const aValue:_ValueType);
+begin
+  {$ifdef _DGL_ObjValue}
+    _Assign(self.FItEndNode.pNext.Data,aValue);
+  {$else}
+    self.FItEndNode.pNext.Data:=aValue;
+  {$endif}
+end;
+
+procedure _TList.Insert(const ItPos: _IIterator; const Value: _ValueType);
+begin
+  Insert(_PListNode(ItPos._Data0),Value);
+end;
+
+procedure _TList.Insert(const Value:_ValueType);
+begin
+  Insert(@self.FItEndNode,Value);
+end;
+
+procedure _TList.Insert(const ItPos:_IIterator;const num:integer;const Value:_ValueType);
+var
+  i : integer;
+begin
+  for i:=0 to num-1 do
+    Insert(_PListNode(ItPos._Data0),Value);
+end;
+
+procedure _TList.Insert(const ItPos:_IIterator;const ItBegin,ItEnd:_IIterator);
+var
+  It : _IIterator;
+begin
+  It:=ItBegin.Clone();
+  while (not It.IsEqual(ItEnd)) do
+  begin
+    Insert(_PListNode(ItPos._Data0),It.Value);
+    It.Next;
+  end;
+end;
+
+function _TList.ItEnd: _IIterator;
+begin
+  _TListIterator.ItCreate(result,@self.FItEndNode);
+end;
+
+procedure _TList.PopBack;
+begin
+  self.ErasePPos(self.FItEndNode.pPrevious);
+end;
+
+procedure _TList.PopFront;
+begin
+  self.ErasePPos(self.FItEndNode.pNext);
+end;
+
+procedure _TList.PushBack(const Value: _ValueType);
+begin
+  Insert(@self.FItEndNode,Value);
+end;
+
+procedure _TList.PushFront(const Value: _ValueType);
+begin
+  Insert(self.FItEndNode.pNext,Value);
+end;
+
+
+procedure _TList.Reverse;
+var
+  tmpPNode : _PListNode;
+  pNode : _PListNode;
+begin
+  pNode:=self.FItEndNode.pNext;
+  FItEndNode.pNext:=FItEndNode.pPrevious;
+  FItEndNode.pPrevious:=pNode;
+  while pNode<>@self.FItEndNode do
+  begin
+    tmpPNode:=pNode.pNext;
+    pNode.pNext:=pNode.pPrevious;
+    pNode.pPrevious:=tmpPNode;
+    pNode:=tmpPNode;
+  end;
+end;
+
+function _TList.Size: Integer;
+var
+  PNode : _PListNode;
+begin
+  PNode:=self.FItEndNode.pNext;
+  result:=0;
+  while PNode<>@self.FItEndNode do
+  begin
+    PNode:=PNode.PNext;
+    inc(result);
+  end;
+end;
+
+procedure _TList.Splice(const ItPos: _IIterator; AContainer: _IList;
+  const ACItBegin, ACItEnd: _IIterator);
+begin
+  Transfer(_PListNode(ItPos._Data0),
+           _PListNode(ACItBegin._Data0),
+           _PListNode(ACItEnd._Data0));
+end;
+
+procedure _TList.Splice(const ItPos: _IIterator; AContainer: _IList;
+  const ACItPos: _IIterator);
+var
+  pNode: _PListNode;
+begin
+  pNode:=_PListNode(ACItPos._Data0);;
+  Transfer(_PListNode(ItPos._Data0),
+           pNode,pNode.pNext);
+end;
+
+procedure _TList.Splice(const ItPos: _IIterator; AContainer: _IList);
+begin
+  self.Splice(ItPos,AContainer,AContainer.ItBegin,AContainer.ItEnd);
+end;
+
+function _TList.IsEmpty: Boolean;
+begin
+  result:=(@self.FItEndNode=self.FItEndNode.pNext);
+end;
+
+class procedure _TList.DeleteNode(PNode: _PListNode);
+begin
+  {$ifdef _DGL_ObjValue}
+  _Free(PNode.Data);
+  {$endif}
+  system.Dispose(PNode);
+end;
+
+class procedure _TList.DeleteNode(PNodeBegin, PNodeEnd: _PListNode);
+var
+  tmpPNext : _PListNode;
+begin
+  while PNodeBegin<>PNodeEnd do
+  begin
+    tmpPNext:=PNodeBegin.pNext;
+    self.DeleteNode(PNodeBegin);
+    PNodeBegin:=tmpPNext;
+  end;
+end;
+
+class function _TList.NewNode(const Value: _ValueType): _PListNode;
+begin
+  //result:=nil;
+  system.New(result);
+  {$ifdef _DGL_ObjValue}
+  result.Data:=_CopyCreateNew(Value);
+  {$else}
+  result.Data:=Value;
+  {$endif}
+end;
+
+class procedure _TList.Insert(const PNodePos: _PListNode;
+  const Value: _ValueType);
+var
+  PtmpNode : _PListNode;
+begin
+  PtmpNode:=self.NewNode(Value);
+  PtmpNode.pNext:=PNodePos;
+  PtmpNode.pPrevious:=PNodePos.pPrevious;
+
+  PNodePos.pPrevious.pNext:=PtmpNode;
+  PNodePos.pPrevious:=PtmpNode;
+end;
+
+class procedure _TList.ErasePPos(const PNodePos: _PListNode);
+begin
+  PNodePos.pNext.pPrevious:=PNodePos.pPrevious;
+  PNodePos.pPrevious.pNext:=PNodePos.pNext;
+  self.DeleteNode(PNodePos);
+end;
+
+procedure _TList.Erase(const ItBegin, ItEnd: _IIterator);
+var
+  pBeginNode,pEndNode : _PListNode;
+begin
+  pBeginNode:=_PListNode(ItBegin._Data0);
+  pEndNode:=_PListNode(ItEnd._Data0);
+
+  pEndNode.pPrevious:=pBeginNode.pPrevious;
+  pBeginNode.pPrevious.pNext:=pEndNode;
+  self.DeleteNode(pBeginNode,pEndNode);
+end;
+
+class procedure _TList.Transfer(const Position, ItBegin,
+  ItEnd: _PListNode);
+var
+  tmp : _PListNode;
+begin
+  if (Position=ItEnd) then exit;
+
+  ItEnd.pPrevious.pNext:=Position;
+  ItBegin.pPrevious.pNext:=ItEnd;
+  Position.pPrevious.pNext:=ItBegin;
+
+  tmp:=Position.pPrevious;
+  Position.pPrevious:=ItEnd.pPrevious;
+  ItEnd.pPrevious:=ItBegin.pPrevious;
+  ItBegin.pPrevious:=tmp;
+end;
+
+constructor _TList.Create(const num: integer);
+{$ifdef  _DGL_ObjValue}
+var
+  _Default_Value : _ValueType;
+{$endif}
+begin
+  inherited Create();
+  self.FItEndNode.pNext:=@self.FItEndNode;
+  self.FItEndNode.pPrevious:=@self.FItEndNode;
+
+  {$ifdef  _DGL_ObjValue}
+  _Default_Value:=_CreateNew();
+  self.Insert(self.ItBegin,num,_Default_Value);
+  _Free(_Default_Value);
+  {$else}
+  self.Insert(self.ItBegin,num,_NULL_Value);
+  {$endif}
+end;
+
+procedure _TList.Assign(const num:integer;const Value: _ValueType);
+begin
+  self.Clear();
+  self.PushBack(num,Value);
+end;
+
+procedure _TList.Assign(const ItBegin,ItEnd:_IIterator);
+begin
+  self.Clear();
+  self.PushBack(ItBegin,ItEnd);
+end;
+
+procedure _TList.PushBack(const num:integer;Value: _ValueType);
+var
+  i: integer;
+begin
+  for i:=0 to num-1 do
+    self.PushBack(Value);
+end;
+
+procedure _TList.PushBack(const ItBegin,ItEnd: _IIterator);
+begin
+  Insert(self.ItEnd(),ItBegin,ItEnd);
+end;
+
+
+procedure _TList.PushFront(const num:integer;Value: _ValueType);
+var
+  i: integer;
+begin
+  for i:=0 to num-1 do
+    self.PushFront(Value);
+end;
+
+procedure _TList.PushFront(const ItBegin,ItEnd: _IIterator);
+begin
+  Insert(self.ItBegin(),ItBegin,ItEnd);
+end;
+
+
+function _TList.IsEquals(const AContainer: _IContainer): Boolean;
+var
+  i : integer;
+  it: _IIterator;
+  ContainerSize: integer;
+  ItSelf : _PListNode;
+begin
+  ContainerSize:=AContainer.Size();
+  if ContainerSize<>self.Size() then
+  begin
+    result:=false;
+    exit;
+  end;
+
+  it:=AContainer.ItBegin();
+  ItSelf:=self.FItEndNode.pNext;
+  for i:=0 to ContainerSize-1 do
+  begin
+    {$ifdef  _DGL_Compare}
+    if  (not _IsEqual(ItSelf.Data,it.Value))   then
+    {$else}
+    if  not(ItSelf.Data=it.Value)   then
+    {$endif}
+    begin
+      result:=false;
+      exit;
+    end
+    else
+    begin
+      it.Next();
+      ItSelf:=ItSelf.PNext;
+    end;
+  end;
+  result:=true;
+end;
+
+function _TList.IsLess(const AContainer: _IContainer): Boolean;
+var
+  i : integer;
+  selfSize,ACSize,MinSize : integer;
+  ItSelf : _PListNode;
+  it : _IIterator;
+begin
+  selfSize:=self.Size();
+  ACSize:=AContainer.Size();
+  MinSize:=ACSize;
+  if selfSize<MinSize then MinSize:=selfSize;
+
+  it:=AContainer.ItBegin();
+  ItSelf:=self.FItEndNode.pNext;
+  for i:=0 to MinSize-1 do
+  begin
+    {$ifdef  _DGL_Compare}
+    if (_IsLess(it.Value,ItSelf.Data)) then
+    {$else}
+    if it.Value<ItSelf.Data then
+    {$endif}
+    begin
+      result:=false;
+      exit;
+    end
+    else
+    begin
+      it.Next();
+      ItSelf:=ItSelf.PNext;
+    end;
+  end;
+  result:=(selfSize<ACSize);
+end;
+
+
+
+procedure _TList.Resize(const num: integer; const Value: _ValueType);
+var
+  i : integer;
+  OldCount : integer;
+begin
+  OldCount:=self.Size();
+  if num<OldCount then
+  begin
+    for i:=num to OldCount-1 do
+      PopBack();
+  end
+  else
+  begin
+    for i:=OldCount to num-1 do
+      PushBack(Value);
+  end;
+end;
+
+procedure _TList.Resize(const num:integer);
+begin
+  Resize(num,_NULL_Value);
+end;
+
+
+
+procedure _TList.Sort();
+begin
+  self.Sort(_IsLess);
+end;
+
+  type
+    _PListNodeArray=array [0..maxint div (sizeof(_PListNode))-1] of _PListNode;
+    _PPListNodeArray = ^_PListNodeArray;
+
+   TTestBinaryFunction_PListNode=function(const x,y:_PListNode):boolean  of object;
+
+  type
+    _TList_TestBinaryFunction=object//class(TObject)
+    public
+      TestBinaryFunction : TTestBinaryFunction;
+      function TestBinaryFunction_PListNode(const x,y:_PListNode):boolean;{$ifdef _DGL_Inline} inline; {$endif}
+    end;
+    function _TList_TestBinaryFunction.TestBinaryFunction_PListNode(const x,y:_PListNode):boolean;
+    begin
+      result:=TestBinaryFunction(x.Data,y.Data);
+    end;
+  
+  type
+    _TList_TestBinaryFunctionOfObject=object//class(TObject)
+    public
+      TestBinaryFunction : TTestBinaryFunctionOfObject;
+      function TestBinaryFunction_PListNode(const x,y:_PListNode):boolean;{$ifdef _DGL_Inline} inline; {$endif}
+    end;
+    function _TList_TestBinaryFunctionOfObject.TestBinaryFunction_PListNode(const x,y:_PListNode):boolean;
+    begin
+      result:=TestBinaryFunction(x.Data,y.Data);
+    end;
+
+{$define _DGL_Sys_Cmp_}
+  {$I _List_Algorithms_Base.inc_pas}
+{$undef  _DGL_Sys_Cmp_}
+{$define _DGL_Proc_Cmp_}
+  {$I _List_Algorithms_Base.inc_pas}
+{$undef  _DGL_Proc_Cmp_}
+{$define _DGL_ObjProc_Cmp_}
+  {$I _List_Algorithms_Base.inc_pas}
+{$undef  _DGL_ObjProc_Cmp_}
+
+
+{ _TListIterator }
+
+class procedure _TListIterator.ItCreate(var SelfItData:_IIterator;const pNode: _PListNode);
+begin
+  SelfItData._ObjIteratorClass:=_TListIterator;
+  _PListNode(SelfItData._Data0):=pNode;
+end;
+
+class function _TListIterator.GetValue(const SelfItData:_IIterator): _ValueType;
+begin
+  result:=(_PListNode(SelfItData._Data0)).Data;
+end;
+
+class function _TListIterator.IsEqual(const SelfItData:_IIterator;const Iterator: _IIterator): boolean;
+begin
+  result:=(SelfItData._Data0)=(Iterator._Data0);
+end;
+
+class procedure _TListIterator.Next(var SelfItData:_IIterator);
+begin
+  _PListNode(SelfItData._Data0):=_PListNode(SelfItData._Data0).pNext;
+end;
+
+class procedure _TListIterator.Previous(var SelfItData:_IIterator);
+begin
+  _PListNode(SelfItData._Data0):=_PListNode(SelfItData._Data0).pPrevious;
+end;
+
+class procedure _TListIterator.SetValue(const SelfItData:_IIterator;const Value: _ValueType);
+begin
+  {$ifdef _DGL_ObjValue}
+  _Assign(_PListNode(SelfItData._Data0).Data,Value);
+  {$else}
+  _PListNode(SelfItData._Data0).Data:=Value;
+  {$endif}
+end;
+
+
+class function _TListIterator.Distance(const SelfItData:_IIterator;const Iterator:_IIterator):integer;
+type
+  _PIListIterator  = ^_IListIterator;
+var
+  it : _IListIterator;
+begin
+  _IIterator(it):=SelfItData;
+  result:=0;
+  while it._Data0<>Iterator._Data0 do
+  begin
+    inc(result);
+    it.Next();
+  end;
+end;
+
+class procedure _TListIterator.Next(var SelfItData:_IIterator; const Step:integer);
+type
+  _PIListIterator  = ^_IListIterator;
+var
+  i : integer;
+begin
+  if Step>=0 then
+    for i:=0 to Step-1 do _PIListIterator(@SelfItData).Next()
+  else
+    for i:=0 to (-Step)-1 do _PIListIterator(@SelfItData).Previous();
+end;
+
+class function _TListIterator.IteratorTraits():TIteratorTraits;
+begin
+  result:=itBidirectionalTag;
+end;
+
+ {_IListIterator}
+
+procedure _IListIterator.SetValue(const aValue: _ValueType);
+begin
+  {$ifdef _DGL_ObjValue}
+  _Assign(_PListNode(Self._Data0).Data,Value);
+  {$else}
+  _PListNode(Self._Data0).Data:=Value;
+  {$endif}
+end;
+
+function  _IListIterator.GetValue(): _ValueType;
+begin
+  result:=(_PListNode(Self._Data0)).Data;
+end;
+
+function  _IListIterator.GetNextValue(const Step:integer): _ValueType;
+var
+  It : _IListIterator;
+begin
+  it._ObjIteratorClass:=self._ObjIteratorClass;
+  It._Data0:=self._Data0;
+  It.Next(Step);
+  result:=It.Value;
+end;
+
+procedure _IListIterator.SetNextValue(const Step:integer;const aValue:_ValueType);
+var
+  It : _IListIterator;
+begin
+  it._ObjIteratorClass:=self._ObjIteratorClass;
+  It._Data0:=self._Data0;
+  It.Next(Step);
+  It.Value:=aValue;
+end;
+
+function  _IListIterator.IsEqual(const Iterator:_IIterator):boolean;
+begin
+  result:=(Self._Data0)=(Iterator._Data0);
+end;
+
+procedure _IListIterator.Assign (const Iterator:_IIterator);
+begin
+  Self._ObjIteratorClass:=Iterator._ObjIteratorClass;
+  Self._Data0:=Iterator._Data0;
+end;
+
+procedure _IListIterator.Next();
+begin
+  _PListNode(Self._Data0):=_PListNode(Self._Data0).pNext;
+end;
+
+procedure _IListIterator.Previous();
+begin
+  _PListNode(Self._Data0):=_PListNode(Self._Data0).pPrevious;
+end;
+
+function  _IListIterator.Clone():_IIterator;
+begin
+  result._ObjIteratorClass:=self._ObjIteratorClass;
+  result._Data0:=self._Data0;
+end;
+
+function  _IListIterator.Clone(const NextStep:integer):_IIterator;
+begin
+  result._ObjIteratorClass:=self._ObjIteratorClass;
+  result._Data0:=self._Data0;
+  result.Next(NextStep);
+end;
+
+function _IListIterator.IteratorTraits():TIteratorTraits;
+begin
+  result:=itBidirectionalTag;
+end;
+
+
+{$endif } // __List_inc_pas_
