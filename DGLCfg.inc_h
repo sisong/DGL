@@ -21,7 +21,7 @@
 {$define  __DGLCfg_inc_h_}
 
 const
-   DGL_Version = 1.27;
+   DGL_Version = 1.28;
 
    {$IFDEF CONDITIONALEXPRESSIONS}
      {$IF Declared(CompilerVersion) and (CompilerVersion >= 17)}  //Delphi 2005
