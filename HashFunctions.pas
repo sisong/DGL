@@ -23,31 +23,32 @@
 unit HashFunctions;
 
 interface
+{$I DGLCfg.inc_h}
                          
-function HashValue_Data(const PSrcData:PByte;const ByteCount: integer):Cardinal;//计算hash值
+function HashValue_Data(const PSrcData:PByte;const ByteCount: _TNativeInt):_TNativeUInt;//计算hash值
 
-function HashValue_Str(const Key :String):Cardinal; //计算Hash值; 区分大小写
-function HashValue_StrCaseInsensitive(const Key :String):Cardinal; //计算Hash值；不区分大小写
+function HashValue_Str(const Key :String):_TNativeUInt; //计算Hash值; 区分大小写
+function HashValue_StrCaseInsensitive(const Key :String):_TNativeUInt; //计算Hash值；不区分大小写
 function IsEqual_StrCaseInsensitive(const Left,Right:String):boolean;  //不区分大小写的相等比较
 function IsLess_StrCaseInsensitive(const Left,Right:String):boolean;  //不区分大小写的小于比较
-function Pos_StrCaseInsensitive(const Substr: string; S: string): Integer; {$ifdef _DGL_Inline} inline; {$endif}
-function PosEx_StrCaseInsensitive(const Substr: string; S: string;const Index:integer): Integer;
+function Pos_StrCaseInsensitive(const Substr: string; S: string): _TNativeInt; {$ifdef _DGL_Inline} inline; {$endif}
+function PosEx_StrCaseInsensitive(const Substr: string; S: string;const Index:_TNativeInt): _TNativeInt;
 
-function HashValue_WideStr(const Key :WideString):Cardinal; //计算Hash值; 区分大小写
-function HashValue_WideStrCaseInsensitive(const Key :WideString):Cardinal; //计算Hash值；不区分大小写
+function HashValue_WideStr(const Key :WideString):_TNativeUInt; //计算Hash值; 区分大小写
+function HashValue_WideStrCaseInsensitive(const Key :WideString):_TNativeUInt; //计算Hash值；不区分大小写
 function IsEqual_WideStrCaseInsensitive(const Left,Right:WideString):boolean;  //不区分大小写的相等比较
 function IsLess_WideStrCaseInsensitive(const Left,Right:WideString):boolean;  //不区分大小写的小于比较
-function Pos_WideStrCaseInsensitive(const Substr: WideString; S: WideString): Integer;
-function PosEx_WideStrCaseInsensitive(const Substr: WideString; S: WideString;const Index:integer): Integer;
+function Pos_WideStrCaseInsensitive(const Substr: WideString; S: WideString): _TNativeInt;
+function PosEx_WideStrCaseInsensitive(const Substr: WideString; S: WideString;const Index:_TNativeInt): _TNativeInt;
 
-function HashValue_Int64(const Key :Int64):Cardinal;{$ifdef _DGL_Inline} inline; {$endif}
-function HashValue_Real(const Key :Real):Cardinal; {$ifdef _DGL_Inline} inline; {$endif}
-function HashValue_Real48(const Key :Real48):Cardinal; {$ifdef _DGL_Inline} inline; {$endif}
-function HashValue_Single(const Key :Single):Cardinal;
-function HashValue_Double(const Key :double):Cardinal; {$ifdef _DGL_Inline} inline; {$endif}
-function HashValue_Extended(const Key :Extended):Cardinal; {$ifdef _DGL_Inline} inline; {$endif}
-function HashValue_Comp(const Key :Comp):Cardinal;{$ifdef _DGL_Inline} inline; {$endif}
-function HashValue_Currency(const Key :Currency):Cardinal;{$ifdef _DGL_Inline} inline; {$endif}
+function HashValue_Int64(const Key :Int64):_TNativeUInt;{$ifdef _DGL_Inline} inline; {$endif}
+function HashValue_Real(const Key :Real):_TNativeUInt; {$ifdef _DGL_Inline} inline; {$endif}
+function HashValue_Real48(const Key :Real48):_TNativeUInt; {$ifdef _DGL_Inline} inline; {$endif}
+function HashValue_Single(const Key :Single):_TNativeUInt;
+function HashValue_Double(const Key :double):_TNativeUInt; {$ifdef _DGL_Inline} inline; {$endif}
+function HashValue_Extended(const Key :Extended):_TNativeUInt; {$ifdef _DGL_Inline} inline; {$endif}
+function HashValue_Comp(const Key :Comp):_TNativeUInt;{$ifdef _DGL_Inline} inline; {$endif}
+function HashValue_Currency(const Key :Currency):_TNativeUInt;{$ifdef _DGL_Inline} inline; {$endif}
 
 
 
@@ -56,9 +57,9 @@ implementation
 uses
   math,SysUtils;
 
-function HashValue_Data(const PSrcData:PByte;const ByteCount: integer):Cardinal;//计算hash值
+function HashValue_Data(const PSrcData:PByte;const ByteCount: _TNativeInt):_TNativeUInt;//计算hash值
 var
-  i : integer;
+  i : _TNativeInt;
   PData:PByteArray;
 begin
   result:=ByteCount;
@@ -70,9 +71,9 @@ begin
 end;
 
 ///
-function HashValue_Str(const Key :String):Cardinal; // 区分大小写
+function HashValue_Str(const Key :String):_TNativeUInt; // 区分大小写
 var
-  i,Len    : integer;
+  i,Len    : _TNativeInt;
   pStrChar : PByteArray;
 begin
   Len:= length(Key);
@@ -107,9 +108,9 @@ const CharCaseInsensitive : array [0..MaxChar] of BYTE=
 	224,	225,	226,	227,	228,	229,	230,	231,	232,	233,	234,	235,	236,	237,	238,	239,
 	240,	241,	242,	243,	244,	245,	246,	247,	248,	249,	250,	251,	252,	253,	254,	255
   );
-function HashValue_StrCaseInsensitive(const Key :String):Cardinal; //不区分大小写
+function HashValue_StrCaseInsensitive(const Key :String):_TNativeUInt; //不区分大小写
 var
-  i,Len    : integer;
+  i,Len    : _TNativeInt;
   pStrChar : PByteArray;
 begin
   Len:= length(Key);
@@ -123,7 +124,7 @@ end;
 
 function IsEqual_StrCaseInsensitive(const Left,Right:String):boolean;  //不区分大小写
 var
-  i,LLen,RLen    : integer;
+  i,LLen,RLen    : _TNativeInt;
   pLStrChar      : PChar;
   pRStrChar      : PChar;
 begin
@@ -153,11 +154,11 @@ end;
 
 function IsLess_StrCaseInsensitive(const Left,Right:String):boolean;  //不区分大小写的小于比较
 var
-  i,LLen,RLen    : integer;
+  i,LLen,RLen    : _TNativeInt;
   pLStrChar      : PChar;
   pRStrChar      : PChar;
-  LChar      : Cardinal;
-  RChar      : Cardinal;
+  LChar      : _TNativeUInt;
+  RChar      : _TNativeUInt;
 begin
   LLen:= length(Left);
   RLen:= length(Right);
@@ -182,15 +183,15 @@ begin
   result:=LLen<RLen;
 end;
 
-function Pos_StrCaseInsensitive(const Substr: string; S: string): Integer;
+function Pos_StrCaseInsensitive(const Substr: string; S: string): _TNativeInt;
 begin
   result:=PosEx_StrCaseInsensitive(Substr,S,1);
 end;
 
-function PosEx_StrCaseInsensitive(const Substr: string; S: string;const Index:integer): Integer;
-  function _Case_IsEq(const CaseSub,Spos:PChar;const Length:integer):boolean;
+function PosEx_StrCaseInsensitive(const Substr: string; S: string;const Index:_TNativeInt): _TNativeInt;
+  function _Case_IsEq(const CaseSub,Spos:PChar;const Length:_TNativeInt):boolean;
   var
-    i : integer;
+    i : _TNativeInt;
   begin
     for i:=0 to Length-1 do
     begin
@@ -204,7 +205,7 @@ function PosEx_StrCaseInsensitive(const Substr: string; S: string;const Index:in
   end;
   
 var
-  i,LS,LSub : integer;
+  i,LS,LSub : _TNativeInt;
   FdChar : Char;
   CaseSub  : string;
 begin
@@ -227,14 +228,14 @@ begin
   end;
 end;
 
-function Pos_WideStrCaseInsensitive(const Substr: WideString; S: WideString): Integer;
+function Pos_WideStrCaseInsensitive(const Substr: WideString; S: WideString): _TNativeInt;
 begin
   result:=PosEx_WideStrCaseInsensitive(Substr,S,1);
 end;
-function PosEx_WideStrCaseInsensitive(const Substr: WideString; S: WideString;const Index:integer): Integer;
-  function _Case_IsEq(const CaseSub,Spos:PWideChar;const Length:integer):boolean;
+function PosEx_WideStrCaseInsensitive(const Substr: WideString; S: WideString;const Index:_TNativeInt): _TNativeInt;
+  function _Case_IsEq(const CaseSub,Spos:PWideChar;const Length:_TNativeInt):boolean;
   var
-    i : integer;
+    i : _TNativeInt;
     tmpWChar : Word;
   begin
     for i:=0 to Length-1 do
@@ -251,7 +252,7 @@ function PosEx_WideStrCaseInsensitive(const Substr: WideString; S: WideString;co
   end;
   
 var
-  i,LS,LSub : integer;
+  i,LS,LSub : _TNativeInt;
   FdChar : WideChar;
   CaseSub  : WideString;
   tmpW : WideChar;
@@ -277,9 +278,9 @@ begin
 end;
 
 
-function HashValue_WideStr(const Key :WideString):Cardinal; // 区分大小写
+function HashValue_WideStr(const Key :WideString):_TNativeUInt; // 区分大小写
 var
-  i,Len    : integer;
+  i,Len    : _TNativeInt;
   pStrChar : PWordArray;
 begin
   pStrChar:=PWordArray(Key);
@@ -291,9 +292,9 @@ begin
   end;
 end;
 
-function HashValue_WideStrCaseInsensitive(const Key :WideString):Cardinal; //不区分大小写
+function HashValue_WideStrCaseInsensitive(const Key :WideString):_TNativeUInt; //不区分大小写
 var
-  i,Len    : integer;
+  i,Len    : _TNativeInt;
   pStrChar : PWordArray;
   wChar    : Word;
 begin
@@ -311,11 +312,11 @@ end;
 
 function IsEqual_WideStrCaseInsensitive(const Left,Right:WideString):boolean;  //不区分大小写
 var
-  i,LLen,RLen    : integer;
+  i,LLen,RLen    : _TNativeInt;
   pLStrChar      : PWideChar;
   pRStrChar      : PWideChar;
-  LChar      : Cardinal;
-  RChar      : Cardinal;
+  LChar      : _TNativeUInt;
+  RChar      : _TNativeUInt;
 begin
   LLen:= length(Left);
   RLen:= length(Right);
@@ -350,11 +351,11 @@ end;
 
 function IsLess_WideStrCaseInsensitive(const Left,Right:WideString):boolean;  //不区分大小写的小于比较
 var
-  i,LLen,RLen    : integer;
+  i,LLen,RLen    : _TNativeInt;
   pLStrChar      : PWideChar;
   pRStrChar      : PWideChar;
-  LChar      : Cardinal;
-  RChar      : Cardinal;
+  LChar      : _TNativeUInt;
+  RChar      : _TNativeUInt;
 begin
   LLen:= length(Left);
   RLen:= length(Right);
@@ -388,41 +389,41 @@ begin
   result:=LLen<RLen;
 end;
 
-function HashValue_Int64(const Key :Int64):Cardinal;
+function HashValue_Int64(const Key :Int64):_TNativeUInt;
 var
-  lowkey : Cardinal;
+  lowkey : _TNativeUInt;
 begin
   lowkey:=Key;
   result:=Key shr 32;
   result:=(result xor (Result shl 5))+lowkey;
 end;
 
-function HashValue_Real(const Key :Real):Cardinal;
+function HashValue_Real(const Key :Real):_TNativeUInt;
 begin
   result:=HashValue_Data(@Key,sizeof(Key));
 end;
 
-function HashValue_Real48(const Key :Real48):Cardinal;
+function HashValue_Real48(const Key :Real48):_TNativeUInt;
 begin
   result:=HashValue_Data(@Key,sizeof(Key));
 end;
-function HashValue_Single(const Key :Single):Cardinal;
+function HashValue_Single(const Key :Single):_TNativeUInt;
 begin
   result:=HashValue_Data(@Key,sizeof(Key));
 end;
-function HashValue_Double(const Key :double):Cardinal;
+function HashValue_Double(const Key :double):_TNativeUInt;
 begin
   result:=HashValue_Data(@Key,sizeof(Key));
 end;
-function HashValue_Extended(const Key :Extended):Cardinal;
+function HashValue_Extended(const Key :Extended):_TNativeUInt;
 begin
   result:=HashValue_Data(@Key,sizeof(Key));
 end;
-function HashValue_Comp(const Key :Comp):Cardinal;
+function HashValue_Comp(const Key :Comp):_TNativeUInt;
 begin
   result:=HashValue_Data(@Key,sizeof(Key));
 end;
-function HashValue_Currency(const Key :Currency):Cardinal;
+function HashValue_Currency(const Key :Currency):_TNativeUInt;
 begin
   result:=HashValue_Data(@Key,sizeof(Key));
 end;

@@ -63,15 +63,30 @@ uses
 
 function _IsEqual(const a,b :_ValueType):boolean; //result:=(a=b);
 begin
-  result:=(PInt64(@@a)^)=PInt64(@@b)^;
+  {$IFDEF CPU64BITS}
+    result:= ( (PInt64(@@a)^)=(PInt64(@@b)^) ) and ( (PInt64(UInt64(@@a)+8)^)=(PInt64(UInt64(@@b)+8)^) );
+  {$ELSE}
+    result:=   (PInt64(@@a)^)=(PInt64(@@b)^);
+  {$ENDIF}
 end;
 
 function _IsLess(const a,b :_ValueType):boolean;  //result:=(a<b); Ä¬ÈÏÅÅÐò×¼Ôò
-begin
-  result:=(PInt64(@@a)^)<PInt64(@@b)^;
+begin                       
+  {$IFDEF CPU64BITS}
+    if ((PInt64(@@a)^)<>(PInt64(@@b)^)) then
+    begin
+      result :=(PInt64(@@a)^)<(PInt64(@@b)^);
+    end
+    else
+    begin
+      result:= (PInt64(UInt64(@@a)+8)^)<(PInt64(UInt64(@@b)+8)^);
+    end;
+  {$ELSE}
+    result :=(PInt64(@@a)^)<(PInt64(@@b)^);
+  {$ENDIF}
 end;
 
 initialization
-  Assert(sizeof(int64)=sizeof(_ValueType));
+  Assert(2*sizeof(_TNativeUInt)=sizeof(_ValueType));
 end.
 

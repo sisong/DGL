@@ -34,11 +34,6 @@
   //----------------------------------------------------------------------------
   // 作用描述: 实现_IQueue接口 ，内部使用_TDeque来实现
   // 主要方法：参见_IQueue接口的说明
-  // 使用方式：
-  // 注意事项:
-  // 作    者: HouSisong , 2004.09.08
-  // [相关资料]: (如果有的话)
-  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
   //----------------------------------------------------------------------------
   _TQueue = class(TInterfacedObject,_IQueue)
   private
@@ -54,17 +49,17 @@
     procedure SetFrontValue(const aValue:_ValueType);                      {$ifdef _DGL_Inline} inline; {$endif}
     property  Front: _ValueType read GetFrontValue write SetFrontValue;
     procedure Clear();                          {$ifdef _DGL_Inline} inline; {$endif}
-    function  Size(): Integer;                   {$ifdef _DGL_Inline} inline; {$endif}
+    function  Size(): _TNativeInt;                   {$ifdef _DGL_Inline} inline; {$endif}
     function  IsEmpty(): Boolean;                 {$ifdef _DGL_Inline} inline; {$endif}
     function  IsEquals(const AContainer: _IQueue): Boolean;   {$ifdef _DGL_Inline} inline; {$endif}
     function  Clone():_IQueue;                                  {$ifdef _DGL_Inline} inline; {$endif}
-    procedure Assign(const num:integer;const Value: _ValueType);overload;       {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Assign(const num:_TNativeInt;const Value: _ValueType);overload;       {$ifdef _DGL_Inline} inline; {$endif}
     procedure Assign(const ItBegin,ItEnd:_IIterator);overload;         //todo: Warning inline on if _ValueType if "object" then error!!!
     function  GetSelfObj():TObject;   {$ifdef _DGL_Inline} inline; {$endif}
   public
     constructor Create(); overload;
-    constructor Create(const num:integer);overload;
-    constructor Create(const num:integer;const Value:_ValueType);overload;
+    constructor Create(const num:_TNativeInt);overload;
+    constructor Create(const num:_TNativeInt;const Value:_ValueType);overload;
     constructor Create(const ItBegin,ItEnd:_IIterator);overload;
     constructor Create(const AQueue:_TQueue);overload;   
     destructor  Destroy(); override;

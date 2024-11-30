@@ -35,10 +35,54 @@
     end;
   {$endif}
 
+  {$IFDEF CPU64BITS}
+  function __DGL_Random64(const bigRange: int64):int64;
+  var
+    ha,hb,la,lb: UInt64;
+    rh,rl,rm0,rm1,t,c,lo: UInt64;
+  begin
+  {$IFOPT Q+}
+    {$DEFINE __OVERFLOWCHECKS}
+    {$OVERFLOWCHECKS OFF}
+  {$ENDIF}
+    ha := UInt32(UInt32(RandSeed) * $08088405 + 1);
+    la := UInt32(UInt32(ha) * $08088405 + 1);
+    RandSeed := la;
+    
+    hb:=(UInt64(bigRange)) shr 32;
+    lb:=UInt32(bigRange);
+    rh:=ha*hb;
+    rm0:=ha*lb;
+    rm1:=hb*la;
+    rl:=la*lb;
+    t:=rl+(rm0 shl 32);
+    c:=UInt64(t<rl);
+    lo:=t+(rm1 shl 32);
+    c:=c+UInt64(lo<t);
+    result:=rh+(rm0 shr 32)+(rm1 shr 32)+c;
+  {$IFDEF __OVERFLOWCHECKS}
+    {$UNDEF __OVERFLOWCHECKS}
+    {$OVERFLOWCHECKS ON}
+  {$ENDIF}
+  end;
+  {$ENDIF}
+
+
+function _DGL_Random(const Range: _TNativeInt):_TNativeInt; {$ifdef _DGL_Inline} inline; {$endif}
+begin
+  {$IFDEF CPU64BITS}
+  if (Range<>Int32(Range)) then
+  begin
+    result:=__DGL_Random64(Range);
+    exit;
+  end;
+  {$ENDIF}
+  result:=Random(Range);
+end;
 
 { _TAbstractIterator }
 
-class function _TAbstractIterator.Distance(const SelfItData:_IIterator;const Iterator: _IIterator): integer;
+class function _TAbstractIterator.Distance(const SelfItData:_IIterator;const Iterator: _IIterator): _TNativeInt;
 var
   It :_IIterator;
 begin
@@ -51,7 +95,7 @@ begin
   end;
 end;
 
-class function  _TAbstractIterator.GetNextValue(const SelfItData:_IIterator;const Step:integer): _ValueType;
+class function  _TAbstractIterator.GetNextValue(const SelfItData:_IIterator;const Step:_TNativeInt): _ValueType;
 var
   It: _IIterator;
 begin
@@ -60,7 +104,8 @@ begin
   result:=self.GetValue(It);
 end;
 
-class procedure _TAbstractIterator.SetNextValue(const SelfItData:_IIterator;const Step:integer;const aValue:_ValueType);var
+class procedure _TAbstractIterator.SetNextValue(const SelfItData:_IIterator;const Step:_TNativeInt;const aValue:_ValueType);
+var
   It: _IIterator;
 begin
   It:=SelfItData;
@@ -68,9 +113,9 @@ begin
   Self.SetValue(It,aValue);
 end;
 
-class procedure _TAbstractIterator.Next(var SelfItData:_IIterator;const Step: integer);
+class procedure _TAbstractIterator.Next(var SelfItData:_IIterator;const Step: _TNativeInt);
 var
-  i : integer;
+  i : _TNativeInt;
 begin
   if Step>=0 then
     for i:=0 to Step-1 do self.Next(SelfItData)
@@ -78,7 +123,7 @@ begin
     for i:=0 to (-Step)-1 do self.Previous(SelfItData);
 end;
 
-class function  _TAbstractIterator.Clone(const SelfItData:_IIterator;const NextStep:integer):_IIterator;
+class function  _TAbstractIterator.Clone(const SelfItData:_IIterator;const NextStep:_TNativeInt):_IIterator;
 begin
   result:=SelfItData;
   self.Next(result,NextStep);
@@ -131,18 +176,18 @@ begin
   result:=self;
 end;
 
-function _IIterator.Clone(const NextStep: integer): _IIterator;
+function _IIterator.Clone(const NextStep: _TNativeInt): _IIterator;
 begin
   result:=self;
   result._ObjIteratorClass.Next(result,NextStep);
 end;
 
-function _IIterator.Distance(const Iterator: _IIterator): integer;
+function _IIterator.Distance(const Iterator: _IIterator): _TNativeInt;
 begin
   result:=self._ObjIteratorClass.Distance(self,Iterator);
 end;
 
-function _IIterator.GetNextValue(const Step: integer): _ValueType;
+function _IIterator.GetNextValue(const Step: _TNativeInt): _ValueType;
 begin
   result:=self._ObjIteratorClass.GetNextValue(self,Step);
 end;                 
@@ -157,7 +202,7 @@ begin
   result:=self._ObjIteratorClass.IsEqual(self,Iterator);
 end;
 
-procedure _IIterator.Next(const Step: integer);
+procedure _IIterator.Next(const Step: _TNativeInt);
 begin
   self._ObjIteratorClass.Next(self,Step);
 end;
@@ -172,7 +217,7 @@ begin
   self._ObjIteratorClass.Previous(self);
 end;
 
-procedure _IIterator.SetNextValue(const Step: integer;const aValue: _ValueType);
+procedure _IIterator.SetNextValue(const Step: _TNativeInt;const aValue: _ValueType);
 begin
   self._ObjIteratorClass.SetNextValue(self,Step,aValue);
 end;

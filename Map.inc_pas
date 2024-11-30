@@ -46,7 +46,7 @@ begin
   self.FRB_Tree.Clear();
 end;
 
-function _TMap_Base.Count(const Key: _KeyType): integer;
+function _TMap_Base.Count(const Key: _KeyType): _TNativeInt;
 begin
   result:=self.FRB_Tree.Count(Key);
 end;
@@ -78,18 +78,18 @@ begin
   self.FRB_Tree.Erase(_TRB_TreeIterator(ItBegin._Data0),_TRB_TreeIterator(ItEnd._Data0));
 end;
 
-function _TMap_Base.EraseValue(const Value: _ValueType): integer;
+function _TMap_Base.EraseValue(const Value: _ValueType): _TNativeInt;
 begin
   result:=self.FRB_Tree.EraseValue(Value);
 end;
 
-function  _TMap_Base.EraseValue(const Key:_KeyType;const Value:_ValueType):integer;
+function  _TMap_Base.EraseValue(const Key:_KeyType;const Value:_ValueType):_TNativeInt;
 begin
   result:=self.FRB_Tree.EraseValue(Key,Value);
 end;
 
 
-function  _TMap_Base.EraseKey(const Key:_KeyType):integer;
+function  _TMap_Base.EraseKey(const Key:_KeyType):_TNativeInt;
 begin
   result:=self.FRB_Tree.EraseKey(Key);
 end;
@@ -125,7 +125,7 @@ begin
   _TMapIterator.ItCreate(_IIterator(result),self.FRB_Tree.LowerBound(Key));
 end;
 
-function _TMap_Base.Size: Integer;
+function _TMap_Base.Size: _TNativeInt;
 begin
   result:=self.FRB_Tree.Size();
 end;
@@ -138,7 +138,7 @@ end;
 
  { _TMap }
 
-procedure _TMap.Assign(const num: integer; const Key: _KeyType;const Value: _ValueType);
+procedure _TMap.Assign(const num: _TNativeInt; const Key: _KeyType;const Value: _ValueType);
 begin
   self.FRB_Tree.Clear();
   if num>0 then
@@ -186,7 +186,7 @@ begin
   end;
 end;
 
-procedure _TMap.Insert(const num: integer;
+procedure _TMap.Insert(const num: _TNativeInt;
   const Key: _KeyType; const Value: _ValueType);
 begin
   if num>0 then
@@ -205,7 +205,7 @@ end;
 
 { _TMultiMap }
 
-procedure _TMultiMap.Assign(const num: integer; const Key: _KeyType;
+procedure _TMultiMap.Assign(const num: _TNativeInt; const Key: _KeyType;
   const Value: _ValueType);
 begin
   self.FRB_Tree.Clear();
@@ -241,7 +241,7 @@ begin
   self.Insert(AMultiMap.ItBegin(),AMultiMap.ItEnd);
 end;
 
-constructor _TMultiMap.Create(const num: integer; const Key: _KeyType;const Value: _ValueType);
+constructor _TMultiMap.Create(const num: _TNativeInt; const Key: _KeyType;const Value: _ValueType);
 begin
   inherited Create();
   self.Assign(num,Key,Value);
@@ -257,9 +257,9 @@ begin
   self.FRB_Tree.MultiInsert(Key,Value);
 end;
 
-procedure _TMultiMap.Insert(const num: integer; const Key: _KeyType; const Value: _ValueType);
+procedure _TMultiMap.Insert(const num: _TNativeInt; const Key: _KeyType; const Value: _ValueType);
 var
-  i : integer;
+  i : _TNativeInt;
 begin
   for i:=0 to num-1 do
     self.FRB_Tree.MultiInsert(Key,Value);

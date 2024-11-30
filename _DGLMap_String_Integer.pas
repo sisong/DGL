@@ -35,7 +35,7 @@ type
 
 const
   _NULL_Value:integer=0;
-  function _HashValue(const Key: _KeyType):Cardinal;{$ifdef _DGL_Inline} inline; {$endif}//Hash函数
+  function _HashValue(const Key: _KeyType):_TNativeUInt;{$ifdef _DGL_Inline} inline; {$endif}//Hash函数
 
 {$I HashMap.inc_h} //"类"模版的声明文件
 {$I Map.inc_h} //"类"模版的声明文件
@@ -61,7 +61,7 @@ uses
 {$I Map.inc_pas} //"类"模版的实现文件
 {$I Algorithms.inc_pas}
 
-function _HashValue(const Key :_KeyType):Cardinal; overload;
+function _HashValue(const Key :_KeyType):_TNativeUInt; overload;
 begin
   result:=HashValue_Str(Key);
 end;

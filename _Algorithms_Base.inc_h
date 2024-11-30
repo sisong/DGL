@@ -26,7 +26,7 @@
   public
 
     //返回两个迭代器之间的元素个数
-    class function Distance(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ):integer; overload;
+    class function Distance(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ):_TNativeInt; overload;
 
     //返回两个元素列是否相等
     class function IsEquals(const ItBegin0,ItEnd0,ItBegin1,ItEnd1: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ):boolean; overload;
@@ -43,9 +43,9 @@
     class function FindIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Value:_ValueType;const TestBinaryFunction:TTestBinaryFunctionOfObject): {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ; overload;
 
     //统计元素个数
-    class function Count(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Value:_ValueType):integer; overload;
-    class function CountIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunction):integer;overload;
-    class function CountIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunctionOfObject):integer;overload;
+    class function Count(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Value:_ValueType):_TNativeInt; overload;
+    class function CountIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunction):_TNativeInt;overload;
+    class function CountIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunctionOfObject):_TNativeInt;overload;
 
     //寻找子串
     class function Search(const ItBegin,ItEnd,ItBeginSub,ItEndSub: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ): {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ; overload;
@@ -64,8 +64,8 @@
 
     //交换值
     class procedure SwapValue(const It0,It1: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} );overload;                            //todo: Warning inline on if _ValueType if "object" then error!!!
-    class procedure SwapValue(const It0: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Index0: integer;const It1: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Index1: integer);overload;   //todo: Warning inline on if _ValueType if "object" then error!!!
-    class procedure SwapValue(const It: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Index0,Index1: integer);overload;  //{$ifdef _DGL_Inline} inline; {$endif}
+    class procedure SwapValue(const It0: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Index0: _TNativeInt;const It1: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Index1: _TNativeInt);overload;   //todo: Warning inline on if _ValueType if "object" then error!!!
+    class procedure SwapValue(const It: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Index0,Index1: _TNativeInt);overload;  //{$ifdef _DGL_Inline} inline; {$endif}
 
    //将ItBeginSrc,ItEndSrc区间内的数据拷贝到ItBeginDest开始的区域中
     class procedure Copy(const ItBeginSrc,ItEndSrc,ItBeginDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ); overload;
@@ -82,20 +82,20 @@
     class procedure SwapRanges(const ItBegin0,ItEnd0,ItBegin1: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ); overload;
    
     //替换元素
-    class function Replace(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const OldValue,NewValue:_ValueType):integer; overload;
-    class function ReplaceIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunction;const NewValue:_ValueType):integer;overload;
-    class function ReplaceIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunctionOfObject;const NewValue:_ValueType):integer;overload;
-    class function ReplaceCopy(const ItBeginSrc,ItEndSrc,ItBeginDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const OldValue,NewValue:_ValueType):integer; overload;
-    class function ReplaceCopyIf(const ItBeginSrc,ItEndSrc,ItBeginDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunction;const NewValue:_ValueType):integer;overload;
-    class function ReplaceCopyIf(const ItBeginSrc,ItEndSrc,ItBeginDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunctionOfObject;const NewValue:_ValueType):integer;overload;
+    class function Replace(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const OldValue,NewValue:_ValueType):_TNativeInt; overload;
+    class function ReplaceIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunction;const NewValue:_ValueType):_TNativeInt;overload;
+    class function ReplaceIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunctionOfObject;const NewValue:_ValueType):_TNativeInt;overload;
+    class function ReplaceCopy(const ItBeginSrc,ItEndSrc,ItBeginDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const OldValue,NewValue:_ValueType):_TNativeInt; overload;
+    class function ReplaceCopyIf(const ItBeginSrc,ItEndSrc,ItBeginDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunction;const NewValue:_ValueType):_TNativeInt;overload;
+    class function ReplaceCopyIf(const ItBeginSrc,ItEndSrc,ItBeginDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunctionOfObject;const NewValue:_ValueType):_TNativeInt;overload;
 
     //填充区间
     class procedure Fill(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Value:_ValueType);overload;
-    class procedure Fill(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const N:integer;const Value:_ValueType);overload;
+    class procedure Fill(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const N:_TNativeInt;const Value:_ValueType);overload;
     class procedure Generate(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const GenerateFunction:TGenerateFunction);overload;
-    class procedure Generate(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const N:integer;const GenerateFunction:TGenerateFunction);overload;
+    class procedure Generate(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const N:_TNativeInt;const GenerateFunction:TGenerateFunction);overload;
     class procedure Generate(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const GenerateFunction:TGenerateFunctionOfObject);overload;
-    class procedure Generate(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const N:integer;const GenerateFunction:TGenerateFunctionOfObject);overload;
+    class procedure Generate(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const N:_TNativeInt;const GenerateFunction:TGenerateFunctionOfObject);overload;
 
 
     //移除元素  //返回值(result)表示Value在[ItBegin,result)区间内被移除了

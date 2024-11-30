@@ -23,11 +23,11 @@
 
 
 {$ifdef  _DGL_Algorithms_Object_Function}
-        procedure __DGL_QuickSort(ItBegin:_PValueType_Iterator;Right:integer;
+        procedure __DGL_QuickSort(ItBegin:_PValueType_Iterator;Right:_TNativeInt;
             const TestBinaryFunction:TTestBinaryFunctionOfObject);overload;
           type  _QuickSort_TTestBinaryFunction=TTestBinaryFunctionOfObject;
 {$else}
-        procedure __DGL_QuickSort(ItBegin:_PValueType_Iterator;Right:integer;
+        procedure __DGL_QuickSort(ItBegin:_PValueType_Iterator;Right:_TNativeInt;
             const TestBinaryFunction:TTestBinaryFunction);overload;
           type  _QuickSort_TTestBinaryFunction=TTestBinaryFunctionOfObject;
 {$endif}
@@ -43,9 +43,9 @@ class procedure _TAlgorithms.Sort(const ItBegin,ItEnd:_PValueType_Iterator;const
 class procedure _TAlgorithms.Sort(const ItBegin,ItEnd:_PValueType_Iterator;const TestBinaryFunction:TTestBinaryFunction);
 {$endif}
 var
-  Right : integer;
+  Right : _TNativeInt;
 begin
-  Right:=((integer(ItEnd)-integer(ItBegin)) div sizeof(_ValueType))  - 1 ;
+  Right:=((_TNativeInt(ItEnd)-_TNativeInt(ItBegin)) div sizeof(_ValueType))  - 1 ;
   if Right>0 then
     __DGL_QuickSort(ItBegin,Right,TestBinaryFunction);
 end;
@@ -68,7 +68,7 @@ begin
 
   It:=ItBegin;
   Itp:=ItBegin;
-  inc(integer(Itp),sizeof(_ValueType));
+  inc(_TNativeUInt(Itp),sizeof(_ValueType));
   while (not (ItP=ItEnd)) do
   begin
     if TestBinaryFunction(ItP[0],It[0]) then
@@ -76,8 +76,8 @@ begin
       result:=false;
       exit;
     end;
-    inc(integer(It),sizeof(_ValueType));
-    inc(integer(Itp),sizeof(_ValueType));
+    inc(_TNativeUInt(It),sizeof(_ValueType));
+    inc(_TNativeUInt(Itp),sizeof(_ValueType));
   end;
   result:=true;
 end;
@@ -89,11 +89,11 @@ class function _TAlgorithms.LowerBound(const ItBegin,ItEnd:_PValueType_Iterator;
 class function _TAlgorithms.LowerBound(const ItBegin,ItEnd:_PValueType_Iterator;const Value:_ValueType;const TestBinaryFunction:TTestBinaryFunction):_PValueType_Iterator;
 {$endif}
 var
-  left,LowerBound : integer;
-  m : integer;
-  Count : integer;
+  left,LowerBound : _TNativeInt;
+  m : _TNativeInt;
+  Count : _TNativeInt;
 begin
-  Count:=longword(integer(ItEnd)-integer(ItBegin)) div sizeof(_ValueType);
+  Count:=_TNativeUInt(_TNativeInt(ItEnd)-_TNativeInt(ItBegin)) div sizeof(_ValueType);
   left:=-1;
   LowerBound:=Count;
   while (left+1<>LowerBound) do

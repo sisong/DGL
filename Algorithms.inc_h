@@ -37,8 +37,8 @@ type
   public
   //todo: private
     class procedure SwapValue(const It0,It1:_PValueType_Iterator);overload;  {$ifdef _DGL_Inline} inline; {$endif}
-    class procedure SwapValue(const It:_PValueType_Iterator;const Index0,Index1: integer);overload;   {$ifdef _DGL_Inline} inline; {$endif}
-    class procedure SwapValue(const It0:_PValueType_Iterator;const Index0: integer;const It1:_PValueType_Iterator;const Index1: integer);overload; {$ifdef _DGL_Inline} inline; {$endif}
+    class procedure SwapValue(const It:_PValueType_Iterator;const Index0,Index1: _TNativeInt);overload;   {$ifdef _DGL_Inline} inline; {$endif}
+    class procedure SwapValue(const It0:_PValueType_Iterator;const Index0: _TNativeInt;const It1:_PValueType_Iterator;const Index1: _TNativeInt);overload; {$ifdef _DGL_Inline} inline; {$endif}
     class procedure Sort(const ItBegin,ItEnd:_PValueType_Iterator); overload;
     class procedure Sort(const ItBegin,ItEnd:_PValueType_Iterator;const TestBinaryFunction:TTestBinaryFunction); overload;
     class procedure Sort(const ItBegin,ItEnd:_PValueType_Iterator;const TestBinaryFunction:TTestBinaryFunctionOfObject); overload;

@@ -38,7 +38,7 @@ procedure TTest_Queue.testQueue;
 var
   Queue : IStrQueue;
   sk : IStrQueue;
-  i : integer;
+  i : _TNativeInt;
 begin
   Queue:=TStrQueue.Create();
   Check( Queue.IsEmpty);

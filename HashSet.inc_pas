@@ -52,7 +52,7 @@ begin
   self.FHashTable.Clear();
 end;
 
-function _THashSet_Base.Count(const Value: _HashValueType): integer;
+function _THashSet_Base.Count(const Value: _HashValueType): _TNativeInt;
 begin
   result:=self.FHashTable.Count(Value);
 end;
@@ -78,7 +78,7 @@ begin
   self.FHashTable.Erase(ItPos);
 end;
 
-function _THashSet_Base.EraseValue(const Value: _HashValueType): integer;
+function _THashSet_Base.EraseValue(const Value: _HashValueType): _TNativeInt;
 begin
   result:=self.FHashTable.EraseKey(Value);
 end;
@@ -111,7 +111,7 @@ begin
       self.FHashTable,self.FHashTable.LowerBound(Value));
 end;
 
-function _THashSet_Base.Size: Integer;
+function _THashSet_Base.Size: _TNativeInt;
 begin
   result:=self.FHashTable.Size();
 end;
@@ -121,7 +121,7 @@ begin
   _THashSetIterator.ItCreate(result,self.FHashTable,self.FHashTable.UpperBound(Value));
 end;
 
-procedure _THashSet_Base.Reserve(const ReserveSize: integer);
+procedure _THashSet_Base.Reserve(const ReserveSize: _TNativeInt);
 begin
   self.FHashTable.Reserve(ReserveSize);
 end;
@@ -141,7 +141,7 @@ begin
   self.Insert(self.ItBegin,ItBegin,ItEnd);
 end;
 
-procedure _THashSet.Assign(const num: integer; const Value: _HashValueType);
+procedure _THashSet.Assign(const num: _TNativeInt; const Value: _HashValueType);
 begin
   self.FHashTable.Clear();
   if num>0 then
@@ -194,7 +194,7 @@ begin
   end;
 end;
 
-procedure _THashSet.Insert(const ItPos: _IIterator; const num: integer;
+procedure _THashSet.Insert(const ItPos: _IIterator; const num: _TNativeInt;
   const Value: _HashValueType);
 begin
   if num>0 then
@@ -204,9 +204,9 @@ end;
 
 { _THashMultiSet }
 
-procedure _THashMultiSet.Assign(const num: integer; const Value: _HashValueType);
+procedure _THashMultiSet.Assign(const num: _TNativeInt; const Value: _HashValueType);
 var
-  i : integer;
+  i : _TNativeInt;
 begin
   self.FHashTable.Clear();
   for i:=0 to num-1 do
@@ -246,10 +246,10 @@ begin
   end;
 end;
 
-procedure _THashMultiSet.Insert(const ItPos: _IIterator; const num: integer;
+procedure _THashMultiSet.Insert(const ItPos: _IIterator; const num: _TNativeInt;
   const Value: _HashValueType);
 var
-  i : integer;
+  i : _TNativeInt;
 begin
   for i:=0 to num-1 do
     self.FHashTable.MultiInsert(Value);
@@ -260,7 +260,7 @@ begin
   self.FHashTable.MultiInsert(Value);
 end;
 
-constructor _THashMultiSet.Create(const num: integer;
+constructor _THashMultiSet.Create(const num: _TNativeInt;
   const Value: _HashValueType);
 begin
   inherited Create();

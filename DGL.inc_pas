@@ -22,9 +22,15 @@
 
 //DGL.inc_pas
 
+  {$IFOPT R+}
+    {$DEFINE __RANGECHECKS}
+    {$RANGECHECKS OFF}
+  {$ENDIF}
+
+
   {$I DGLIntf.inc_pas}
 
-  {$I Algorithms.inc_pas}   //
+  {$I Algorithms.inc_pas}
 
   {$I PointerItBox.inc_pas}
 
@@ -41,3 +47,8 @@
   {$I HashSet.inc_pas}
   {$I HashMap.inc_pas}
 
+
+  {$IFDEF __RANGECHECKS}
+    {$UNDEF __RANGECHECKS}
+    {$RANGECHECKS ON}
+  {$ENDIF}

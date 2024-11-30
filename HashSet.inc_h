@@ -34,11 +34,6 @@ type
   //----------------------------------------------------------------------------
   // 作用描述: _THashSet的迭代器
   // 主要方法：(参见_Iterator的说明)
-  // 使用方式：
-  // 注意事项:
-  // 作    者: HouSisong , 2004.09.08
-  // [相关资料]: (如果有的话)
-  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
   //----------------------------------------------------------------------------
   //hash Iterator
   _THashSetIterator = class(_THashBaseIterator)
@@ -58,19 +53,19 @@ type
     function  ItBegin(): _IIterator;                           {$ifdef _DGL_Inline} inline; {$endif}
     function  ItEnd(): _IIterator;                             {$ifdef _DGL_Inline} inline; {$endif}
     procedure Clear();                                         {$ifdef _DGL_Inline} inline; {$endif}
-    function  Size(): Integer;                                 {$ifdef _DGL_Inline} inline; {$endif}
+    function  Size(): _TNativeInt;                                 {$ifdef _DGL_Inline} inline; {$endif}
     function  IsEmpty(): Boolean;                              {$ifdef _DGL_Inline} inline; {$endif}
-    function  EraseValue(const Value:_ValueType):integer; overload;       {$ifdef _DGL_Inline} inline; {$endif}
+    function  EraseValue(const Value:_ValueType):_TNativeInt; overload;       {$ifdef _DGL_Inline} inline; {$endif}
     procedure Erase(const ItPos:_IIterator);  overload;                   //{$ifdef _DGL_Inline} inline; {$endif}
     procedure Erase(const ItBegin,ItEnd: _IIterator);  overload;
-    function  Count(const Value:_ValueType):integer;                      {$ifdef _DGL_Inline} inline; {$endif}
+    function  Count(const Value:_ValueType):_TNativeInt;                      {$ifdef _DGL_Inline} inline; {$endif}
     function  Find(const Value:_ValueType):_IIterator;                    {$ifdef _DGL_Inline} inline; {$endif}
     function  LowerBound(const Value:_ValueType):_IIterator;               {$ifdef _DGL_Inline} inline; {$endif}
     function  UpperBound(const Value:_ValueType):_IIterator;               {$ifdef _DGL_Inline} inline; {$endif}
     procedure EqualRange(const Value:_ValueType;out ItBegin,ItEnd:_IIterator);  {$ifdef _DGL_Inline} inline; {$endif}
     function  GetSelfObj():TObject;                            {$ifdef _DGL_Inline} inline; {$endif}
   public
-    procedure Reserve(const ReserveSize: integer);                 {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Reserve(const ReserveSize: _TNativeInt);                 {$ifdef _DGL_Inline} inline; {$endif}
     constructor Create(); overload;
     destructor  Destroy(); override;
   end;
@@ -78,19 +73,14 @@ type
   //----------------------------------------------------------------------------
   // 作用描述: 底部利用_THashTableBase实现的Set
   // 主要方法：(参见_ISet的说明)
-  // 使用方式：
-  // 注意事项:
-  // 作    者: HouSisong , 2004.09.10
-  // [相关资料]: (如果有的话)
-  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
   //----------------------------------------------------------------------------
   _THashSet  = class(_THashSet_Base,_ISet,_IContainer)
   public
     procedure Insert(const Value:_ValueType); overload;                                   {$ifdef _DGL_Inline} inline; {$endif}
     procedure Insert(const ItPos:_IIterator;const Value:_ValueType); overload;            //{$ifdef _DGL_Inline} inline; {$endif}
-    procedure Insert(const ItPos:_IIterator;const num:integer;const Value:_ValueType); overload; //{$ifdef _DGL_Inline} inline; {$endif}
+    procedure Insert(const ItPos:_IIterator;const num:_TNativeInt;const Value:_ValueType); overload; //{$ifdef _DGL_Inline} inline; {$endif}
     procedure Insert(const ItPos:_IIterator;const ItBegin,ItEnd:_IIterator);overload;       //
-    procedure Assign(const num:integer;const Value: _ValueType);overload;                   {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Assign(const num:_TNativeInt;const Value: _ValueType);overload;                   {$ifdef _DGL_Inline} inline; {$endif}
     procedure Assign(const ItBegin,ItEnd:_IIterator);overload;                              //{$ifdef _DGL_Inline} inline; {$endif}
     function  Clone():_IContainer;                                                          {$ifdef _DGL_Inline} inline; {$endif}
     procedure CloneToInterface(out NewContainer);                     {$ifdef _DGL_Inline} inline; {$endif}
@@ -103,19 +93,14 @@ type
   //----------------------------------------------------------------------------
   // 作用描述: 底部利用_THashTableBase实现的MultiSet  , 以继承方式重用了_THashSet_Base的部分代码
   // 主要方法：(参见_IMultiSet的说明)
-  // 使用方式：
-  // 注意事项:
-  // 作    者: HouSisong , 2004.09.10
-  // [相关资料]: (如果有的话)
-  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
   //----------------------------------------------------------------------------
   _THashMultiSet  = class(_THashSet_Base,_IMultiSet,_ISet,_IContainer)
   public
     procedure Insert(const Value:_HashValueType);overload;                                        {$ifdef _DGL_Inline} inline; {$endif}
     procedure Insert(const ItPos:_IIterator;const Value:_HashValueType); overload;               // {$ifdef _DGL_Inline} inline; {$endif}
-    procedure Insert(const ItPos:_IIterator;const num:integer;const Value:_HashValueType); overload;  //{$ifdef _DGL_Inline} inline; {$endif}
+    procedure Insert(const ItPos:_IIterator;const num:_TNativeInt;const Value:_HashValueType); overload;  //{$ifdef _DGL_Inline} inline; {$endif}
     procedure Insert(const ItPos:_IIterator;const ItBegin,ItEnd:_IIterator);overload;             //
-    procedure Assign(const num:integer;const Value: _HashValueType);overload;                     {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Assign(const num:_TNativeInt;const Value: _HashValueType);overload;                     {$ifdef _DGL_Inline} inline; {$endif}
     procedure Assign(const ItBegin,ItEnd:_IIterator);overload;                                   //
     function  Clone: _IContainer;                                                                 {$ifdef _DGL_Inline} inline; {$endif}
     procedure CloneToInterface(out NewContainer);  {$ifdef _DGL_Inline} inline; {$endif}
@@ -123,7 +108,7 @@ type
     constructor Create(); overload;
     constructor Create(const ItBegin,ItEnd:_IIterator);overload;
     constructor Create(const ASet:_THashMultiSet);overload;
-    constructor Create(const num:integer;const Value: _HashValueType);overload;
+    constructor Create(const num:_TNativeInt;const Value: _HashValueType);overload;
   end;
   
 

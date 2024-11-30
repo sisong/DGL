@@ -24,13 +24,13 @@
 
 
 {$ifdef _DGL_Sys_Cmp_}
-function  _TList.EraseValue(const Value: _ValueType): integer;
+function  _TList.EraseValue(const Value: _ValueType): _TNativeInt;
 {$endif}
 {$ifdef _DGL_Proc_Cmp_}
-function  _TList.EraseValueIf(const TestFunction:TTestFunction):integer;
+function  _TList.EraseValueIf(const TestFunction:TTestFunction):_TNativeInt;
 {$endif}
 {$ifdef _DGL_ObjProc_Cmp_}
-function  _TList.EraseValueIf(const TestFunction:TTestFunctionOfObject):integer;
+function  _TList.EraseValueIf(const TestFunction:TTestFunctionOfObject):_TNativeInt;
 {$endif}
 var
   PNode : _PListNode;
@@ -155,7 +155,7 @@ procedure _TList.Sort(const TestBinaryFunction:TTestBinaryFunctionOfObject);
 {$endif}
   type  _QuickSort_TTestBinaryFunction=TTestBinaryFunction_PListNode;
   type  _QuickSort_PValueArray=_PPListNodeArray;
-  procedure __DGL_QuickSort(ItBegin:_QuickSort_PValueArray;Right:integer;
+  procedure __DGL_QuickSort(ItBegin:_QuickSort_PValueArray;Right:_TNativeInt;
           const TestBinaryFunction:_QuickSort_TTestBinaryFunction); overload;
     type  _QuickSort_ValueType=_PListNode;
             {$I _Pointer_QuickSort_Base.inc_pas} //QuickSort procedure
@@ -163,7 +163,7 @@ procedure _TList.Sort(const TestBinaryFunction:TTestBinaryFunctionOfObject);
 var
   CmpObj : TCmpObj;
   PNodeArray : array of _PListNode;
-  ListSize,i : integer;
+  ListSize,i : _TNativeInt;
   It : _PListNode;
 begin
   ListSize:=self.Size();

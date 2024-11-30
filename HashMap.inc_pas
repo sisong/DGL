@@ -41,11 +41,11 @@ begin
   result:=FHashTable.Size()=0;
 end;
 
-function  _THashMap_Base.getAlwaysReserveSize():integer;
+function  _THashMap_Base.getAlwaysReserveSize():_TNativeInt;
 begin
   result:=self.FHashTable.AlwaysReserveSize;
 end;
-procedure _THashMap_Base.setAlwaysReserveSize(const aAlwaysReserveSize:integer);
+procedure _THashMap_Base.setAlwaysReserveSize(const aAlwaysReserveSize:_TNativeInt);
 begin
   self.FHashTable.AlwaysReserveSize:=aAlwaysReserveSize;
 end;
@@ -55,7 +55,7 @@ begin
   self.FHashTable.Clear();
 end;
 
-function _THashMap_Base.Count(const Key: _HashKeyType): integer;
+function _THashMap_Base.Count(const Key: _HashKeyType): _TNativeInt;
 begin
   result:=self.FHashTable.Count(Key);
 end;
@@ -87,18 +87,18 @@ begin
   self.FHashTable.Erase(ItBegin,ItEnd);
 end;
 
-function _THashMap_Base.EraseValue(const Value: _HashValueType): integer;
+function _THashMap_Base.EraseValue(const Value: _HashValueType): _TNativeInt;
 begin
   result:=self.FHashTable.EraseValue(Value);
 end;
 
-function  _THashMap_Base.EraseValue(const Key:_HashKeyType;const Value:_HashValueType):integer;
+function  _THashMap_Base.EraseValue(const Key:_HashKeyType;const Value:_HashValueType):_TNativeInt;
 begin
   result:=self.FHashTable.EraseValue(Key,Value);
 end;
 
 
-function  _THashMap_Base.EraseKey(const Key:_HashKeyType):integer;
+function  _THashMap_Base.EraseKey(const Key:_HashKeyType):_TNativeInt;
 begin
   result:=self.FHashTable.EraseKey(Key);
 end;
@@ -138,12 +138,12 @@ begin
       self.FHashTable, self.FHashTable.LowerBound(Key));
 end;
 
-procedure _THashMap_Base.Reserve(const ReserveSize: integer);
+procedure _THashMap_Base.Reserve(const ReserveSize: _TNativeInt);
 begin
   self.FHashTable.Reserve(ReserveSize);
 end;
 
-function _THashMap_Base.Size: Integer;
+function _THashMap_Base.Size: _TNativeInt;
 begin
   result:=self.FHashTable.Size();
 end;
@@ -157,7 +157,7 @@ end;
 
  { _THashMap }
 
-procedure _THashMap.Assign(const num: integer; const Key: _HashKeyType;
+procedure _THashMap.Assign(const num: _TNativeInt; const Key: _HashKeyType;
   const Value: _HashValueType);
 begin
   self.FHashTable.Clear();
@@ -206,7 +206,7 @@ begin
   end;
 end;
 
-procedure _THashMap.Insert(const num: integer;
+procedure _THashMap.Insert(const num: _TNativeInt;
   const Key: _HashKeyType; const Value: _HashValueType);
 begin
   if num>0 then
@@ -225,7 +225,7 @@ end;
 
 { _THashMultiMap }
 
-procedure _THashMultiMap.Assign(const num: integer; const Key: _HashKeyType;
+procedure _THashMultiMap.Assign(const num: _TNativeInt; const Key: _HashKeyType;
   const Value: _HashValueType);
 begin
   self.FHashTable.Clear();
@@ -261,7 +261,7 @@ begin
   self.Insert(AMultiMap.ItBegin(),AMultiMap.ItEnd);
 end;
 
-constructor _THashMultiMap.Create(const num: integer; const Key: _HashKeyType;
+constructor _THashMultiMap.Create(const num: _TNativeInt; const Key: _HashKeyType;
   const Value: _HashValueType);
 begin
   inherited Create();
@@ -278,9 +278,9 @@ begin
   self.FHashTable.MultiInsert(Key,Value);
 end;
 
-procedure _THashMultiMap.Insert(const num: integer; const Key: _HashKeyType; const Value: _HashValueType);
+procedure _THashMultiMap.Insert(const num: _TNativeInt; const Key: _HashKeyType; const Value: _HashValueType);
 var
-  i : integer;
+  i : _TNativeInt;
 begin
   for i:=0 to num-1 do
     self.FHashTable.MultiInsert(Key,Value);

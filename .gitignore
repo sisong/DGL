@@ -10,3 +10,5 @@ __history
 *.exe
 *.cfg
 *.dof
+*.~inc_h
+*.~pas

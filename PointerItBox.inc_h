@@ -34,11 +34,6 @@ type
   //----------------------------------------------------------------------------
   // 作用描述: 实现_IIterator接口  将一般指针包装成_IIterator
   // 主要方法：参见_IIterator接口的说明
-  // 使用方式：
-  // 注意事项:
-  // 作    者: HouSisong , 2004.09.02
-  // [相关资料]: (如果有的话)
-  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
   //----------------------------------------------------------------------------
           _TNudePointerType = _PValueType;// ^_ValueType;
 
@@ -52,23 +47,23 @@ type
     function  IteratorTraits():TIteratorTraits; {$ifdef _DGL_Inline} inline; {$endif}
     procedure SetValue(const aValue: _ValueType); {$ifdef _DGL_Inline} inline; {$endif}
     function  GetValue(): _ValueType; {$ifdef _DGL_Inline} inline; {$endif}
-    function  GetNextValue(const Step:integer): _ValueType; {$ifdef _DGL_Inline} inline; {$endif}
-    procedure SetNextValue(const Step:integer;const aValue:_ValueType);{$ifdef _DGL_Inline} inline; {$endif}
+    function  GetNextValue(const Step:_TNativeInt): _ValueType; {$ifdef _DGL_Inline} inline; {$endif}
+    procedure SetNextValue(const Step:_TNativeInt;const aValue:_ValueType);{$ifdef _DGL_Inline} inline; {$endif}
 
     property  Value: _ValueType read GetValue write SetValue;
-    property  NextValue[const Index:integer]: _ValueType read GetNextValue write SetNextValue;
+    property  NextValue[const Index:_TNativeInt]: _ValueType read GetNextValue write SetNextValue;
     function  IsEqual(const Iterator:_IIterator):boolean;  //{$ifdef _DGL_Inline} inline; {$endif}
-    function  Distance(const Iterator:_IIterator):integer;//{$ifdef _DGL_Inline} inline; {$endif}
+    function  Distance(const Iterator:_IIterator):_TNativeInt;//{$ifdef _DGL_Inline} inline; {$endif}
     procedure Assign (const Iterator:_IIterator); //{$ifdef _DGL_Inline} inline; {$endif}
     procedure Next();overload;   {$ifdef _DGL_Inline} inline; {$endif}
-    procedure Next(const Step:integer);overload;  {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Next(const Step:_TNativeInt);overload;  {$ifdef _DGL_Inline} inline; {$endif}
     procedure Previous(); {$ifdef _DGL_Inline} inline; {$endif}
     function  Clone():_IIterator; overload; {$ifdef _DGL_Inline} inline; {$endif}
-    function  Clone(const NextStep:integer):_IIterator;overload; {$ifdef _DGL_Inline} inline; {$endif}
+    function  Clone(const NextStep:_TNativeInt):_IIterator;overload; {$ifdef _DGL_Inline} inline; {$endif}
   public
     procedure SetPointerNil();overload;     {$ifdef _DGL_Inline} inline; {$endif}
     procedure SetPointer(const aPointer : _TNudePointerType);overload;   {$ifdef _DGL_Inline} inline; {$endif}
-    procedure SetPointer(const aPointer : _TNudePointerType;const Step:integer); overload;    {$ifdef _DGL_Inline} inline; {$endif}
+    procedure SetPointer(const aPointer : _TNudePointerType;const Step:_TNativeInt); overload;    {$ifdef _DGL_Inline} inline; {$endif}
     procedure SetPointer(const aPointerItBox : _IPointerItBox);overload;   //{$ifdef _DGL_Inline} inline; {$endif}
     property  Pointer:_TNudePointerType read getPointer write _SetPointer;
   end;
@@ -80,16 +75,16 @@ type
             class function  IteratorTraits():TIteratorTraits; override;
             class procedure SetValue(const SelfItData:_IIterator;const AValue: _ValueType); override;
             class function  GetValue(const SelfItData:_IIterator): _ValueType; override;
-            class function  GetNextValue(const SelfItData:_IIterator;const Step:integer): _ValueType; override;
-            class procedure SetNextValue(const SelfItData:_IIterator;const Step:integer;const Value:_ValueType); override;
+            class function  GetNextValue(const SelfItData:_IIterator;const Step:_TNativeInt): _ValueType; override;
+            class procedure SetNextValue(const SelfItData:_IIterator;const Step:_TNativeInt;const Value:_ValueType); override;
             class function  IsEqual(const SelfItData:_IIterator;const Iterator:_IIterator):boolean; override;
-            class function  Distance(const SelfItData:_IIterator;const Iterator:_IIterator):integer; override;
+            class function  Distance(const SelfItData:_IIterator;const Iterator:_IIterator):_TNativeInt; override;
             class procedure Assign (var SelfItData:_IIterator;const Iterator:_IIterator); override;
             class procedure Next(var SelfItData:_IIterator);overload; override;
-            class procedure Next(var SelfItData:_IIterator;const Step:integer);overload; override;
+            class procedure Next(var SelfItData:_IIterator;const Step:_TNativeInt);overload; override;
             class procedure Previous(var SelfItData:_IIterator);  override;
             class function  Clone(const SelfItData:_IIterator):_IIterator;overload; override;
-            class function  Clone(const SelfItData:_IIterator;const NextStep:integer):_IIterator;overload; override;
+            class function  Clone(const SelfItData:_IIterator;const NextStep:_TNativeInt):_IIterator;overload; override;
           end;
 
           
@@ -97,6 +92,6 @@ type
   _IVectorIterator = _IPointerItBox;
 
   function PointerBox(const aPointer : _TNudePointerType):_IVectorIterator; overload;   {$ifdef _DGL_Inline} inline; {$endif}
-  function PointerBox(const aPointer : _TNudePointerType;const NextStep:integer):_IVectorIterator; overload;   {$ifdef _DGL_Inline} inline; {$endif}
+  function PointerBox(const aPointer : _TNudePointerType;const NextStep:_TNativeInt):_IVectorIterator; overload;   {$ifdef _DGL_Inline} inline; {$endif}
 
 {$endif } //  __PointerItBox_inc_h_

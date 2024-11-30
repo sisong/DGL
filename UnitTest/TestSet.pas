@@ -13,8 +13,8 @@ type
 
   TTest_Set = class(TTestCase)
   private
-    procedure private_TestSet2(st: _ISet; const Count: integer);
-    procedure private_TestMultiSet2(st: _IMultiSet; const Count: integer);
+    procedure private_TestSet2(st: _ISet; const Count: _TNativeInt);
+    procedure private_TestMultiSet2(st: _IMultiSet; const Count: _TNativeInt);
   public
     procedure Setup; override;
     procedure TearDown; override;
@@ -54,18 +54,18 @@ begin
 
 end;
 
-  procedure TTest_Set.private_TestMultiSet2(st  : _IMultiSet;const Count:integer);
+  procedure TTest_Set.private_TestMultiSet2(st  : _IMultiSet;const Count:_TNativeInt);
   var
-    i : integer;
-    Index: integer;
+    i : _TNativeInt;
+    Index: _TNativeInt;
     Values : array of pointer;
-    ValueCount: integer;
+    ValueCount: _TNativeInt;
   begin
     setlength(Values,Count);
     ValueCount:=0;
     for i:=0 to Count*2-1 do
     begin
-      Index:=random(Count);
+      Index:=_DGL_Random(Count);
       if Values[Index]=nil then
       begin
         Values[Index]:=pointer((Index+5) div 4) ;
@@ -96,18 +96,18 @@ end;
 
     CheckEquals(st.Size,0);
   end;
-  procedure TTest_Set.private_TestSet2(st  : _ISet;const Count:integer);
+  procedure TTest_Set.private_TestSet2(st  : _ISet;const Count:_TNativeInt);
   var
-    i : integer;
-    Index: integer;
+    i : _TNativeInt;
+    Index: _TNativeInt;
     Values : array of pointer;
-    ValueCount: integer;
+    ValueCount: _TNativeInt;
   begin
     setlength(Values,Count);
     ValueCount:=0;
     for i:=0 to Count*2-1 do
     begin
-      Index:=random(Count);
+      Index:=_DGL_Random(Count);
       if Values[Index]=nil then
       begin
         Values[Index]:=pointer(Index+1) ;
@@ -142,21 +142,21 @@ end;
 procedure TTest_Set.testHashSet2;
 var
   st  : _ISet;
-  i : integer;
+  i : _TNativeInt;
 const
   csCount=13;
 begin
   st:=_THashSet.Create();
   for i:=0 to 57-1 do
   begin
-    private_TestSet2(st,i*csCount+random(csCount));
+    private_TestSet2(st,i*csCount+_DGL_Random(csCount));
   end;
 
 end;
 procedure TTest_Set.testHashMultiSet2;
 var
   st  : _IMultiSet;
-  i : integer;
+  i : _TNativeInt;
 const
   csCount=13;
 begin
@@ -164,7 +164,7 @@ begin
 
   for i:=0 to 57-1 do
   begin
-    private_TestMultiSet2(st,i*csCount+random(csCount));
+    private_TestMultiSet2(st,i*csCount+_DGL_Random(csCount));
   end;
 end;
 
@@ -198,21 +198,21 @@ end;
 procedure TTest_Set.testSet2;
 var
   st  : _ISet;
-  i : integer;
+  i : _TNativeInt;
 const
   csCount=13;
 begin
   st:=_TSet.Create();
   for i:=0 to 57-1 do
   begin
-    private_TestSet2(st,i*csCount+random(csCount));
+    private_TestSet2(st,i*csCount+_DGL_Random(csCount));
   end;
 
 end;
 procedure TTest_Set.testMultiSet2;
 var
   st  : _IMultiSet;
-  i : integer;
+  i : _TNativeInt;
 const
   csCount=13;
 begin
@@ -220,7 +220,7 @@ begin
 
   for i:=0 to 57-1 do
   begin
-    private_TestMultiSet2(st,i*csCount+random(csCount));
+    private_TestMultiSet2(st,i*csCount+_DGL_Random(csCount));
   end;
 end;
 
@@ -259,7 +259,7 @@ procedure TTest_Set.private_testMultiSet(st: _ISet);
     itEnd:=c.ItEnd;
     result:='';
     while not it.IsEqual(itEnd) do begin
-      result := result+inttostr(integer(it.Value))+' ';
+      result := result+inttostr(_TNativeInt(it.Value))+' ';
       it.Next();
     end;
   end;
@@ -267,7 +267,7 @@ var
   st0 : _ISet;
   it : _IIterator;
   it0,it1 : _IIterator;
-  i : integer;
+  i : _TNativeInt;
 begin
   CheckEquals(st.Size,0);
   st.Insert(Pointer(3));
@@ -299,11 +299,11 @@ begin
   it0:=st.LowerBound(pointer(5));
   it1:=st.UpperBound(pointer(5));
   CheckEquals(it0.Distance(it1),10); //
-  CheckEquals(integer(it0.Value),5);
+  CheckEquals(_TNativeInt(it0.Value),5);
 
   st.EqualRange(Pointer(7),it0,it1);
   CheckEquals(it0.Distance(it1),10); //
-  CheckEquals(integer(it0.Value),7);
+  CheckEquals(_TNativeInt(it0.Value),7);
 
   st0:=_ISet(st.Clone);
   CheckEquals(st.Size,st0.Size);
@@ -314,7 +314,7 @@ begin
   st.Assign(st0.ItBegin,st0.ItEnd);
 
   it:=st.Find(Pointer(10));
-  CheckEquals(integer(it.Value),10);
+  CheckEquals(_TNativeInt(it.Value),10);
   st.Erase(it);
   it:=st.Find(Pointer(10));
   Check(not st.ItEnd.IsEqual(it));
@@ -353,7 +353,7 @@ var
   st0 : _ISet;
   it : _IIterator;
   it0,it1 : _IIterator;
-  i : integer;
+  i : _TNativeInt;
 begin
   CheckEquals(st.Size,0);
   st.Insert(Pointer(3));
@@ -386,10 +386,10 @@ begin
   it0:=st.LowerBound(pointer(5));
   it1:=st.UpperBound(pointer(5));
   CheckEquals(it0.Distance(it1),1); //
-  CheckEquals(integer(it0.Value),5);
+  CheckEquals(_TNativeInt(it0.Value),5);
 
   st.EqualRange(Pointer(7),it0,it1);
-  CheckEquals(integer(it0.Value),7);
+  CheckEquals(_TNativeInt(it0.Value),7);
   CheckEquals(it0.Distance(it1),1); //
 
   st0:=_ISet(st.Clone);
@@ -400,7 +400,7 @@ begin
   st.Assign(st0.ItBegin,st0.ItEnd);
 
   it:=st.Find(Pointer(10));
-  CheckEquals(integer(it.Value),10);
+  CheckEquals(_TNativeInt(it.Value),10);
   st.Erase(it);
   it:=st.Find(Pointer(10));
   Check(st.ItEnd.IsEqual(it));
@@ -429,7 +429,7 @@ end;
 
 procedure TTest_Set.private_testSetIterator(st: _ISet);
 var
-    i   : integer;
+    i   : _TNativeInt;
     It0,It1   : IPointerIterator;
 
 begin
@@ -442,7 +442,7 @@ begin
   it1:=st.ItEnd();
   CheckEquals(It0.Distance(It1),2);
   it1.Previous();
-  CheckEquals(integer(It0.Value)+integer(It1.Value),20);
+  CheckEquals(_TNativeInt(It0.Value)+_TNativeInt(It1.Value),20);
 
   it0:=st.ItBegin();
   it1:=st.ItEnd();
@@ -450,7 +450,7 @@ begin
   it1.Next(-2);
   CheckEquals(It1.Distance(It0),2);
   it0.Previous();
-  CheckEquals(integer(It0.Value)+integer(It1.Value),20);
+  CheckEquals(_TNativeInt(It0.Value)+_TNativeInt(It1.Value),20);
 
   st.Clear();
   for i:=0 to 10000 do

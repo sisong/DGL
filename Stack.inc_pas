@@ -35,7 +35,7 @@ begin
   self.FBaseContainer.Assign(ItBegin, ItEnd);
 end;
 
-procedure _TStack.Assign(const num: integer; const Value: _ValueType);
+procedure _TStack.Assign(const num: _TNativeInt; const Value: _ValueType);
 begin
   self.FBaseContainer.Assign(num,Value);
 end;
@@ -56,13 +56,13 @@ begin
   FBaseContainer :=_TDefaultStackBaseContainer.Create();
 end;
 
-constructor _TStack.Create(const num: integer; const Value: _ValueType);
+constructor _TStack.Create(const num: _TNativeInt; const Value: _ValueType);
 begin
   inherited Create();
   FBaseContainer :=_TDefaultStackBaseContainer.Create(num,Value);
 end;
 
-constructor _TStack.Create(const num: integer);
+constructor _TStack.Create(const num: _TNativeInt);
 begin
   inherited Create();
   FBaseContainer :=_TDefaultStackBaseContainer.Create(num);
@@ -111,7 +111,7 @@ begin
   FBaseContainer.PushBack(Value);
 end;
 
-function _TStack.Size: Integer;
+function _TStack.Size: _TNativeInt;
 begin
   result:=FBaseContainer.Size;
 end;

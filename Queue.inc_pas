@@ -34,7 +34,7 @@ begin
   self.FBaseContainer.Assign(ItBegin,ItEnd);
 end;
 
-procedure _TQueue.Assign(const num: integer; const Value: _ValueType);
+procedure _TQueue.Assign(const num: _TNativeInt; const Value: _ValueType);
 begin
   self.FBaseContainer.Assign(num,Value);
 end;
@@ -65,13 +65,13 @@ begin
   FBaseContainer :=_TDefaultQueueBaseContainer.Create();
 end;
 
-constructor _TQueue.Create(const num: integer; const Value: _ValueType);
+constructor _TQueue.Create(const num: _TNativeInt; const Value: _ValueType);
 begin
   inherited Create();
   FBaseContainer :=_TDefaultQueueBaseContainer.Create(num,Value);
 end;
 
-constructor _TQueue.Create(const num: integer);
+constructor _TQueue.Create(const num: _TNativeInt);
 begin
   inherited Create();
   FBaseContainer :=_TDefaultQueueBaseContainer.Create(num);
@@ -130,7 +130,7 @@ begin
   FBaseContainer.PushBack(Value);
 end;
 
-function _TQueue.Size: Integer;
+function _TQueue.Size: _TNativeInt;
 begin
   result:=FBaseContainer.Size;
 end;

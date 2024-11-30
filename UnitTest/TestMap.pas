@@ -92,7 +92,7 @@ end;
 procedure TTest_Map.private_testMap(const st: IStrIntMap);
 var
   it : IStrIntMapIterator;
-  i: integer;
+  i: _TNativeInt;
 begin
   CheckEquals(st.Size,0);
 
@@ -132,7 +132,7 @@ end;
 
 procedure TTest_Map.private_testMapIterator(const st: IStrIntMap);
 var
-    i   : integer;
+    i   : _TNativeInt;
     It0,It1   : IStrIntMapIterator;
 
 begin
@@ -182,7 +182,7 @@ procedure TTest_Map.private_testMultiMap(const st: IStrIntMultiMap);
   end;
 var
   it : IStrIntMapIterator;
-  i : integer;
+  i : _TNativeInt;
 begin
   CheckEquals(st.Size,0);
 

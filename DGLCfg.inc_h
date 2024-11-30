@@ -21,7 +21,16 @@
 {$define  __DGLCfg_inc_h_}
 
 const
-   DGL_Version = 1.28;
+   DGL_Version = 1.29;
+
+type
+   {$IFDEF CPU64BITS}
+      _TNativeUInt = UInt64;
+      _TNativeInt  = Int64;
+   {$ELSE}
+      _TNativeUInt = Cardinal;
+      _TNativeInt  = Integer;
+   {$ENDIF}
 
    {$IFDEF CONDITIONALEXPRESSIONS}
      {$IF Declared(CompilerVersion) and (CompilerVersion >= 17)}  //Delphi 2005

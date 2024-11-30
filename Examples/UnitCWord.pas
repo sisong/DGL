@@ -68,9 +68,9 @@ uses
     result:=pxStr+Format(ResultFormat,[RunTime])
   end;
 
-  function GetNextWord(const text:string;var PosIndex: integer):string;
+  function GetNextWord(const text:string;var PosIndex: _TNativeInt):string;
   var
-    WordBegin: integer;
+    WordBegin: _TNativeInt;
   begin
     while (PosIndex<=length(text)) do
     begin
@@ -110,10 +110,10 @@ var
   strWord   : string;
   Iterator  : IStrIntMapIterator;
   ListItem  : TListItem;
-  BeginIndex: integer;
-  SumWord   : integer;
-  SumWordCout : integer;
-  i,RunTimes : integer;
+  BeginIndex: _TNativeInt;
+  SumWord   : _TNativeInt;
+  SumWordCout : _TNativeInt;
+  i,RunTimes : _TNativeInt;
   StrIntVector : IStrIntVector;
   ItVector     : IStrIntIterator;
   tgetWordTime : extended;
@@ -182,7 +182,7 @@ begin
 end;
 
 
-  procedure AddtestResult(li:TListItem;Start: extended;Times:integer;const pxStr:string='');
+  procedure AddtestResult(li:TListItem;Start: extended;Times:_TNativeInt;const pxStr:string='');
   begin
     li.SubItems.Add(pxStr+FormatTime((GetNowTime-Start)/Times));
     application.ProcessMessages();
@@ -194,7 +194,7 @@ end;
   end;
 
 var
-  g_tmp : integer;
+  g_tmp : _TNativeInt;
 
 procedure TForm1.Button4Click(Sender: TObject);
 begin
@@ -210,10 +210,10 @@ type
   var
     li:TListItem;
     Start: extended;
-    i,j : integer;
+    i,j : _TNativeInt;
     it : IIntMapIterator;
     ClearSum : extended;
-    NextVisiteTimes:integer;
+    NextVisiteTimes:_TNativeInt;
   begin
     NextVisiteTimes:=5;
 
@@ -258,10 +258,10 @@ type
   var
     li:TListItem;
     Start: extended;
-    i,j : integer;
+    i,j : _TNativeInt;
     it : IIntIterator;
     ClearSum : extended;
-    NextVisiteTimes:integer;
+    NextVisiteTimes:_TNativeInt;
   begin
     NextVisiteTimes:=5;
 
@@ -364,11 +364,11 @@ const
 type
   TContainerType = IIntSerialContainer;
   procedure TestPerformances(const ContainerName:string;const Container:TContainerType;
-    PushBackTimes,NextVisiteTimes,RandomVisiteTimes,InsertAtMiddleTimes,PushFrontTimes:integer;IsList:boolean=false);
+    PushBackTimes,NextVisiteTimes,RandomVisiteTimes,InsertAtMiddleTimes,PushFrontTimes:_TNativeInt;IsList:boolean=false);
   var
     li:TListItem;
     Start: extended;
-    i : integer;
+    i : _TNativeInt;
     it : IIntIterator;
     ClearSum : extended;
   begin
@@ -432,11 +432,11 @@ type
   end;
 
   procedure TestPerformances_Vector(const ContainerName:string;const Container:TIntVector;
-    PushBackTimes,NextVisiteTimes,RandomVisiteTimes,InsertAtMiddleTimes,PushFrontTimes:integer);
+    PushBackTimes,NextVisiteTimes,RandomVisiteTimes,InsertAtMiddleTimes,PushFrontTimes:_TNativeInt);
   var
     li:TListItem;
     Start: extended;
-    i : integer;
+    i : _TNativeInt;
     it : IIntVectorIterator;
     ClearSum : extended;
   begin
@@ -496,11 +496,11 @@ type
 
   end;
   procedure TestPerformances_Deque(const ContainerName:string;const Container:TIntDeque;
-    PushBackTimes,NextVisiteTimes,RandomVisiteTimes,InsertAtMiddleTimes,PushFrontTimes:integer);
+    PushBackTimes,NextVisiteTimes,RandomVisiteTimes,InsertAtMiddleTimes,PushFrontTimes:_TNativeInt);
   var
     li:TListItem;
     Start: extended;
-    i : integer;
+    i : _TNativeInt;
     it : IIntDequeIterator;
     ClearSum : extended;
   begin
@@ -559,11 +559,11 @@ type
   end;
 
   procedure TestPerformances_List(const ContainerName:string;const Container:TIntList;
-    PushBackTimes,NextVisiteTimes,RandomVisiteTimes,InsertAtMiddleTimes,PushFrontTimes:integer);
+    PushBackTimes,NextVisiteTimes,RandomVisiteTimes,InsertAtMiddleTimes,PushFrontTimes:_TNativeInt);
   var
     li:TListItem;
     Start: extended;
-    i : integer;
+    i : _TNativeInt;
     it : IIntListIterator;
     ClearSum : extended;
   begin
@@ -622,12 +622,12 @@ type
   end;
 
   procedure TestPerformances_Array(const ContainerName:string;
-    PushBackTimes,NextVisiteTimes,RandomVisiteTimes,InsertAtMiddleTimes,PushFrontTimes:integer);
+    PushBackTimes,NextVisiteTimes,RandomVisiteTimes,InsertAtMiddleTimes,PushFrontTimes:_TNativeInt);
   var
     li:TListItem;
     Start: extended;
-    Container:array of integer;
-    L,i,j,k : integer;
+    Container:array of _TNativeInt;
+    L,i,j,k : _TNativeInt;
     ClearSum : extended;
   begin
     li:=self.lvPerfo.Items.Add();
@@ -664,8 +664,8 @@ type
     begin
       g_tmp:=Container[_rand() mod (csRandomVisiteSize)];  //
       Container[_rand() mod (csRandomVisiteSize)]:=g_tmp;  //
-      //g_tmp:=Random(csRandomVisiteSize);  //
-      //g_tmp:=Random(csRandomVisiteSize);  //
+      //g_tmp:=_DGL_Random(csRandomVisiteSize);  //
+      //g_tmp:=_DGL_Random(csRandomVisiteSize);  //
     end;
     AddtestResult(li,Start,RandomVisiteTimes);
 
@@ -698,12 +698,12 @@ type
   end;
 
   procedure TestPerformances_TList(const ContainerName:string;
-    PushBackTimes,NextVisiteTimes,RandomVisiteTimes,InsertAtMiddleTimes,PushFrontTimes:integer);
+    PushBackTimes,NextVisiteTimes,RandomVisiteTimes,InsertAtMiddleTimes,PushFrontTimes:_TNativeInt);
   var
     li:TListItem;
     Start: extended;
     Container:TList;
-    L,i,j,k : integer;
+    L,i,j,k : _TNativeInt;
     ClearSum : extended;
   begin
     li:=self.lvPerfo.Items.Add();
@@ -724,7 +724,7 @@ type
     Start := GetNowTime;
     for I := 0 to NextVisiteTimes - 1 do
     begin
-      g_tmp:=integer(Container.Items[i]);  //
+      g_tmp:=_TNativeInt(Container.Items[i]);  //
       Container.Items[i]:=Pointer(g_tmp);  //
     end;
     AddtestResult(li,Start,NextVisiteTimes);
@@ -739,8 +739,8 @@ type
     begin
       Pointer(g_tmp):=Container.Items[_rand() mod (csRandomVisiteSize)];  //
       Container.Items[_rand() mod (csRandomVisiteSize)]:=Pointer(g_tmp);  //
-      //g_tmp:=Random(csRandomVisiteSize);  //
-      //g_tmp:=Random(csRandomVisiteSize);  //
+      //g_tmp:=_DGL_Random(csRandomVisiteSize);  //
+      //g_tmp:=_DGL_Random(csRandomVisiteSize);  //
     end;
     AddtestResult(li,Start,RandomVisiteTimes);
 
@@ -826,10 +826,10 @@ var
   //it,it1 : IIntVectorIterator;
   it,it1 : IIntIterator;
   ClearSum,Start : extended;
-  rTimes,i : integer;
+  rTimes,i : _TNativeInt;
     li:TListItem;
 
-  ar : array of integer;
+  ar : array of _TNativeInt;
   par : Pinteger;
 begin
   li:=self.lvPerfo.Items.Add();
@@ -926,7 +926,7 @@ end;
 
 procedure TForm1.Button2Click(Sender: TObject);
 var
-  i,si : integer;
+  i,si : _TNativeInt;
   strs: string;
 begin
   strs:='';

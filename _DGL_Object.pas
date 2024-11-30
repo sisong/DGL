@@ -28,14 +28,15 @@ unit _DGL_Object;
 
 interface
 uses
-  SysUtils;
+  SysUtils; 
+{$I DGLCfg.inc_h}
 
 var
-  _refCount : integer=0;
-  _ValueCount : integer=1;
+  _refCount : _TNativeInt=0;
+  _ValueCount : _TNativeInt=1;
 type
   TTestObj = class(TObject)
-    FValue : integer;
+    FValue : _TNativeInt;
     constructor Create();overload;
     constructor Create(v:TTestObj);overload;
     destructor Destroy();override;
@@ -46,7 +47,7 @@ type
   _ValueType  = TTestObj;
 const
   _NULL_Value:TTestObj =nil ;
-  function _HashValue(const Key:_ValueType) : Cardinal;//Hash函数
+  function _HashValue(const Key:_ValueType) : _TNativeUInt;//Hash函数
 
   {$define _DGL_Compare}  //需要比较函数，可选
   function  _IsEqual(const a,b :_ValueType):boolean; //result:=(a=b);
@@ -102,10 +103,10 @@ implementation
 
 {$I DGL.inc_pas}
 
-function _HashValue(const Key :_ValueType):Cardinal;
+function _HashValue(const Key :_ValueType):_TNativeUInt;
 begin
   Assert(Key<>nil);
-  result:=Cardinal(Key.FValue)*37;
+  result:=_TNativeUInt(Key.FValue)*37;
 end;
 
 

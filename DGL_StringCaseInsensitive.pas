@@ -29,7 +29,7 @@ const
 type
   _ValueType   = string; //大小写不敏感的String
 
-  function _HashValue(const Key: _ValueType):Cardinal;{$ifdef _DGL_Inline} inline; {$endif}//Hash函数
+  function _HashValue(const Key: _ValueType):_TNativeUInt;{$ifdef _DGL_Inline} inline; {$endif}//Hash函数
   {$define _DGL_Compare}  //比较函数
   function _IsEqual(const a,b :_ValueType):boolean;{$ifdef _DGL_Inline} inline; {$endif} //result:=(a=b);
   function _IsLess(const a,b :_ValueType):boolean; {$ifdef _DGL_Inline} inline; {$endif} //result:=(a<b); 默认排序准则
@@ -78,7 +78,7 @@ implementation
 uses
   HashFunctions;
 
-function _HashValue(const Key :_ValueType):Cardinal; overload;
+function _HashValue(const Key :_ValueType):_TNativeUInt; overload;
 begin
   result:=HashValue_StrCaseInsensitive(Key);
 end;

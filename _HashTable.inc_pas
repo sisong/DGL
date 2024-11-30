@@ -55,11 +55,10 @@ end;
 
 
 
-function GetBigHashCapacityIndex(const Capacity:Cardinal;const CapacityIndex:Byte=_csDefaultHashCapacityIndex):Byte;
+function GetBigHashCapacityIndex(const Capacity:_TNativeUInt;const CapacityIndex:Byte=_csDefaultHashCapacityIndex):Byte;
 var
-  i : integer;
+  i : _TNativeInt;
 begin
-  Assert(Capacity<=_csHashCapacityList[high(_csHashCapacityList)]);
   for i:=CapacityIndex to high(_csHashCapacityList) do
   begin
     if _csHashCapacityList[i]>=Capacity then
@@ -68,12 +67,12 @@ begin
       exit;
     end;
   end;
-  result:=_csDefaultHashCapacityIndex;
+  result:=high(_csHashCapacityList);
 end;
 
 procedure _THashTableBase.Clear;
 var
-  i         : Cardinal;
+  i         : _TNativeUInt;
   PNode     : _PHashNode;
   PNodeTemp : _PHashNode;
 begin
@@ -141,7 +140,7 @@ var
   OldDataList : _TPHashNodeDArray;
   pNode       : _PHashNode;
   pNodeTemp   : _PHashNode;
-  i           : integer;
+  i           : _TNativeInt;
 
   procedure   move_insert(pMoveNode : _PHashNode);
   var
@@ -183,7 +182,7 @@ function _THashTableBase.FindItem(const Key: _HashKeyType):_TTagHashIterator;
 var
   PNode : _PHashNode;
 begin                             //1103515245 or 41 or 1
-  result.ArrayIndex:=( {$ifdef _DGL_NotHashFunction}1*Cardinal
+  result.ArrayIndex:=( {$ifdef _DGL_NotHashFunction}1*_TNativeUInt
        {$else}_HashValue{$endif}(Key)) mod self.FCapacity;
   result.pPNode:=@self.FDataList[result.ArrayIndex];
   PNode:=result.pPNode^;
@@ -228,7 +227,7 @@ end;
 
 procedure _THashTableBase.Swap(HastTable: _THashTableBase);
 var
-  tempi     : integer;
+  tempi     : _TNativeInt;
   tempArray : _TPHashNodeDArray;
 begin
   if self=HastTable then exit;
@@ -245,7 +244,7 @@ end;
 
 function _THashTableBase.ItBegin: _TTagHashIterator;
 var
-  i :integer;
+  i :_TNativeInt;
 begin
   for i:=low(self.FDataList) to high(self.FDataList) do
   begin
@@ -267,13 +266,13 @@ begin
 end;
 
 
-procedure _THashTableBase.SetAlwaysReserve(const aAlwaysReserveSize: Cardinal);
+procedure _THashTableBase.SetAlwaysReserve(const aAlwaysReserveSize: _TNativeUInt);
 begin
   FAlwaysReserveIndex:=GetBigHashCapacityIndex(aAlwaysReserveSize);
   self.Reserve(_csHashCapacityList[FAlwaysReserveIndex]);
 end;
 
-function _THashTableBase.getAlwaysReserveSize():Cardinal;
+function _THashTableBase.getAlwaysReserveSize():_TNativeUInt;
 begin
   if FAlwaysReserveIndex=0 then
     result:=0
@@ -281,13 +280,13 @@ begin
     result:=_csHashCapacityList[FAlwaysReserveIndex];
 end;
 
-procedure _THashTableBase.Reserve(const ReserveSize: Cardinal);
+procedure _THashTableBase.Reserve(const ReserveSize: _TNativeUInt);
 begin
   if ReserveSize>self.FCapacity then
     self.SetCapacityIndex(GetBigHashCapacityIndex(ReserveSize,FCapacityIndex));
 end;
 
-function _THashTableBase.Size: Cardinal;
+function _THashTableBase.Size: _TNativeUInt;
 begin
   result:=self.FCount;
 end;
@@ -317,7 +316,7 @@ begin
   end;
 end;
 
-function _THashTableBase.Count(const Key: _HashKeyType): integer;
+function _THashTableBase.Count(const Key: _HashKeyType): _TNativeInt;
 var
   ItBegin,ItEnd: _TTagHashIterator;
 begin
@@ -331,7 +330,7 @@ begin
 end;
 
 
-function _DGL_Int_Min_HashTableBase(const x,y:integer):integer;  {$ifdef _DGL_Inline} inline; {$endif}
+function _DGL_Int_Min_HashTableBase(const x,y:_TNativeInt):_TNativeInt;  {$ifdef _DGL_Inline} inline; {$endif}
 begin
   if x<y then
     result:=x
@@ -343,8 +342,8 @@ procedure _THashTableBase.Erase(const ItBegin, ItEnd: _IIterator);
 var
   It0,It1:_TTagHashIterator;
   tmp :_PHashNode;
-  i : integer;
-  MinIndex : integer;
+  i : _TNativeInt;
+  MinIndex : _TNativeInt;
 begin
   It0:=_PtmpHashIt_Data(@ItBegin).FNodeIt;
   if self.IsEndIt(It0) then exit;
@@ -386,7 +385,7 @@ begin
 end;
 
 
-function _THashTableBase.EraseKey(const Key: _HashKeyType): integer;
+function _THashTableBase.EraseKey(const Key: _HashKeyType): _TNativeInt;
 var
   pPHashNode: _PPHashNode ;
 begin
@@ -405,10 +404,10 @@ begin
   DecCapacity();
 end;
 
-function _THashTableBase.EraseValue(const Value: _HashValueType): integer;
+function _THashTableBase.EraseValue(const Value: _HashValueType): _TNativeInt;
 var
   pPNode : _PPHashNode;
-  i : integer;
+  i : _TNativeInt;
 begin
   result:=0;
   for i:=low(self.FDataList) to high(self.FDataList) do
@@ -435,7 +434,7 @@ begin
   DecCapacity();
 end;
 
-function  _THashTableBase.EraseValue(const Key: _HashKeyType;const Value: _HashValueType): integer;
+function  _THashTableBase.EraseValue(const Key: _HashKeyType;const Value: _HashValueType): _TNativeInt;
 var
   pPHashNode: _PPHashNode ;
 begin
@@ -480,7 +479,7 @@ end;
 
 class procedure  _THashTableBase.Previous(const HashTable:_THashTableBase;var It: _TTagHashIterator);
 var
-  i     : integer;
+  i     : _TNativeInt;
   tmppPNode : _PPHashNode;
   tmpPNodeOld : _PHashNode;
 begin
@@ -519,7 +518,7 @@ end;
 
 class procedure _THashTableBase.Next(const HashTable:_THashTableBase;var It: _TTagHashIterator);
 var
-  i     : integer;
+  i     : _TNativeInt;
 begin
   Assert(It.pPNode<>nil);
   
@@ -552,7 +551,7 @@ begin
 end;
 
 function _THashTableBase.CountRange(const Key: _HashKeyType; out ItBegin,
-  ItEnd: _TTagHashIterator): integer;
+  ItEnd: _TTagHashIterator): _TNativeInt;
 begin
   ItBegin:=self.LowerBound(Key);
   if self.IsEndIt(ItBegin) then

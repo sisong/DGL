@@ -85,9 +85,9 @@ type
     procedure privateAddNode(pNodeNew : _PRB_TreeNode;pNodePos, pNodeParent: _PRB_TreeNode; const Key: _RB_Tree_KeyType);overload;
     procedure AddNode(pNodePos, pNodeParent: _PRB_TreeNode; const Key: _RB_Tree_KeyType;const Value:_RB_Tree_ValueType);overload;
     procedure AddNode(pNodePos, pNodeParent: _PRB_TreeNode; const Key: _RB_Tree_KeyType);overload;
-    function  CountRange(const Key: _RB_Tree_KeyType; out ItBegin,ItEnd: _TRB_TreeIterator): integer;
+    function  CountRange(const Key: _RB_Tree_KeyType; out ItBegin,ItEnd: _TRB_TreeIterator): _TNativeInt;
   private
-    FNodeCount    : integer;
+    FNodeCount    : _TNativeInt;
     FHeader       : _PRB_TreeNode;  //root:=FHeader.Parent;
     procedure Inti();
     function  FindInsertNodeParent(const Key: _RB_Tree_KeyType;const pIsInsertLeftNode:PBoolean=nil):_PRB_TreeNode;
@@ -100,20 +100,20 @@ type
     function  ItBegin():_TRB_TreeIterator;
     function  ItEnd():_TRB_TreeIterator;
     function  IsEmpty():boolean;
-    function  Size():integer;
+    function  Size():_TNativeInt;
     procedure UniqueInsert(const Key: _RB_Tree_KeyType;const Value: _RB_Tree_ValueType); overload;
     procedure MultiInsert(const Key: _RB_Tree_KeyType;const Value: _RB_Tree_ValueType);overload;
     procedure UniqueInsert(const Key: _RB_Tree_KeyType); overload;
     procedure MultiInsert(const Key: _RB_Tree_KeyType);overload;
 
     function  GetItemValue(const Key: _RB_Tree_KeyType): _RB_Tree_ValueType;
-    function  EraseValue(const Value: _RB_Tree_ValueType): integer;  overload;
-    function  EraseValue(const Key: _RB_Tree_KeyType;const Value: _RB_Tree_ValueType): integer;  overload;
-    function  EraseKey(const Key: _RB_Tree_KeyType): integer;  overload;
+    function  EraseValue(const Value: _RB_Tree_ValueType): _TNativeInt;  overload;
+    function  EraseValue(const Key: _RB_Tree_KeyType;const Value: _RB_Tree_ValueType): _TNativeInt;  overload;
+    function  EraseKey(const Key: _RB_Tree_KeyType): _TNativeInt;  overload;
     procedure Erase(const ItPos:_TRB_TreeIterator);  overload;
     procedure Erase(const ItBegin,ItEnd: _TRB_TreeIterator);  overload;
 
-    function  Count(const Key:_RB_Tree_KeyType):integer;
+    function  Count(const Key:_RB_Tree_KeyType):_TNativeInt;
     function  FindKey(const Key:_RB_Tree_KeyType):_TRB_TreeIterator;
     function  FindValue(const Value:_RB_Tree_ValueType):_TRB_TreeIterator;
     function  LowerBound(const Key:_RB_Tree_KeyType):_TRB_TreeIterator;//==FindKey

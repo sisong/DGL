@@ -21,9 +21,9 @@
 //------------------------------------------------------------------------------
 //_Pointer_QuickSort_Base.inc_pas
 
-  //procedure __DGL_QuickSort(ItBegin:_QuickSort_PValueArray;Right:integer;
+  //procedure __DGL_QuickSort(ItBegin:_QuickSort_PValueArray;Right:_TNativeInt;
   //        const TestBinaryFunction:_QuickSort_TTestBinaryFunction); overload;
-    procedure _Swap(It:_QuickSort_PValueArray;const Index0,Index1:integer); {$ifdef _DGL_Inline} inline; {$endif} 
+    procedure _Swap(It:_QuickSort_PValueArray;const Index0,Index1:_TNativeInt); {$ifdef _DGL_Inline} inline; {$endif} 
     var
       tmp : _QuickSort_ValueType;
     begin
@@ -32,10 +32,10 @@
       It[Index1]:=tmp;
     end;
   var
-    i,j : integer;
+    i,j : _TNativeInt;
   begin
 
-    _Swap(ItBegin,0,random(Right+1));
+    _Swap(ItBegin,0,_DGL_Random(Right+1));
     i:=0;
     j:=Right+1;
     while true do

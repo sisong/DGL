@@ -39,7 +39,7 @@ type
 const
    _NULL_Value:_ValueType=(Key:('');Value:(0));
 
-  function _HashValue(const Value:_ValueType) : Cardinal;{$ifdef _DGL_Inline} inline; {$endif}//Hash函数
+  function _HashValue(const Value:_ValueType) : _TNativeUInt;{$ifdef _DGL_Inline} inline; {$endif}//Hash函数
 
   {$define _DGL_Compare}  //是否需要比较函数，可选
   function _IsEqual(const a,b :_ValueType):boolean; {$ifdef _DGL_Inline} inline; {$endif}//result:=(a=b);
@@ -82,9 +82,9 @@ uses
 
 {$I DGL.inc_pas}
 
-function _HashValue(const Value :_ValueType):Cardinal;
+function _HashValue(const Value :_ValueType):_TNativeUInt;
 begin
-  result:=HashValue_Str(Value.Key)*37+Cardinal(Value.Value);
+  result:=HashValue_Str(Value.Key)*37+_TNativeUInt(Value.Value);
 end;
 
 function Pair_StrInt(const Key:string;const Value:integer):_ValueType;

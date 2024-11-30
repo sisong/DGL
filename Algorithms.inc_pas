@@ -26,13 +26,6 @@
 
 {$I DGLIntf.inc_pas}
 {$I PointerItBox.inc_pas}
-
-
-        function __DGL_System_Random(const Range: Integer):integer; {$ifdef _DGL_Inline} inline; {$endif}
-        begin
-          result:=Random(Range);
-        end;
-
         
     {$I _Algorithms_Base.inc_pas}
 {$define _DGL_VectorItType}
@@ -53,7 +46,7 @@ begin
   It1[0]:=tmp;
 end;
 
-class procedure _TAlgorithms.SwapValue(const It0:_PValueType_Iterator;const Index0: integer;const It1:_PValueType_Iterator;const Index1: integer);
+class procedure _TAlgorithms.SwapValue(const It0:_PValueType_Iterator;const Index0: _TNativeInt;const It1:_PValueType_Iterator;const Index1: _TNativeInt);
 var
   tmp : _ValueType;
 begin
@@ -62,7 +55,7 @@ begin
   It1[Index1]:=tmp;
 end;
 
-class procedure _TAlgorithms.SwapValue(const It:_PValueType_Iterator;const Index0,Index1: integer);
+class procedure _TAlgorithms.SwapValue(const It:_PValueType_Iterator;const Index0,Index1: _TNativeInt);
 var
   tmp : _ValueType;
 begin                           

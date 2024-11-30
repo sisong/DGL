@@ -87,7 +87,7 @@ end;
 
 function _IsLess(const a,b :_ValueType):boolean;
 begin
-  result:=(Cardinal(a)<Cardinal(b));
+  result:=(_TNativeUInt(a)<_TNativeUInt(b));
 end;
 
 

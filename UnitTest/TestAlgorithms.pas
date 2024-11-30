@@ -23,7 +23,7 @@ type
     function  TansfromAdd1(const x:integer):integer;
     function TansfromAdd(const x0, x1: integer): integer;
     function Get10(): integer;
-    function RandomGenerate(const Range: Integer): integer;
+    function RandomGenerate(const Range: _TNativeInt): _TNativeInt;
   public
     procedure Setup; override;
     procedure TearDown; override;
@@ -91,17 +91,25 @@ begin
   result:=x0+x1;
 end;
 
-function gpRandomGenerate(const Range: Integer):integer;
+  {$IFOPT Q+}
+    {$DEFINE __OVERFLOWCHECKS}
+    {$OVERFLOWCHECKS OFF}
+  {$ENDIF}
+function gpRandomGenerate(const Range: _TNativeInt):_TNativeInt;
  //0<=result<Range
 begin
-  result:=abs(Random(Range*1242341)*123567 mod Range);
+  result:=abs(_DGL_Random(Range*1242341)*123567 mod Range);
 end;
 
-function TTest_Algorithms.RandomGenerate(const Range: Integer):integer;
+function TTest_Algorithms.RandomGenerate(const Range: _TNativeInt):_TNativeInt;
  //0<=result<Range
 begin
-  result:=abs(Random(Range*1242341)*123567 mod Range);
+  result:=abs(_DGL_Random(Range*1242341)*123567 mod Range);
 end;
+  {$IFDEF __OVERFLOWCHECKS}
+    {$UNDEF __OVERFLOWCHECKS}
+    {$OVERFLOWCHECKS ON}
+  {$ENDIF}
 
 
 procedure TTest_Algorithms.TearDown;
@@ -135,8 +143,8 @@ const
 var
   IntVector : IIntVector;
   IntVector1 : IIntVector;
-  it,it1 :IIntIterator;
-  i: integer;
+  it :IIntIterator;
+  i: _TNativeInt;
 begin
   //test Distance\IsEquals\ForEach\Find
 
@@ -204,8 +212,8 @@ const
 var
   IntVector : IIntVector;
   IntVector1 : IIntVector;
-  it,it1 :IIntIterator;
-  i,j: integer;
+  it :IIntIterator;
+  i,j: _TNativeInt;
 begin
   //test Count\Search\MinElement\MaxElement
 
@@ -272,8 +280,7 @@ const
 var
   IntVector : IIntVector;
   IntVector1,IntVector2 : IIntVector;
-  it,it1 :IIntIterator;
-  i,j: integer;
+  i: _TNativeInt;
 begin
   //test SwapValue\Copy\Tansfrom\SwapRanges
 
@@ -368,9 +375,8 @@ const
   num = 100;
 var
   IntVector : IIntVector;
-  IntVector1,IntVector2 : IIntVector;
-  it,it1 :IIntIterator;
-  i,j: integer;
+  it :IIntIterator;
+  i: _TNativeInt;
 begin
   //test Replace\Fill\Generate\Remove
 
@@ -458,16 +464,14 @@ end;
 
 
 var
-  datas : array [0..9] of integer=(9,8,7,6,5,4,3,2,1,0);
+  datas : array [0..9] of _TNativeInt=(9,8,7,6,5,4,3,2,1,0);
 
 procedure TTest_Algorithms.testAlgorithms4;
 const
   num = 100;
 var
   IntVector : IIntVector;
-  IntVector1,IntVector2 : IIntVector;
-  it,it1 :IIntIterator;
-  i,j: integer;
+  i: _TNativeInt;
 begin
   //test: Reverse\RandomShuffle\Sort\IsSorted
 
@@ -527,9 +531,8 @@ const
   num = 100;
 var
   IntVector : IIntVector;
-  IntVector1,IntVector2 : IIntVector;
-  it,it1 :IIntIterator;
-  i,j: integer;
+  it :IIntIterator;
+  i,j: _TNativeInt;
 begin
   //test: BinarySearch\LowerBound
 

@@ -1,6 +1,6 @@
 DGL
 ================
-Version 1.28  
+Version 1.29   
 Delphi泛型库--DGL(The Delphi Generic Library) , writed in 2004.
 
 ===

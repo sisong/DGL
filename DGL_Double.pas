@@ -29,7 +29,7 @@ type
 
 const
   _NULL_Value:Double=0;
-  function _HashValue(const Key: _ValueType):Cardinal;{$ifdef _DGL_Inline} inline; {$endif}//Hashº¯Êý
+  function _HashValue(const Key: _ValueType):_TNativeUInt;{$ifdef _DGL_Inline} inline; {$endif}//Hashº¯Êý
 
 {$I DGL.inc_h}
 
@@ -75,7 +75,7 @@ uses
   HashFunctions;
 
 
-function _HashValue(const Key :_ValueType):Cardinal; overload;
+function _HashValue(const Key :_ValueType):_TNativeUInt; overload;
 begin
   result:=HashValue_Double(Key);
 end;

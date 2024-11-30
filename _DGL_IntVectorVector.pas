@@ -31,7 +31,7 @@ type
 
 const
   _NULL_Value:IIntVector=nil;
-  function _HashValue(const Key: _ValueType):Cardinal;//Hash函数
+  function _HashValue(const Key: _ValueType):_TNativeUInt;//Hash函数
 
   {$define  _DGL_Compare}
   function _IsEqual(const a,b :_ValueType):boolean;{$ifdef _DGL_Inline} inline; {$endif} //result:=(a=b);
@@ -87,9 +87,9 @@ type
 implementation
 
 
-function _HashValue(const Key :_ValueType):Cardinal; overload;
+function _HashValue(const Key :_ValueType):_TNativeUInt; overload;
 begin
-  result:=Cardinal(Key)*37;
+  result:=_TNativeUInt(Key)*37;
 end;
 
 function _IsEqual(const a,b :_ValueType):boolean;
@@ -99,7 +99,7 @@ end;
 
 function _IsLess(const a,b :_ValueType):boolean;
 begin
-  result:=(Cardinal(a)<Cardinal(b));
+  result:=(_TNativeUInt(a)<_TNativeUInt(b));
 end;
 
 function  _CreateNew():_ValueType;overload;//构造

@@ -57,7 +57,7 @@ uses
 procedure TFormDGLDemo.btn_IIntVectorClick(Sender: TObject);
 var
   intVector : IIntVector; //interface type ; Vector use as delphi's array;
-  i,Sum : integer;
+  i,Sum : _TNativeInt;
 begin
   intVector :=TIntVector.Create;
 
@@ -78,7 +78,7 @@ end;
 procedure TFormDGLDemo.btn_TIntVectorClick(Sender: TObject);
 var
   intVector : TIntVector; //class type
-  i,Sum : integer;
+  i,Sum : _TNativeInt;
 begin
   intVector :=TIntVector.Create;
   try
@@ -104,7 +104,7 @@ end;
 procedure TFormDGLDemo.btn_IIntDequeClick(Sender: TObject);
 var
   intDeque : IIntDeque;
-  i,Sum : integer;
+  i,Sum : _TNativeInt;
 begin
   intDeque :=TIntDeque.Create;
 
@@ -130,7 +130,7 @@ procedure TFormDGLDemo.btn_IPointerListClick(Sender: TObject);
 var
   piList : IPointerList;
   it : IPointerIterator;
-  i,Sum : integer;
+  i,Sum : _TNativeInt;
 begin
   piList :=TPointerList.Create;
 
@@ -149,7 +149,7 @@ begin
   it:=piList.ItBegin; //it is pointer to piList's first;
   for i:=0 to piList.Size()-1 do
   begin
-    Sum:=Sum+integer(it.Value);
+    Sum:=Sum+_TNativeInt(it.Value);
     it.Next;
   end;
   Assert(it.IsEqual(piList.ItEnd));
@@ -161,7 +161,7 @@ end;
 procedure TFormDGLDemo.btn_IIntSerialContainerClick(Sender: TObject);
   procedure SetVaues(const Container:IByteSerialContainer);
   var
-    i : integer;
+    i : _TNativeInt;
   begin
     for i:=0 to 100-1 do
       Container.PushBack(i);
@@ -170,7 +170,7 @@ procedure TFormDGLDemo.btn_IIntSerialContainerClick(Sender: TObject);
   procedure CheckSum(const Container:IByteSerialContainer);
   var
     it : IByteIterator;
-    Sum : integer;
+    Sum : _TNativeInt;
   begin
     it:=Container.ItBegin;
     Sum :=0;
@@ -206,7 +206,7 @@ procedure TFormDGLDemo.btn_IPointerSetClick(Sender: TObject);
 var
   piSet : IPointerSet;
   it : IPointerIterator;
-  i,Sum : integer;
+  i,Sum : _TNativeInt;
 begin
   piSet :=TPointerHashSet.Create;
 
@@ -218,7 +218,7 @@ begin
   it:=piSet.ItBegin;
   for i:=0 to piSet.Size-1 do
   begin
-    inc(Sum,integer(it.Value));
+    inc(Sum,_TNativeInt(it.Value));
     it.Next;
   end;
   Assert(Sum=((0+99)*100 div 2));
@@ -243,7 +243,7 @@ procedure TFormDGLDemo.btn_IPointerMultiSetClick(Sender: TObject);
 var
   piMSet : IPointerMultiSet;
   it,itt : IPointerIterator;
-  i,Sum : integer;
+  i,Sum : _TNativeInt;
 begin
   piMSet :=TPointerHashMultiSet.Create;
 
@@ -255,7 +255,7 @@ begin
   it:=piMSet.ItBegin;
   for i:=0 to piMSet.Size-1 do
   begin
-    inc(Sum,integer(it.Value));
+    inc(Sum,_TNativeInt(it.Value));
     it.Next;
   end;
   Assert(Sum=((0+99)*100 div 2)*2);
@@ -288,7 +288,7 @@ end;
 procedure TFormDGLDemo.btn_IStrIntMapClick(Sender: TObject);
 var
   StrIntMap : IStrIntMap;
-  i,Sum : integer;
+  i,Sum : _TNativeInt;
   it: IStrIntMapIterator;
 begin
   StrIntMap :=TStrIntHashMap.Create;
@@ -329,7 +329,7 @@ end;
 procedure TFormDGLDemo.btn_IStrMultiMapClick(Sender: TObject);
 var
   StrMMap : IStrMultiMap;
-  i,Sum : integer;
+  i,Sum : _TNativeInt;
   it,itt: IStrMapIterator;
 begin
   StrMMap :=TStrHashMultiMap.Create;
@@ -476,7 +476,7 @@ end;
     end;
   end;
 var
-  AgSum : integer;
+  AgSum : _TNativeInt;
   procedure SumAValue(const Value: Byte);
   begin
     inc(AgSum,Value);
@@ -487,7 +487,7 @@ procedure TFormDGLDemo.btn_IByteIteratorClick(Sender: TObject);
 var
   BContainer : IByteContainer;
   it0,it1: IByteIterator;
-  i,sum : integer;
+  i,sum : _TNativeInt;
 begin
   BContainer :=TByteVector.Create(100);
   //BContainer :=TByteDeque.Create(100);
@@ -498,7 +498,7 @@ begin
   it1:=BContainer.ItEnd();
   while not it0.IsEqual(it1) do
   begin
-    it0.Value:=random(256);
+    it0.Value:=_DGL_Random(256);
     it0.Next;
   end;
 

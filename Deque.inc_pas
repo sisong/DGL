@@ -107,7 +107,7 @@ end;
 
 procedure _TDeque.DestroyClear();
 var
-  i : integer;      
+  i : _TNativeInt;      
 begin
   {$ifdef  _DGL_ObjValue}
     _Deque_Free_ObjValue(self,FFrontPos,FEndPos);
@@ -145,14 +145,14 @@ end;
 
 
 
-constructor _TDeque.Create(const num: integer; const Value: _ValueType);
+constructor _TDeque.Create(const num: _TNativeInt; const Value: _ValueType);
 begin
   inherited Create();
   Clear();
   self.PushBack(num,Value);
 end;
 
-constructor _TDeque.Create(const num: integer);
+constructor _TDeque.Create(const num: _TNativeInt);
 {$ifdef  _DGL_ObjValue}
 var
   _Default_Value : _ValueType;
@@ -203,10 +203,10 @@ begin
   self.PushBack(ItBegin, ItEnd);
 end;
 
-procedure _TDeque.Resize(const num: integer; const Value: _ValueType);
+procedure _TDeque.Resize(const num: _TNativeInt; const Value: _ValueType);
 var
-  i : integer;
-  OldCount : integer;
+  i : _TNativeInt;
+  OldCount : _TNativeInt;
 begin
   OldCount:=_TDeque_Distance(FFrontPos,FEndPos);
   if num<OldCount then
@@ -221,7 +221,7 @@ begin
   end;
 end;
 
-procedure _TDeque.Resize(const num:integer);
+procedure _TDeque.Resize(const num:_TNativeInt);
 {$ifdef  _DGL_ObjValue}
 var
   _Default_Value : _ValueType;
@@ -236,12 +236,12 @@ begin
   {$endif}
 end;
 
-procedure _TDeque.EraseByIndex(const Index: integer);
+procedure _TDeque.EraseByIndex(const Index: _TNativeInt);
 begin
   Erase(NewIterator(Index));
 end;
 
-procedure _TDeque.InsertByIndex(const Index: Integer;const Value: _ValueType);
+procedure _TDeque.InsertByIndex(const Index: _TNativeInt;const Value: _ValueType);
 begin
   Insert(NewIterator(Index),Value);
 end;
@@ -263,12 +263,12 @@ end;
 
 procedure _TDeque.Erase(const ItBegin, ItEnd: _IIterator);
 var
-  Index: integer;
+  Index: _TNativeInt;
   BeginPos,EndPos,DestPos : _TDequePos;
-  num:integer;
-  i : integer;
-  EndIndex : integer;
-  OldCount : integer;
+  num:_TNativeInt;
+  i : _TNativeInt;
+  EndIndex : _TNativeInt;
+  OldCount : _TNativeInt;
 begin
   Index:=_TDeque_Distance(self.FFrontPos,_PDequeIt(@ItBegin).Pos);
   EndIndex:=_TDeque_Distance(self.FFrontPos,_PDequeIt(@ItEnd).Pos);
@@ -332,7 +332,7 @@ begin
   _TDequeIterator.ItCreate(result,FFrontPos);
 end;
 
-function  _TDeque.NewIterator(const Index: Integer):_IIterator;
+function  _TDeque.NewIterator(const Index: _TNativeInt):_IIterator;
 begin
   _TDequeIterator.ItCreate(result,self,Index);
 end;
@@ -353,36 +353,36 @@ begin
   {$endif}
 end;
 
-function _TDeque.GetItemValue(const Index: Integer): _ValueType;
+function _TDeque.GetItemValue(const Index: _TNativeInt): _ValueType;
 begin
   Assert(Index>=0);
   Assert(Index<_TDeque_Distance(FFrontPos,FEndPos));
   result:=self.GetAItemAddress(Index)^;
 end;
 
-function _TDeque.GetPos(const Index: integer): _TDequePos;
+function _TDeque.GetPos(const Index: _TNativeInt): _TDequePos;
 begin
   result:=FFrontPos;
   _TDeque_IncPos(result,Index);
 end;
 
-function _TDeque.GetAItemAddress(const ItemIndex:integer): _PValueType;
+function _TDeque.GetAItemAddress(const ItemIndex:_TNativeInt): _PValueType;
 var
-  ValueIndex,NodeCount:integer;
+  ValueIndex,NodeCount:_TNativeInt;
   ppNode : _PPDequeNode;
 begin
-  ValueIndex:=ItemIndex+(csDequeNodeCount) + (integer(FFrontPos.PCurValue)-integer(FFrontPos.PEndValue)) div (sizeof(_ValueType));
+  ValueIndex:=ItemIndex+(csDequeNodeCount) + (_TNativeInt(FFrontPos.PCurValue)-_TNativeInt(FFrontPos.PEndValue)) div (sizeof(_ValueType));
   NodeCount:=ValueIndex div csDequeNodeCount;
-  ppNode:=_PPDequeNode(integer(FFrontPos.PPNode)+NodeCount*sizeof(_PPDequeNode));
+  ppNode:=_PPDequeNode(_TNativeInt(FFrontPos.PPNode)+NodeCount*sizeof(_PPDequeNode));
   ValueIndex:=ValueIndex-NodeCount*csDequeNodeCount;
   result:={$ifdef _DGL_ClassFunction_Specific}_TDeque_Get_ClassFunction_Address{$else}@{$endif}(ppNode^[ValueIndex]);
 end;
 
-function _TDeque.IndexOf(const Value: _ValueType): Integer;
+function _TDeque.IndexOf(const Value: _ValueType): _TNativeInt;
 var
-  i : integer;
+  i : _TNativeInt;
   Pos : _TDequePos;
-  OldCount : integer;
+  OldCount : _TNativeInt;
 begin
   Pos:=self.FFrontPos;
   OldCount:=_TDeque_Distance(FFrontPos,FEndPos);
@@ -404,7 +404,7 @@ end;
 
 procedure _TDeque.Insert(const ItPos: _IIterator; const Value: _ValueType);
 var
-  Index: integer;
+  Index: _TNativeInt;
 begin
   Index:=_TDeque_Distance(self.FFrontPos,_PDequeIt(@ItPos).Pos);
   if Index=0 then
@@ -420,10 +420,10 @@ begin
   self.PushBack(Value);
 end;
 
-procedure _TDeque.Insert(const ItPos: _IIterator; const num: integer;
+procedure _TDeque.Insert(const ItPos: _IIterator; const num: _TNativeInt;
   const Value: _ValueType);
 var
-  Index: integer;
+  Index: _TNativeInt;
 begin
   if num<=0 then exit;
   
@@ -438,7 +438,7 @@ end;
 
 procedure _TDeque.Insert(const ItPos, ItBegin, ItEnd: _IIterator);
 var
-  Index: integer;
+  Index: _TNativeInt;
 begin
   Index:=_TDeque_Distance(self.FFrontPos,_PDequeIt(@ItPos).Pos);
   if Index=0 then
@@ -449,9 +449,9 @@ begin
     _MiddleInsert(ItPos, ItBegin, ItEnd,0,_NULL_Value);
 end;
 
-procedure _TDeque._MiddleInsert(const ItPos, ItBegin, ItEnd: _IIterator;num: integer;const Value: _ValueType);
+procedure _TDeque._MiddleInsert(const ItPos, ItBegin, ItEnd: _IIterator;num: _TNativeInt;const Value: _ValueType);
 var
-  Index: integer;
+  Index: _TNativeInt;
   BeginPos,EndPos,DestPos : _TDequePos;
   IsItInsert : boolean;
 {$ifdef  _DGL_ObjValue}
@@ -519,7 +519,7 @@ var
 begin
   Assert(self.FFrontPos.PCurValue<>self.FEndPos.PCurValue);
   PValue:=(self.FEndPos.PCurValue);
-  if longword(PValue)=longword(integer(FEndPos.PPNode^)) then
+  if _TNativeUInt(PValue)=_TNativeUInt(_TNativeInt(FEndPos.PPNode^)) then
   begin
     _TDeque_DecPos(FEndPos);
     PValue:=(self.FEndPos.PCurValue);
@@ -557,9 +557,9 @@ begin
   end;
 end;
 
-procedure _TDeque.PushFront(const num:integer;Value: _ValueType);
+procedure _TDeque.PushFront(const num:_TNativeInt;Value: _ValueType);
 var
-  i: integer;
+  i: _TNativeInt;
 begin
   for i:=0 to num-1 do
     self.PushFront(Value);
@@ -567,7 +567,7 @@ end;
 
 procedure _TDeque.PushFront(const ItBegin,ItEnd: _IIterator);
 var
-  i,num: integer;
+  i,num: _TNativeInt;
   It: _IIterator;
 begin
   num:=ItBegin.Distance(ItEnd);
@@ -584,15 +584,15 @@ var
   PValue : _PValueType;
 begin                  
   PValue:=FEndPos.PCurValue;
-  if longword(PValue)+sizeof(_ValueType)>=longword(FEndPos.PEndValue) then
+  if _TNativeUInt(PValue)+sizeof(_ValueType)>=_TNativeUInt(FEndPos.PEndValue) then
   begin
-    if longword(PValue)>=longword(FEndPos.PEndValue) then
+    if _TNativeUInt(PValue)>=_TNativeUInt(FEndPos.PEndValue) then
       ExtendCapabilityBack();
     PValue:=FEndPos.PCurValue;
     _TDeque_IncPos(self.FEndPos);
   end
   else
-    FEndPos.PCurValue:=_PValueType(longword(PValue)+sizeof(_ValueType)); //==  inc(FEndPos.PCurValue);
+    FEndPos.PCurValue:=_PValueType(_TNativeUInt(PValue)+sizeof(_ValueType)); //==  inc(FEndPos.PCurValue);
 
 
   {$ifdef  _DGL_ObjValue}
@@ -602,9 +602,9 @@ begin
   {$endif}
 end;
 
-procedure _TDeque.PushBack(const num:integer;Value: _ValueType);
+procedure _TDeque.PushBack(const num:_TNativeInt;Value: _ValueType);
 var
-  i: integer;
+  i: _TNativeInt;
 begin
   for i:=0 to num-1 do
     self.PushBack(Value);
@@ -612,7 +612,7 @@ end;
 
 procedure _TDeque.PushBack(const ItBegin,ItEnd: _IIterator);
 var
-  i,num: integer;
+  i,num: _TNativeInt;
   It: _IIterator;
 begin
   num:=ItBegin.Distance(ItEnd);
@@ -651,7 +651,7 @@ end;
 
 function _TDeque.IsEquals(const AContainer: _IContainer): Boolean;
 var
-  i : integer;
+  i : _TNativeInt;
   it : _IIterator;
 begin
   if self.Size()<>AContainer.Size() then
@@ -680,8 +680,8 @@ end;
 
 function _TDeque.IsLess(const AContainer: _IContainer): Boolean;
 var
-  i : integer;
-  selfSize,ACSize,MinSize : integer;
+  i : _TNativeInt;
+  selfSize,ACSize,MinSize : _TNativeInt;
   it : _IIterator;
 begin
   selfSize:=_TDeque_Distance(FFrontPos,FEndPos);
@@ -726,12 +726,12 @@ begin
   end;
 end;
 
-function _TDeque.EraseValue(const Value: _ValueType): integer;
+function _TDeque.EraseValue(const Value: _ValueType): _TNativeInt;
 var
   iRead  : _TDequePos;
   iWrite : _TDequePos;
-  fIndex : integer;
-  i  : integer;
+  fIndex : _TNativeInt;
+  i  : _TNativeInt;
   {$ifdef _DGL_ObjValue}
     tmpValue : _ValueType;
   {$endif}
@@ -776,12 +776,12 @@ begin
   for i:=0 to result-1 do self.PopBack();
 end;
 
-procedure _TDeque.Reserve(const ReserveSize: integer);
+procedure _TDeque.Reserve(const ReserveSize: _TNativeInt);
 begin
   //ok! do nothing
 end;
 
-procedure _TDeque.SetItemValue(const Index: Integer; const Value: _ValueType);
+procedure _TDeque.SetItemValue(const Index: _TNativeInt; const Value: _ValueType);
 begin
   Assert(Index>=0);
   Assert(Index<_TDeque_Distance(FFrontPos,FEndPos));
@@ -792,7 +792,7 @@ begin
   {$endif}
 end;
 
-function _TDeque.Size: Integer;
+function _TDeque.Size: _TNativeInt;
 begin
   result:=_TDeque_Distance(FFrontPos,FEndPos);
 end;
@@ -816,7 +816,7 @@ end;
 procedure _TDeque_IncPos(var Pos: _TDequePos);
 begin
   Inc(Pos.PCurValue);
-  if longword(Pos.PCurValue)>=longword(Pos.PEndValue) then
+  if _TNativeUInt(Pos.PCurValue)>=_TNativeUInt(Pos.PEndValue) then
   begin
     inc(Pos.PPNode);
     if (Pos.PPNode^<>nil) then
@@ -832,12 +832,12 @@ begin
   end;
 end;
 
-procedure _TDeque_IncPos(var Pos: _TDequePos; const dxIndex: integer);
+procedure _TDeque_IncPos(var Pos: _TDequePos; const dxIndex: _TNativeInt);
 var
-  nIndex,nodeCount : integer;
-  ValueIndex: integer;
+  nIndex,nodeCount : _TNativeInt;
+  ValueIndex: _TNativeInt;
 begin
-  ValueIndex:=(integer(Pos.PCurValue)-integer(Pos.PPNode^)) div (sizeof(_ValueType));
+  ValueIndex:=(_TNativeInt(Pos.PCurValue)-_TNativeInt(Pos.PPNode^)) div (sizeof(_ValueType));
   nIndex:=ValueIndex+dxIndex;
   if nIndex>=0 then
   begin
@@ -862,15 +862,15 @@ begin
     dec(Pos.PPNode,nodeCount+1);
     Assert(Pos.PPNode^<>nil);
     Pos.PEndValue:={$ifdef _DGL_ClassFunction_Specific}_TDeque_Get_ClassFunction_Address{$else}@{$endif}(Pos.PPNode^[csDequeNodeCount]);
-    Pos.PCurValue:=_PValueType(integer(Pos.PEndValue)-((nIndex -nodeCount*csDequeNodeCount)+1)*sizeof(_ValueType));
+    Pos.PCurValue:=_PValueType(_TNativeInt(Pos.PEndValue)-((nIndex -nodeCount*csDequeNodeCount)+1)*sizeof(_ValueType));
   end;
 end;
 
-function _TDeque_Distance(const BeginPos, EndPos: _TDequePos): integer;
+function _TDeque_Distance(const BeginPos, EndPos: _TDequePos): _TNativeInt;
 begin
-  result:=( (integer(EndPos.PPNode)-integer(BeginPos.PPNode) ) div (sizeof(_PPDequeNode)))*csDequeNodeCount
-          +( (integer(EndPos.PCurValue)-integer(EndPos.PPNode^))
-            -(integer(BeginPos.PCurValue)-integer(BeginPos.PPNode^)) )  div sizeof(_ValueType) ;
+  result:=( (_TNativeInt(EndPos.PPNode)-_TNativeInt(BeginPos.PPNode) ) div (sizeof(_PPDequeNode)))*csDequeNodeCount
+          +( (_TNativeInt(EndPos.PCurValue)-_TNativeInt(EndPos.PPNode^))
+            -(_TNativeInt(BeginPos.PCurValue)-_TNativeInt(BeginPos.PPNode^)) )  div sizeof(_ValueType) ;
 end;
 
 procedure _TDeque.Fill(PBegin, PEnd: _TDequePos; const ItSrcBegin: _IIterator);
@@ -892,15 +892,15 @@ end;
 
 procedure _TDeque.ExtendCapabilityFront;
 var
-  i : integer;
-  L : integer;
-  dL : integer;
+  i : _TNativeInt;
+  L : _TNativeInt;
+  dL : _TNativeInt;
   aPPNode : _PPDequeNode;
   OldBeginPPNode : _PPDequeNode;
-  OldFrontIndex,OldEndIndex : integer;
+  OldFrontIndex,OldEndIndex : _TNativeInt;
 begin
   OldBeginPPNode:=@FNodeArray[0];
-  if longword(self.FFrontPos.PPNode)>longword(OldBeginPPNode) then
+  if _TNativeUInt(self.FFrontPos.PPNode)>_TNativeUInt(OldBeginPPNode) then
   begin
     aPPNode:=self.FFrontPos.PPNode;
     if aPPNode^=nil then   //new node
@@ -911,8 +911,8 @@ begin
   end
   else
   begin
-    OldFrontIndex:=longword(integer(self.FFrontPos.PPNode)-integer(OldBeginPPNode)) div sizeof(_PPDequeNode);
-    OldEndIndex:=longword(integer(self.FEndPos.PPNode)-integer(OldBeginPPNode)) div sizeof(_PPDequeNode);
+    OldFrontIndex:=_TNativeUInt(_TNativeInt(self.FFrontPos.PPNode)-_TNativeInt(OldBeginPPNode)) div sizeof(_PPDequeNode);
+    OldEndIndex:=_TNativeUInt(_TNativeInt(self.FEndPos.PPNode)-_TNativeInt(OldBeginPPNode)) div sizeof(_PPDequeNode);
 
     L:=length(self.FNodeArray);
     Assert(L>=4);
@@ -943,11 +943,11 @@ end;
 
 procedure _TDeque.ExtendCapabilityBack;
 var
-  L : integer;
-  dL : integer;
+  L : _TNativeInt;
+  dL : _TNativeInt;
   aPPNode,aTmpPPNode :_PPDequeNode;
   OldBeginPPNode : _PPDequeNode;
-  OldFrontIndex,OldEndIndex : integer;
+  OldFrontIndex,OldEndIndex : _TNativeInt;
 begin
 
   if (self.FFrontPos.PCurValue=nil)then
@@ -957,7 +957,7 @@ begin
   Assert(self.FEndPos.PPNode<>nil);
 
   aPPNode:=@FNodeArray[L-1];
-  if longword(self.FEndPos.PPNode)+sizeof(_PPDequeNode)<longword(aPPNode) then
+  if _TNativeUInt(self.FEndPos.PPNode)+sizeof(_PPDequeNode)<_TNativeUInt(aPPNode) then
   begin
     aPPNode:=self.FEndPos.PPNode;
     if aPPNode^=nil then
@@ -982,8 +982,8 @@ begin
   else
   begin
     OldBeginPPNode:=@FNodeArray[0];
-    OldFrontIndex:=longword(integer(self.FFrontPos.PPNode)-integer(OldBeginPPNode)) div sizeof(_PPDequeNode);
-    OldEndIndex:=longword(integer(self.FEndPos.PPNode)-integer(OldBeginPPNode)) div sizeof(_PPDequeNode);
+    OldFrontIndex:=_TNativeUInt(_TNativeInt(self.FFrontPos.PPNode)-_TNativeInt(OldBeginPPNode)) div sizeof(_PPDequeNode);
+    OldEndIndex:=_TNativeUInt(_TNativeInt(self.FEndPos.PPNode)-_TNativeInt(OldBeginPPNode)) div sizeof(_PPDequeNode);
 
     dL:=(L shr 2) + csDeultCapability;
     setlength(self.FNodeArray,L + dL);
@@ -1014,15 +1014,15 @@ end;
 
 procedure _TDeque.ReduceCapabilityFront;
 var
-  i : integer;
-  L : integer;
-  DelCount : integer;
+  i : _TNativeInt;
+  L : _TNativeInt;
+  DelCount : _TNativeInt;
   OldBeginPPNode : _PPDequeNode;
-  OldFrontIndex,OldEndIndex : integer;
+  OldFrontIndex,OldEndIndex : _TNativeInt;
 begin
   L:=length(self.FNodeArray);
   OldBeginPPNode:=@FNodeArray[0];
-  OldFrontIndex:=longword(integer(self.FFrontPos.PPNode)-integer(OldBeginPPNode)) div sizeof(_PPDequeNode);
+  OldFrontIndex:=_TNativeUInt(_TNativeInt(self.FFrontPos.PPNode)-_TNativeInt(OldBeginPPNode)) div sizeof(_PPDequeNode);
   
   if OldFrontIndex>=2 then  
   begin
@@ -1031,7 +1031,7 @@ begin
     DelCount:=OldFrontIndex-2-(csDeultCapability shr 1);
     if DelCount*3>L then
     begin
-      OldEndIndex:=longword(integer(self.FEndPos.PPNode)-integer(OldBeginPPNode)) div sizeof(_PPDequeNode);
+      OldEndIndex:=_TNativeUInt(_TNativeInt(self.FEndPos.PPNode)-_TNativeInt(OldBeginPPNode)) div sizeof(_PPDequeNode);
       for i:=0 to L-DelCount-1 do
         FNodeArray[i]:=FNodeArray[i+DelCount];
       //for i:=L-DelCount to L-1 do
@@ -1046,13 +1046,13 @@ end;
 
 procedure _TDeque.ReduceCapabilityBack;
 var
-  L : integer;
-  DelCount : integer;
+  L : _TNativeInt;
+  DelCount : _TNativeInt;
   OldBeginPPNode : _PPDequeNode;
-  OldFrontIndex,OldEndIndex : integer;
+  OldFrontIndex,OldEndIndex : _TNativeInt;
 begin
   OldBeginPPNode:=@FNodeArray[0];
-  OldEndIndex:=longword(integer(self.FEndPos.PPNode)-integer(OldBeginPPNode)) div sizeof(_PPDequeNode);
+  OldEndIndex:=_TNativeUInt(_TNativeInt(self.FEndPos.PPNode)-_TNativeInt(OldBeginPPNode)) div sizeof(_PPDequeNode);
   L:=length(self.FNodeArray);
 
   Assert(FEndPos.PPNode^<>nil);
@@ -1072,7 +1072,7 @@ begin
   begin
     self.DeleteNode(FNodeArray[OldEndIndex+3]);//hold 1 empty node: FNodeArray[OldEndIndex+2] ;
 
-    OldFrontIndex:=longword(integer(self.FFrontPos.PPNode)-integer(OldBeginPPNode)) div sizeof(_PPDequeNode);
+    OldFrontIndex:=_TNativeUInt(_TNativeInt(self.FFrontPos.PPNode)-_TNativeInt(OldBeginPPNode)) div sizeof(_PPDequeNode);
 
     DelCount:=L-(OldEndIndex+3)-(csDeultCapability shr 1);
     if DelCount*3>L then
@@ -1095,7 +1095,7 @@ begin
   _IDeque(NewContainer):=_TDeque.Create(self);
 end;
 
-procedure _TDeque.Assign(const num:integer;const Value: _ValueType);
+procedure _TDeque.Assign(const num:_TNativeInt;const Value: _ValueType);
 begin
   self.Clear();
   self.PushBack(num,Value);
@@ -1119,13 +1119,13 @@ begin
   _PDequeIt(@SelfItData).Pos:=aDequePos;
 end;
 
-class procedure _TDequeIterator.ItCreate(var SelfItData:_IIterator;const ADeque: _TDeque;const Index:integer);
+class procedure _TDequeIterator.ItCreate(var SelfItData:_IIterator;const ADeque: _TDeque;const Index:_TNativeInt);
 begin
   SelfItData._ObjIteratorClass:=_TDequeIterator;
   _PDequeIt(@SelfItData).Pos:=ADeque.GetPos(Index);
 end;
 
-class function _TDequeIterator.Distance(const SelfItData:_IIterator;const Iterator: _IIterator): integer;
+class function _TDequeIterator.Distance(const SelfItData:_IIterator;const Iterator: _IIterator): _TNativeInt;
 begin
   result:=_TDeque_Distance(_PDequeIt(@SelfItData).Pos,_PDequeIt(@Iterator).Pos);
 end;
@@ -1148,13 +1148,13 @@ begin
   pPos:=@_PDequeIt(@SelfItData).pos;
   PValue:=ppos.PCurValue;
   inc(PValue);
-  if longword(PValue)<longword(pPos.PEndValue) then
+  if _TNativeUInt(PValue)<_TNativeUInt(pPos.PEndValue) then
     ppos.PCurValue:=PValue
   else
     _TDeque_IncPos(pPos^);
 end;
 
-class procedure _TDequeIterator.Next(var SelfItData:_IIterator;const Step:integer);
+class procedure _TDequeIterator.Next(var SelfItData:_IIterator;const Step:_TNativeInt);
 begin
   _TDeque_IncPos(_PDequeIt(@SelfItData).Pos,Step);
 end;
@@ -1179,7 +1179,7 @@ begin
     {$endif}
 end;
 
-class function _TDequeIterator.GetNextValue(const SelfItData:_IIterator;const Step:integer): _ValueType;
+class function _TDequeIterator.GetNextValue(const SelfItData:_IIterator;const Step:_TNativeInt): _ValueType;
 var
   nPos : _TDequePos;
 begin
@@ -1188,7 +1188,7 @@ begin
   result:=nPos.PCurValue^;
 end;
 
-class procedure  _TDequeIterator.SetNextValue(const SelfItData:_IIterator;const Step:integer;const aValue: _ValueType);
+class procedure  _TDequeIterator.SetNextValue(const SelfItData:_IIterator;const Step:_TNativeInt;const aValue: _ValueType);
 var
   nPos : _TDequePos;
 begin
@@ -1223,7 +1223,7 @@ function  _IDequeIterator.GetValue(): _ValueType;
 begin
   result:=_PDequeIt(@Self).Pos.PCurValue^;
 end;
-function  _IDequeIterator.GetNextValue(const Step:integer): _ValueType;
+function  _IDequeIterator.GetNextValue(const Step:_TNativeInt): _ValueType;
 var
   nPos : _TDequePos;
 begin
@@ -1231,7 +1231,7 @@ begin
   _TDeque_IncPos(nPos,Step);
   result:=nPos.PCurValue^;
 end;
-procedure _IDequeIterator.SetNextValue(const Step:integer;const aValue:_ValueType);
+procedure _IDequeIterator.SetNextValue(const Step:_TNativeInt;const aValue:_ValueType);
 var
   nPos : _TDequePos;
 begin
@@ -1248,7 +1248,7 @@ function  _IDequeIterator.IsEqual(const Iterator:_IIterator):boolean;
 begin
   result:=_PDequeIt(@Self).Pos.PCurValue=_PDequeIt(@Iterator).Pos.PCurValue;
 end;
-function  _IDequeIterator.Distance(const Iterator:_IIterator):integer;
+function  _IDequeIterator.Distance(const Iterator:_IIterator):_TNativeInt;
 begin
   result:=_TDeque_Distance(_PDequeIt(@Self).Pos,_PDequeIt(@Iterator).Pos);
 end;
@@ -1265,12 +1265,12 @@ begin
   pPos:=@_PDequeIt(@Self).pos;
   PValue:=ppos.PCurValue;
   inc(PValue);
-  if longword(PValue)<longword(pPos.PEndValue) then
+  if _TNativeUInt(PValue)<_TNativeUInt(pPos.PEndValue) then
     ppos.PCurValue:=PValue
   else
     _TDeque_IncPos(pPos^);
 end;
-procedure _IDequeIterator.Next(const Step:integer);
+procedure _IDequeIterator.Next(const Step:_TNativeInt);
 begin
   _TDeque_IncPos(_PDequeIt(@Self).Pos,Step);
 end;
@@ -1289,7 +1289,7 @@ begin
   result._ObjIteratorClass:=self._ObjIteratorClass;
   _PDequeIt(@result).Pos:=_PDequeIt(@Self).Pos;
 end;
-function  _IDequeIterator.Clone(const NextStep:integer):_IIterator;
+function  _IDequeIterator.Clone(const NextStep:_TNativeInt):_IIterator;
 begin
   result._ObjIteratorClass:=self._ObjIteratorClass;
   _PDequeIt(@result).Pos:=_PDequeIt(@Self).Pos;

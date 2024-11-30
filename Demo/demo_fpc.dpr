@@ -9,7 +9,7 @@ uses
 procedure btn_IIntVectorClick(Sender: TObject);
 var
   intVector : IIntVector; //interface type ; Vector use as delphi's array;
-  i,Sum : integer;
+  i,Sum : _TNativeInt;
 begin
   intVector :=TIntVector.Create;
 

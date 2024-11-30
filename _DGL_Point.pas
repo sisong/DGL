@@ -40,7 +40,7 @@ type
 
 const
    _NULL_Value:_ValueType=(x:(0);y:(0));
-  function _HashValue(const Value:_ValueType) : Cardinal;{$ifdef _DGL_Inline} inline; {$endif}//Hash函数
+  function _HashValue(const Value:_ValueType) : _TNativeUInt;{$ifdef _DGL_Inline} inline; {$endif}//Hash函数
 
   {$define _DGL_Compare}  //是否需要比较函数，可选
   function _IsEqual(const a,b :_ValueType):boolean;{$ifdef _DGL_Inline} inline; {$endif} //result:=(a=b);
@@ -89,9 +89,9 @@ implementation
 
 {$I DGL.inc_pas}
 
-function _HashValue(const Value :_ValueType):Cardinal;
+function _HashValue(const Value :_ValueType):_TNativeUInt;
 begin
-  result:=Cardinal(Value.x)*37+Cardinal(Value.y)*9;
+  result:=_TNativeUInt(Value.x)*37+_TNativeUInt(Value.y)*9;
 end;
 
 function Point(a,b:integer):TPoint;

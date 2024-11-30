@@ -42,7 +42,7 @@ procedure TTest_List.testIntfList;
 var
     FList        : IIntfList;
     tmpList        : IIntfList;
-    i : integer;
+    i : _TNativeInt;
     tmpIntf : IInterface;
     tmpIntf2 : IInterface;
     It0,It1 :IIntfIterator;
@@ -177,7 +177,7 @@ procedure TTest_List.testIntfListIterator;
 var
     FList        : IIntfList;
     tmpList        : IIntfList;
-    i : integer;
+    i : _TNativeInt;
     It : IIntfIterator;
     tmpIt : IIntfIterator;
     It0 : IIntfIterator;
@@ -228,7 +228,7 @@ procedure TTest_List.testList;
 var
     FVector        : IPointerList;
     tmpVector        : IPointerList;
-    i : integer;
+    i : _TNativeInt;
     It0,It1:IPointerIterator;
     //str : string;
 begin
@@ -258,17 +258,17 @@ begin
     FVector.PushBack(Pointer(i));
   CheckEquals(FVector.Size,49);
   it0:=FVector.ItBegin; it0.Next(1);
-  CheckEquals(integer(it0.Value),3);
+  CheckEquals(_TNativeInt(it0.Value),3);
 
   tmpVector.Clear();
   tmpVector.PushBack(Pointer(1));
   tmpVector.Insert(tmpVector.ItBegin,FVector.ItBegin,FVector.ItEnd);
   //it0:=tmpVector.ItBegin; Str:='';
   //while not it0.IsEqual(tmpVector.ItEnd) do begin
-  //  Str := str+inttostr(integer(it0.Value))+' '; it0.Next();
+  //  Str := str+inttostr(_TNativeInt(it0.Value))+' '; it0.Next();
   //end; CheckEquals('',Str); 
   it0:=tmpVector.ItBegin; it0.Next(49);
-  CheckEquals(1,integer(it0.Value));
+  CheckEquals(1,_TNativeInt(it0.Value));
   it0:=tmpVector.ItBegin; it0.Next(2);
   Check(it0.Value=Pointer(4));
 
@@ -347,9 +347,9 @@ begin
   FVector.Insert(It0,Pointer(32));
   CheckEquals(FVector.size,11);
   it1:=FVector.ItBegin; it1.Next(5);
-  CheckEquals(integer(it1.Value),(32));
+  CheckEquals(_TNativeInt(it1.Value),(32));
   it1:=FVector.ItBegin; it1.Next(6);
-  CheckEquals(integer(it1.Value),(31));
+  CheckEquals(_TNativeInt(it1.Value),(31));
 
   //
   FVector.Clear();
@@ -374,14 +374,14 @@ end;
 
 function test_List_EraseValueIf3(const Value:Pointer):boolean;
 begin
-  result:=integer(Value)=3;
+  result:=_TNativeInt(Value)=3;
 end;
 
 procedure TTest_List.testList2;
 var
     FList      : IPointerList;
     tmpList    : IPointerList;
-    //i : integer;
+    //i : _TNativeInt;
     //It0,It1:IIterator;
 begin
   FList:=TPointerList.Create();
@@ -396,11 +396,11 @@ begin
   CheckEquals(tmpList.size,0);
   FList.Unique();
   CheckEquals(FList.size,2);
-  CheckEquals(integer(FList.ItBegin.Value),7);
+  CheckEquals(_TNativeInt(FList.ItBegin.Value),7);
   FList.Reverse();
-  CheckEquals(integer(FList.ItBegin.Value),5);
+  CheckEquals(_TNativeInt(FList.ItBegin.Value),5);
   FList.Reverse();
-  CheckEquals(integer(FList.ItBegin.Value),7);
+  CheckEquals(_TNativeInt(FList.ItBegin.Value),7);
   FList.Erase(FList.ItBegin,FList.ItEnd);
   CheckEquals(FList.size,0);
 
@@ -412,8 +412,8 @@ begin
   FList.PushBack(Pointer(3));
   FList.EraseValueIf(test_List_EraseValueIf3);
   CheckEquals(FList.size,2);
-  CheckEquals(integer(FList.ItBegin.Value),5);
-  CheckEquals(integer(FList.Back),4);
+  CheckEquals(_TNativeInt(FList.ItBegin.Value),5);
+  CheckEquals(_TNativeInt(FList.Back),4);
 
   //sort
   FList.Clear();
@@ -422,8 +422,8 @@ begin
   FList.PushBack(Pointer(4));
   FList.PushBack(Pointer(3));
   FList.Sort();
-  CheckEquals(integer(FList.ItBegin.Value),3);
-  CheckEquals(integer(FList.Back),5);
+  CheckEquals(_TNativeInt(FList.ItBegin.Value),3);
+  CheckEquals(_TNativeInt(FList.Back),5);
   Check(TPointerAlgorithms.IsSorted(FList.ItBegin,FList.ItEnd));
 
   //
@@ -438,8 +438,8 @@ begin
   tmpList.PushBack(Pointer(6));
   tmpList.PushBack(Pointer(8));
   FList.Merge(tmpList);
-  CheckEquals(integer(FList.ItBegin.Value),1);
-  CheckEquals(integer(FList.Back),8);
+  CheckEquals(_TNativeInt(FList.ItBegin.Value),1);
+  CheckEquals(_TNativeInt(FList.Back),8);
   Check(TPointerAlgorithms.IsSorted(FList.ItBegin,FList.ItEnd));
   Check(tmpList.IsEmpty);
 
@@ -448,7 +448,7 @@ end;
 procedure TTest_List.testListIterator;
 var
     FVector        : IPointerList;
-    i : integer;
+    i : _TNativeInt;
     It : IPointerIterator;
     tmpIt : IPointerIterator;
 begin
@@ -456,7 +456,7 @@ begin
   CheckEquals(FVector.size,10);
 
   It:=FVector.ItBegin; It.Next(5);
-  CheckEquals(integer(it.Value),(3));
+  CheckEquals(_TNativeInt(it.Value),(3));
 
   FVector.Clear();
   for i:=0 to 50-1 do
@@ -464,29 +464,29 @@ begin
 
   It:=FVector.ItBegin;
   It.Next();
-  CheckEquals(integer(It.Value),(1));
+  CheckEquals(_TNativeInt(It.Value),(1));
   It.Next(4);
-  CheckEquals(integer(It.Value),(5));
+  CheckEquals(_TNativeInt(It.Value),(5));
   CheckEquals(FVector.ItBegin.Distance(It),(5));
   It:=FVector.ItEnd;
   It.Previous();
-  CheckEquals(integer(It.Value),(49));
+  CheckEquals(_TNativeInt(It.Value),(49));
   It.Next(-2);
-  CheckEquals(integer(It.Value),(47));
+  CheckEquals(_TNativeInt(It.Value),(47));
 
   tmpIt:=It.Clone();
-  CheckEquals(integer(tmpIt.Value),integer(It.Value));
+  CheckEquals(_TNativeInt(tmpIt.Value),_TNativeInt(It.Value));
   Check(tmpIt.IsEqual(It));
-  tmpIt.Value:=pointer(integer(It.Value)+1);
-  CheckEquals(integer(tmpIt.Value),integer(It.Value));
+  tmpIt.Value:=pointer(_TNativeInt(It.Value)+1);
+  CheckEquals(_TNativeInt(tmpIt.Value),_TNativeInt(It.Value));
 
   tmpIt.Previous;
-  CheckNotEquals(integer(tmpIt.Value),integer(It.Value));
+  CheckNotEquals(_TNativeInt(tmpIt.Value),_TNativeInt(It.Value));
 
   it.Assign(tmpIt);
-  CheckEquals(integer(tmpIt.Value),integer(It.Value));
+  CheckEquals(_TNativeInt(tmpIt.Value),_TNativeInt(It.Value));
   tmpIt.Previous;
-  CheckNotEquals(integer(tmpIt.Value),integer(It.Value));
+  CheckNotEquals(_TNativeInt(tmpIt.Value),_TNativeInt(It.Value));
 end;
 
 
@@ -499,7 +499,7 @@ var
   it0,it1 : IObjIterator;
   ob : TTestObj;
   ob0 : TTestObj;
-  i : integer;
+  i : _TNativeInt;
   tmov : IObjContainer;
 begin
   //_refCount:=0; //for test

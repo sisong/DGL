@@ -31,7 +31,7 @@ type
 
 const
   _NULL_Value:integer=0;
-  function _HashValue(const Key: _KeyType):Cardinal;{$ifdef _DGL_Inline} inline; {$endif}//Hash函数
+  function _HashValue(const Key: _KeyType):_TNativeUInt;{$ifdef _DGL_Inline} inline; {$endif}//Hash函数
   {$define _DGL_Compare_Key}  //比较函数
   function _IsEqual_Key(const a,b :_KeyType):boolean;{$ifdef _DGL_Inline} inline; {$endif} //result:=(a=b);
   function _IsLess_Key(const a,b :_KeyType):boolean; {$ifdef _DGL_Inline} inline; {$endif} //result:=(a<b); 默认排序准则
@@ -56,7 +56,7 @@ uses
 
 {$I HashMap.inc_pas} //"类"模版的实现文件
 
-function _HashValue(const Key :_KeyType):Cardinal; overload;
+function _HashValue(const Key :_KeyType):_TNativeUInt; overload;
 begin
 //  if IsCaseInsensitive then
     result:=HashValue_StrCaseInsensitive(Key)

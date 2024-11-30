@@ -78,7 +78,7 @@ begin
   end;
 end;
 
-class function _TAlgorithms.Distance(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ):integer;
+class function _TAlgorithms.Distance(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ):_TNativeInt;
 begin
   result:=ItBegin.Distance(ItEnd);
 end;
@@ -92,7 +92,7 @@ begin
     It1.Value:=tmp;
 end;
 
-class procedure _TAlgorithms.SwapValue(const It0: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Index0: integer;const It1: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Index1: integer);
+class procedure _TAlgorithms.SwapValue(const It0: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Index0: _TNativeInt;const It1: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Index1: _TNativeInt);
 var
   tmp : _ValueType;
 begin
@@ -101,7 +101,7 @@ begin
     It1.NextValue[Index1]:=tmp;
 end;
 
-class procedure _TAlgorithms.SwapValue(const It: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Index0,Index1: integer);
+class procedure _TAlgorithms.SwapValue(const It: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Index0,Index1: _TNativeInt);
 var
   tmp : _ValueType;
 begin
@@ -131,7 +131,7 @@ begin
   end;
 end;
 
-class function _TAlgorithms.Replace(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const OldValue,NewValue:_ValueType):integer;
+class function _TAlgorithms.Replace(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const OldValue,NewValue:_ValueType):_TNativeInt;
 var
   It: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
 begin
@@ -152,7 +152,7 @@ begin
   end;
 end;
 
-class function _TAlgorithms.ReplaceCopy(const ItBeginSrc,ItEndSrc,ItBeginDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const OldValue,NewValue:_ValueType):integer;
+class function _TAlgorithms.ReplaceCopy(const ItBeginSrc,ItEndSrc,ItBeginDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const OldValue,NewValue:_ValueType):_TNativeInt;
 var
   ItSrc: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
   ItDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
@@ -190,10 +190,10 @@ begin
   end;
 end;
 
-class procedure _TAlgorithms.Fill(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const N:integer;const Value:_ValueType);
+class procedure _TAlgorithms.Fill(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const N:_TNativeInt;const Value:_ValueType);
 var
   It: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
-  i: integer;
+  i: _TNativeInt;
 begin
   It:=ItBegin;
   for i:=0 to N-1 do
@@ -227,7 +227,7 @@ begin
   end;
 end;
 
-class function _TAlgorithms.Count(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Value:_ValueType):integer;
+class function _TAlgorithms.Count(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Value:_ValueType):_TNativeInt;
 var
   It :  {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
 begin
@@ -362,9 +362,8 @@ begin
 end;
 
 class procedure _TAlgorithms.RandomShuffle(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} );
-
 begin
-  RandomShuffle(ItBegin,ItEnd,__DGL_System_Random);
+  RandomShuffle(ItBegin,ItEnd,_DGL_Random);
 end;
 
 class procedure _TAlgorithms.Sort(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} );

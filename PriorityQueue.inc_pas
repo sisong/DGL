@@ -41,7 +41,7 @@ begin
   _TAlgorithms.MakeHeap(FBaseContainer.ItBegin,FBaseContainer.ItEnd,self.FCompareFunction);
 end;
 
-procedure _TPriorityQueue.Assign(const num: integer; const Value: _ValueType);
+procedure _TPriorityQueue.Assign(const num: _TNativeInt; const Value: _ValueType);
 begin
   self.FBaseContainer.Assign(num,Value);
   //dot need call _TAlgorithms.MakeHeap
@@ -175,7 +175,7 @@ begin
   _TAlgorithms.PushHeap(FBaseContainer.ItBegin,FBaseContainer.ItEnd,self.FCompareFunction);
 end;
 
-function _TPriorityQueue.Size: Integer;
+function _TPriorityQueue.Size: _TNativeInt;
 begin
   result:=FBaseContainer.Size;
 end;

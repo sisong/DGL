@@ -37,7 +37,7 @@ procedure TTest_Stack.testStack;
 var
   Stack : IStrStack;
   sk : IStrStack;
-  i : integer;
+  i : _TNativeInt;
 begin
   Stack:=TStrStack.Create();
   Check( Stack.IsEmpty);

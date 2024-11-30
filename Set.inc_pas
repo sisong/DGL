@@ -54,7 +54,7 @@ begin
   self.FRB_TRee.Clear();
 end;
 
-function _TSet_Base.Count(const Value: _ValueType): integer;
+function _TSet_Base.Count(const Value: _ValueType): _TNativeInt;
 begin
   result:=self.FRB_TRee.Count(Value);
 end;
@@ -80,7 +80,7 @@ begin
   self.FRB_TRee.Erase(_TRB_TreeIterator(ItPos._Data0));
 end;
 
-function _TSet_Base.EraseValue(const Value: _ValueType): integer;
+function _TSet_Base.EraseValue(const Value: _ValueType): _TNativeInt;
 begin
   result:=self.FRB_TRee.EraseKey(Value);
 end;
@@ -109,7 +109,7 @@ begin
   _TSetIterator.ItCreate(result,self.FRB_TRee.LowerBound(Value));
 end;
 
-function _TSet_Base.Size: Integer;
+function _TSet_Base.Size: _TNativeInt;
 begin
   result:=self.FRB_TRee.Size();
 end;
@@ -135,7 +135,7 @@ begin
   self.Insert(self.ItBegin,ItBegin,ItEnd);
 end;
 
-procedure _TSet.Assign(const num: integer; const Value: _ValueType);
+procedure _TSet.Assign(const num: _TNativeInt; const Value: _ValueType);
 begin
   self.FRB_TRee.Clear();
   if num>0 then
@@ -188,7 +188,7 @@ begin
   end;
 end;
 
-procedure _TSet.Insert(const ItPos: _IIterator; const num: integer;
+procedure _TSet.Insert(const ItPos: _IIterator; const num: _TNativeInt;
   const Value: _ValueType);
 begin
   if num>0 then
@@ -198,9 +198,9 @@ end;
 
 { _TMultiSet }
 
-procedure _TMultiSet.Assign(const num: integer; const Value: _ValueType);
+procedure _TMultiSet.Assign(const num: _TNativeInt; const Value: _ValueType);
 var
-  i : integer;
+  i : _TNativeInt;
 begin
   self.FRB_Tree.Clear();
   for i:=0 to num-1 do
@@ -240,10 +240,10 @@ begin
   end;
 end;
 
-procedure _TMultiSet.Insert(const ItPos: _IIterator; const num: integer;
+procedure _TMultiSet.Insert(const ItPos: _IIterator; const num: _TNativeInt;
   const Value: _ValueType);
 var
-  i : integer;
+  i : _TNativeInt;
 begin
   for i:=0 to num-1 do
     self.FRB_TRee.MultiInsert(Value);
@@ -254,7 +254,7 @@ begin
   self.FRB_TRee.MultiInsert(Value);
 end;
 
-constructor _TMultiSet.Create(const num: integer;
+constructor _TMultiSet.Create(const num: _TNativeInt;
   const Value: _ValueType);
 begin
   inherited Create();

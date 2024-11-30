@@ -44,7 +44,7 @@ procedure TTest_Deque.testIntfDeque;
 var
     FDeque        : IIntfDeque;
     tmpDeque        : IIntfDeque;
-    i : integer;
+    i : _TNativeInt;
     tmpIntf : IInterface;
     tmpIntf2 : IInterface;
     It0,It1 :IIntfIterator;
@@ -166,43 +166,43 @@ end;
 procedure TTest_Deque.testIterator;
 var
     FDeque        : IPointerDeque;
-    i : integer;
+    i : _TNativeInt;
     It : IPointerIterator;
     tmpIt : IPointerIterator;
 begin
   FDeque :=TPointerDeque.Create(10,Pointer(3));
   CheckEquals(FDeque.size,10);
 
-  CheckEquals(integer(FDeque.items[5]),(3));
+  CheckEquals(_TNativeInt(FDeque.items[5]),(3));
 
   FDeque.Clear();
   for i:=0 to 50-1 do
     FDeque.PushBack(Pointer(i));
 
   It:=FDeque.ItBegin.Clone(1);
-  CheckEquals(integer(It.Value),(1));
+  CheckEquals(_TNativeInt(It.Value),(1));
   It.Next(4);
-  CheckEquals(integer(It.Value),(5));
+  CheckEquals(_TNativeInt(It.Value),(5));
   CheckEquals(FDeque.ItBegin.Distance(It),(5));
   It:=FDeque.ItEnd;
   It.Previous();
-  CheckEquals(integer(It.Value),(49));
+  CheckEquals(_TNativeInt(It.Value),(49));
   It.Next(-2);
-  CheckEquals(integer(It.Value),(47));
+  CheckEquals(_TNativeInt(It.Value),(47));
 
   tmpIt:=It.Clone();
-  CheckEquals(integer(tmpIt.Value),integer(It.Value));
+  CheckEquals(_TNativeInt(tmpIt.Value),_TNativeInt(It.Value));
   Check(tmpIt.IsEqual(It));
-  tmpIt.Value:=pointer(integer(It.Value)+1);
-  CheckEquals(integer(tmpIt.Value),integer(It.Value));
+  tmpIt.Value:=pointer(_TNativeInt(It.Value)+1);
+  CheckEquals(_TNativeInt(tmpIt.Value),_TNativeInt(It.Value));
 
   tmpIt.Previous;
-  CheckNotEquals(integer(tmpIt.Value),integer(It.Value));
+  CheckNotEquals(_TNativeInt(tmpIt.Value),_TNativeInt(It.Value));
 
   it.Assign(tmpIt);
-  CheckEquals(integer(tmpIt.Value),integer(It.Value));
+  CheckEquals(_TNativeInt(tmpIt.Value),_TNativeInt(It.Value));
   tmpIt.Previous;
-  CheckNotEquals(integer(tmpIt.Value),integer(It.Value));
+  CheckNotEquals(_TNativeInt(tmpIt.Value),_TNativeInt(It.Value));
 
 end;
 procedure TTest_Deque.testObjDeque;
@@ -213,7 +213,7 @@ var
   it0,it1 : IObjIterator;
   ob : TTestObj;
   ob0 : TTestObj;
-  i : integer;
+  i : _TNativeInt;
 begin
   //_refCount:=0; //for test
   
@@ -299,7 +299,7 @@ procedure TTest_Deque.testDeque;
 var
     FDeque        : IPointerDeque;
     tmpDeque        : IPointerDeque;
-    i : integer;
+    i : _TNativeInt;
     It0,It1:IPointerIterator;
 begin
   FDeque :=TPointerDeque.Create();
@@ -309,8 +309,8 @@ begin
   for i:=2 to 5 do
   begin
     FDeque.PushBack(Pointer(i));
-    CheckEquals(integer(FDeque.Front),2);
-    CheckEquals(integer(FDeque.Back),i);
+    CheckEquals(_TNativeInt(FDeque.Front),2);
+    CheckEquals(_TNativeInt(FDeque.Back),i);
   end;
   FDeque.Clear;
 
@@ -337,8 +337,8 @@ begin
   for i:=2 to 50 do
     FDeque.PushBack(Pointer(i));
 
-  CheckEquals(integer(FDeque.Front),2);
-  CheckEquals(integer(FDeque.Back),50);
+  CheckEquals(_TNativeInt(FDeque.Front),2);
+  CheckEquals(_TNativeInt(FDeque.Back),50);
   CheckEquals(FDeque.ItBegin.Distance(FDeque.ItEnd),49);
 
   tmpDeque.Clear();
@@ -443,7 +443,7 @@ procedure TTest_Deque.testRecordDeque;
 var
     FDeque        : IPointVector;
     tmpDeque        : IPointVector;
-    i : integer;
+    i : _TNativeInt;
     It0,It1:IPointIterator;
 begin
   FDeque :=TPointDeque.Create();
@@ -567,7 +567,7 @@ procedure TTest_Deque.testStrDeque;
 var
     FDeque        : IStrDeque;
     tmpDeque        : IStrDeque;
-    i : integer;
+    i : _TNativeInt;
     It0,It1 : IStrIterator;
 begin
   FDeque :=TStrDeque.Create();

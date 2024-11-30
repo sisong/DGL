@@ -32,7 +32,7 @@ type
   _ValueType   = TNotifyEvent;
   {$define _DGL_ClassFunction_Specific}  //特殊处理
 
-  function _HashValue(const Key: _ValueType):Cardinal;{$ifdef _DGL_Inline} inline; {$endif}//Hash函数
+  function _HashValue(const Key: _ValueType):_TNativeUInt;{$ifdef _DGL_Inline} inline; {$endif}//Hash函数
   {$define _DGL_Compare}  //比较函数
   function _IsEqual(const a,b :_ValueType):boolean; {$ifdef _DGL_Inline} inline; {$endif}//result:=(a=b);
   function _IsLess(const a,b :_ValueType):boolean; {$ifdef _DGL_Inline} inline; {$endif} //result:=(a<b); 默认排序准则
@@ -85,23 +85,41 @@ uses
 
 {$I DGL.inc_pas}
 
-function _HashValue(const Key :_ValueType):Cardinal; overload;
+function _HashValue(const Key :_ValueType):_TNativeUInt; overload;
 begin
   result:=HashValue_Int64(PInt64(@@Key)^);
+  {$IFDEF CPU64BITS}
+  result:= result xor HashValue_Int64(PInt64(UInt64(@@Key)+8)^);
+  {$ENDIF}
 end;
 
 function _IsEqual(const a,b :_ValueType):boolean; //result:=(a=b);
 begin
-  result:=(PInt64(@@a)^)=PInt64(@@b)^;
+  {$IFDEF CPU64BITS}
+    result:= ( (PInt64(@@a)^)=(PInt64(@@b)^) ) and ( (PInt64(UInt64(@@a)+8)^)=(PInt64(UInt64(@@b)+8)^) );
+  {$ELSE}
+    result:=   (PInt64(@@a)^)=(PInt64(@@b)^);
+  {$ENDIF}
 end;
 
 function _IsLess(const a,b :_ValueType):boolean;  //result:=(a<b); 默认排序准则
-begin
-  result:=(PInt64(@@a)^)<PInt64(@@b)^;
+begin                       
+  {$IFDEF CPU64BITS}
+    if ((PInt64(@@a)^)<>(PInt64(@@b)^)) then
+    begin
+      result :=(PInt64(@@a)^)<(PInt64(@@b)^);
+    end
+    else
+    begin
+      result:= (PInt64(UInt64(@@a)+8)^)<(PInt64(UInt64(@@b)+8)^);
+    end;
+  {$ELSE}
+    result :=(PInt64(@@a)^)<(PInt64(@@b)^);
+  {$ENDIF}
 end;
 
 initialization
-  Assert(sizeof(int64)=sizeof(_ValueType));
+  Assert(2*sizeof(_TNativeUInt)=sizeof(_ValueType));
 end.
 
 

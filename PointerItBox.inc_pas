@@ -55,10 +55,10 @@ begin
   _TNudePointerType(self._Data0):=aPointer;
 end;
 
-procedure _IPointerItBox.SetPointer(const aPointer : _TNudePointerType;const Step:integer);
+procedure _IPointerItBox.SetPointer(const aPointer : _TNudePointerType;const Step:_TNativeInt);
 begin
   self._ObjIteratorClass:=_TPointerItBox_Obj;
-  self._Data0:= integer(aPointer)+Step*(sizeof(_ValueType)) ;
+  self._Data0:= _TNativeInt(aPointer)+Step*(sizeof(_ValueType)) ;
 end;
 
 function  _IPointerItBox.getPointer():_TNudePointerType;
@@ -78,23 +78,23 @@ function  _IPointerItBox.GetValue(): _ValueType;
 begin
   result:=_TNudePointerType(Self._Data0)^;
 end;
-function  _IPointerItBox.GetNextValue(const Step:integer): _ValueType;
+function  _IPointerItBox.GetNextValue(const Step:_TNativeInt): _ValueType;
 begin
-  result:=_TNudePointerType(Self._Data0+Step*sizeof(_ValueType))^;
+  result:=_TNudePointerType(_TNativeInt(Self._Data0)+Step*sizeof(_ValueType))^;
 end;
-procedure _IPointerItBox.SetNextValue(const Step:integer;const aValue:_ValueType);
+procedure _IPointerItBox.SetNextValue(const Step:_TNativeInt;const aValue:_ValueType);
 begin
   {$ifdef _DGL_ObjValue}
-  _Assign(_TNudePointerType(Self._Data0+Step*sizeof(_ValueType))^,aValue);
+  _Assign(_TNudePointerType(_TNativeInt(Self._Data0)+Step*sizeof(_ValueType))^,aValue);
   {$else}
-  _TNudePointerType(Self._Data0+Step*sizeof(_ValueType))^:=aValue;
+  _TNudePointerType(_TNativeInt(Self._Data0)+Step*sizeof(_ValueType))^:=aValue;
   {$endif}
 end;
 function  _IPointerItBox.IsEqual(const Iterator:_IIterator):boolean;
 begin
   result:=(Self._Data0=Iterator._Data0);
 end;
-function  _IPointerItBox.Distance(const Iterator:_IIterator):integer;
+function  _IPointerItBox.Distance(const Iterator:_IIterator):_TNativeInt;
 begin
   result:=(Iterator._Data0-Self._Data0) div sizeof(_ValueType);
 end;
@@ -107,7 +107,7 @@ procedure _IPointerItBox.Next();
 begin
   inc(PByte(Self._Data0),sizeof(_ValueType));
 end;
-procedure _IPointerItBox.Next(const Step:integer);
+procedure _IPointerItBox.Next(const Step:_TNativeInt);
 begin
   inc(PByte(Self._Data0),Step*sizeof(_ValueType));
 end;
@@ -120,10 +120,10 @@ begin
   result._ObjIteratorClass:=self._ObjIteratorClass;
   result._Data0:=self._Data0;
 end;
-function  _IPointerItBox.Clone(const NextStep:integer):_IIterator;
+function  _IPointerItBox.Clone(const NextStep:_TNativeInt):_IIterator;
 begin
   result._ObjIteratorClass:=self._ObjIteratorClass;
-  result._Data0:=self._Data0+NextStep*sizeof(_ValueType);
+  result._Data0:=_TNativeInt(self._Data0)+NextStep*sizeof(_ValueType);
 end;
 
 function _IPointerItBox.IteratorTraits():TIteratorTraits;
@@ -155,17 +155,17 @@ begin
   result:=_TNudePointerType(SelfItData._Data0)^;
 end;
 
-class function  _TPointerItBox_Obj.GetNextValue(const SelfItData:_IIterator;const Step:integer): _ValueType;
+class function  _TPointerItBox_Obj.GetNextValue(const SelfItData:_IIterator;const Step:_TNativeInt): _ValueType;
 begin
-  result:=_TNudePointerType(integer(_TNudePointerType(SelfItData._Data0))+Step*(sizeof(_ValueType)))^;
+  result:=_TNudePointerType(_TNativeInt(_TNudePointerType(SelfItData._Data0))+Step*(sizeof(_ValueType)))^;
 end;
 
-class procedure _TPointerItBox_Obj.SetNextValue(const SelfItData:_IIterator;const Step:integer;const Value:_ValueType);
+class procedure _TPointerItBox_Obj.SetNextValue(const SelfItData:_IIterator;const Step:_TNativeInt;const Value:_ValueType);
 begin
   {$ifdef _DGL_ObjValue}
-  _Assign(_TNudePointerType(integer(_TNudePointerType(SelfItData._Data0))+Step*(sizeof(_ValueType)))^,Value);
+  _Assign(_TNudePointerType(_TNativeInt(_TNudePointerType(SelfItData._Data0))+Step*(sizeof(_ValueType)))^,Value);
   {$else}
-  _TNudePointerType(integer(_TNudePointerType(SelfItData._Data0))+Step*(sizeof(_ValueType)))^:=Value;
+  _TNudePointerType(_TNativeInt(_TNudePointerType(SelfItData._Data0))+Step*(sizeof(_ValueType)))^:=Value;
   {$endif}
 end;
 
@@ -174,9 +174,9 @@ begin
   result:=(_TNudePointerType(SelfItData._Data0)=_TNudePointerType(Iterator._Data0));
 end;
 
-class function  _TPointerItBox_Obj.Distance(const SelfItData:_IIterator;const Iterator:_IIterator):integer;
+class function  _TPointerItBox_Obj.Distance(const SelfItData:_IIterator;const Iterator:_IIterator):_TNativeInt;
 begin
-  result:=( integer(_TNudePointerType(Iterator._Data0)) - integer(_TNudePointerType(SelfItData._Data0)) )
+  result:=( _TNativeInt(_TNudePointerType(Iterator._Data0)) - _TNativeInt(_TNudePointerType(SelfItData._Data0)) )
      div (sizeof(_ValueType));
 end;
 
@@ -191,7 +191,7 @@ begin
   inc(PByte(SelfItData._Data0),(sizeof(_ValueType)));
 end;
 
-class procedure _TPointerItBox_Obj.Next(var SelfItData:_IIterator;const Step:integer);
+class procedure _TPointerItBox_Obj.Next(var SelfItData:_IIterator;const Step:_TNativeInt);
 begin
   inc(PByte(_TNudePointerType(SelfItData._Data0)),Step*(sizeof(_ValueType)));
 end;
@@ -207,7 +207,7 @@ begin
   result._Data0:=SelfItData._Data0;
 end;
 
-class function  _TPointerItBox_Obj.Clone(const SelfItData:_IIterator;const NextStep:integer):_IIterator;
+class function  _TPointerItBox_Obj.Clone(const SelfItData:_IIterator;const NextStep:_TNativeInt):_IIterator;
 begin
   result._ObjIteratorClass:=SelfItData._ObjIteratorClass;
   result._Data0:=SelfItData._Data0;
@@ -225,7 +225,7 @@ begin
   _TNudePointerType(result._Data0):=aPointer;
 end;
 
-function PointerBox(const aPointer : _TNudePointerType;const NextStep:integer):_IVectorIterator; overload;
+function PointerBox(const aPointer : _TNudePointerType;const NextStep:_TNativeInt):_IVectorIterator; overload;
 begin
   result._ObjIteratorClass:=_TPointerItBox_Obj;
   _TNudePointerType(result._Data0):=aPointer;

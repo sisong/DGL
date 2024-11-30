@@ -47,7 +47,7 @@ procedure TTest_PriorityQueue.testPriorityQueue;
 var
   PriorityQueue : IStrPriorityQueue;
   sk : IStrPriorityQueue;
-  i : integer;
+  i : _TNativeInt;
 begin
   PriorityQueue:=TStrPriorityQueue.Create();
   Check( PriorityQueue.IsEmpty);

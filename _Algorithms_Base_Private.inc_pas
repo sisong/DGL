@@ -143,9 +143,9 @@ end;
 
 
 {$ifdef  _DGL_Algorithms_Object_Function}
-class function _TAlgorithms.ReplaceIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunctionOfObject;const NewValue:_ValueType):integer;
+class function _TAlgorithms.ReplaceIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunctionOfObject;const NewValue:_ValueType):_TNativeInt;
 {$else}
-class function _TAlgorithms.ReplaceIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunction;const NewValue:_ValueType):integer;
+class function _TAlgorithms.ReplaceIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunction;const NewValue:_ValueType):_TNativeInt;
 {$endif}
 var
   It: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
@@ -164,9 +164,9 @@ begin
 end;
 
 {$ifdef  _DGL_Algorithms_Object_Function}
-class function _TAlgorithms.ReplaceCopyIf(const ItBeginSrc,ItEndSrc,ItBeginDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunctionOfObject;const NewValue:_ValueType):integer;
+class function _TAlgorithms.ReplaceCopyIf(const ItBeginSrc,ItEndSrc,ItBeginDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunctionOfObject;const NewValue:_ValueType):_TNativeInt;
 {$else}
-class function _TAlgorithms.ReplaceCopyIf(const ItBeginSrc,ItEndSrc,ItBeginDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunction;const NewValue:_ValueType):integer;
+class function _TAlgorithms.ReplaceCopyIf(const ItBeginSrc,ItEndSrc,ItBeginDest: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunction;const NewValue:_ValueType):_TNativeInt;
 {$endif}
 var
   ItSrc: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
@@ -208,13 +208,13 @@ begin
 end;
 
 {$ifdef  _DGL_Algorithms_Object_Function}
-class procedure _TAlgorithms.Generate(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const N:integer;const GenerateFunction:TGenerateFunctionOfObject);
+class procedure _TAlgorithms.Generate(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const N:_TNativeInt;const GenerateFunction:TGenerateFunctionOfObject);
 {$else}
-class procedure _TAlgorithms.Generate(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const N:integer;const GenerateFunction:TGenerateFunction);
+class procedure _TAlgorithms.Generate(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const N:_TNativeInt;const GenerateFunction:TGenerateFunction);
 {$endif}
 var
   It: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
-  i: integer;
+  i: _TNativeInt;
 begin
   It:=ItBegin;
   for i:=0 to N-1 do
@@ -250,9 +250,9 @@ end;
 
 
 {$ifdef  _DGL_Algorithms_Object_Function}
-class function _TAlgorithms.CountIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunctionOfObject):integer;
+class function _TAlgorithms.CountIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunctionOfObject):_TNativeInt;
 {$else}
-class function _TAlgorithms.CountIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunction):integer;
+class function _TAlgorithms.CountIf(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestFunction:TTestFunction):_TNativeInt;
 {$endif}
 var
   It :  {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
@@ -374,7 +374,7 @@ class procedure _TAlgorithms.RandomShuffle(const ItBegin,ItEnd: {$ifdef _DGL_Vec
 {$endif}
 var
   It :  {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
-  i,r,MaxStep : integer;
+  i,r,MaxStep : _TNativeInt;
 begin
   It:=ItBegin;
   MaxStep:=ItBegin.Distance(ItEnd);
@@ -388,16 +388,16 @@ end;
 
 
 {$ifdef  _DGL_Algorithms_Object_Function}
-        procedure __DGL_QuickSort(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;Right:integer;
+        procedure __DGL_QuickSort(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;Right:_TNativeInt;
             const TestBinaryFunction:TTestBinaryFunctionOfObject);overload;
 {$else}
-        procedure __DGL_QuickSort(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;Right:integer;
+        procedure __DGL_QuickSort(const ItBegin: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;Right:_TNativeInt;
             const TestBinaryFunction:TTestBinaryFunction);overload;
 {$endif}
         var
-          i,j : integer;
+          i,j : _TNativeInt;
         begin
-          _TAlgorithms.SwapValue(ItBegin,0,random(Right+1));
+          _TAlgorithms.SwapValue(ItBegin,0,_DGL_Random(Right+1));
           i:=0;
           j:=Right+1;
           while true do
@@ -428,7 +428,7 @@ class procedure _TAlgorithms.Sort(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType
 class procedure _TAlgorithms.Sort(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunction);
 {$endif}
 var
-  Right: integer;
+  Right: _TNativeInt;
 begin
   if (ItBegin._ObjIteratorClass=_TVectorIterator) then
   begin
@@ -500,9 +500,9 @@ class function _TAlgorithms.LowerBound(const ItBegin,ItEnd: {$ifdef _DGL_VectorI
 class function _TAlgorithms.LowerBound(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const Value:_ValueType;const TestBinaryFunction:TTestBinaryFunction): {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;
 {$endif}
 var
-  left,LowerBound : integer;
-  m : integer;
-  Count : integer;                       
+  left,LowerBound : _TNativeInt;
+  m : _TNativeInt;
+  Count : _TNativeInt;                       
 begin
   {todo£ºif (ItBegin._ObjIteratorClass=_TVectorIterator) then
   begin
@@ -539,7 +539,7 @@ class procedure _TAlgorithms.PushHeap(const ItBegin,ItEnd: {$ifdef _DGL_VectorIt
 class procedure _TAlgorithms.PushHeap(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunction);
 {$endif}
 var
-  ip,isub : integer;
+  ip,isub : _TNativeInt;
 begin
   isub:=ItBegin.Distance(ItEnd)-1;
   while true do
@@ -561,8 +561,8 @@ class procedure _TAlgorithms.PopHeap(const ItBegin,ItEnd: {$ifdef _DGL_VectorItT
 class procedure _TAlgorithms.PopHeap(const ItBegin,ItEnd: {$ifdef _DGL_VectorItType}_IVectorIterator{$else}_IIterator{$endif} ;const TestBinaryFunction:TTestBinaryFunction);
 {$endif}
 var
-  ip,isub : integer;
-  Count   : integer;
+  ip,isub : _TNativeInt;
+  Count   : _TNativeInt;
 begin
   Count:=ItBegin.Distance(ItEnd);
   dec(Count);

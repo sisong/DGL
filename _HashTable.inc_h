@@ -42,7 +42,7 @@ type
 //------------------------------------------------------------------------------
 // _THashTableBase
 
-//var testTHashNodeCount:integer=0;
+//var testTHashNodeCount:_TNativeInt=0;
 
 
 type  //开链hash桶(链表)
@@ -64,7 +64,7 @@ type  //开链hash桶(链表)
     end;
 
 const                        //32 bit
-  _csHashCapacityList:array[0..32] of Cardinal=
+  _csHashCapacityList:array[0..32] of _TNativeUInt=
                 (
                 31 ,    //1
                 31 ,    //2
@@ -101,14 +101,14 @@ const                        //32 bit
                 4294967291
                 );
   const  _csDefaultHashCapacityIndex = 5;
-  function GetBigHashCapacityIndex(const Capacity:Cardinal;const CapacityIndex:Byte=_csDefaultHashCapacityIndex):Byte;
+  function GetBigHashCapacityIndex(const Capacity:_TNativeUInt;const CapacityIndex:Byte=_csDefaultHashCapacityIndex):Byte;
   
 type
   _THashBaseIterator = class;  //hash Iterator
 
   //_THashTableBase内部维护的简易迭代器
   _TTagHashIterator =  record
-    ArrayIndex  : integer;
+    ArrayIndex  : _TNativeInt;
     pPNode      : _PPHashNode;
   end;
 
@@ -151,23 +151,18 @@ type
   //           LowerBound       : 返回某键值的第一个可安插位置
   //           UpperBound       : 返回某键值的最后一个可安插位置
   //           EqualRange       : 返回某键值的可安插的第一个和最后一个位置
-  // 使用方式：
-  // 注意事项: 内部实现，外部不要直接使用
-  // 作    者: HouSisong , 2004.09.08
-  // [相关资料]: (如果有的话)
-  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
   //----------------------------------------------------------------------------
   _THashTableBase = class(TObject)
   private
     FDataList     : _TPHashNodeDArray;
-    FCount        : Cardinal;
-    FCapacity     : Cardinal;
+    FCount        : _TNativeUInt;
+    FCapacity     : _TNativeUInt;
     FCapacityIndex: Byte; //0..32
     FAlwaysReserveIndex: Byte;
     F_DGL_OnlySet : boolean;
     procedure   SetCapacityIndex(const NewCapacityIndex: Byte);
     procedure   DecCapacity();
-    function    CountRange(const Key:_HashKeyType;out ItBegin,ItEnd:_TTagHashIterator):integer;
+    function    CountRange(const Key:_HashKeyType;out ItBegin,ItEnd:_TTagHashIterator):_TNativeInt;
     function    getNewNode(const Key: _HashKeyType;const Value: _HashValueType): _PHashNode;overload;   {$ifdef _DGL_Inline} inline; {$endif}   //todo: Warning inline on if _ValueType if "object" then error!!!
     function    getNewNode(const Key: _HashKeyType): _PHashNode;overload;  {$ifdef _DGL_Inline} inline; {$endif}
     procedure   DisposeNode(const pHashNode: _PHashNode);   {$ifdef _DGL_Inline} inline; {$endif}
@@ -183,33 +178,33 @@ type
     class procedure  Next(const HashTable:_THashTableBase;var It : _TTagHashIterator);       {$ifdef _DGL_Inline} inline; {$endif}
     class function   IsEndIt(const It : _TTagHashIterator):boolean;                           {$ifdef _DGL_Inline} inline; {$endif}
     class function   IsEqualIt(const It0,It1 : _TTagHashIterator):boolean;
-    procedure setAlwaysReserve(const aAlwaysReserveSize: Cardinal);   {$ifdef _DGL_Inline} inline; {$endif}
-    function getAlwaysReserveSize():Cardinal;    {$ifdef _DGL_Inline} inline; {$endif}
+    procedure setAlwaysReserve(const aAlwaysReserveSize: _TNativeUInt);   {$ifdef _DGL_Inline} inline; {$endif}
+    function getAlwaysReserveSize():_TNativeUInt;    {$ifdef _DGL_Inline} inline; {$endif}
   public
     constructor Create(const IsOnlySet : boolean) ;//use defunlt function Pointer
     destructor  Destroy; override;
   public
     function  ItBegin(): _TTagHashIterator;            {$ifdef _DGL_Inline} inline; {$endif}
     function  ItEnd(): _TTagHashIterator;               {$ifdef _DGL_Inline} inline; {$endif}
-    procedure Reserve(const ReserveSize: Cardinal);       {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Reserve(const ReserveSize: _TNativeUInt);       {$ifdef _DGL_Inline} inline; {$endif}
     procedure UniqueInsert(const Key: _HashKeyType;const Value: _HashValueType); overload;  //todo: Warning inline on if _ValueType if "object" then error!!!
     procedure MultiInsert(const Key: _HashKeyType;const Value: _HashValueType);overload;    //todo: Warning inline on if _ValueType if "object" then error!!!
     procedure UniqueInsert(const Key: _HashKeyType); overload;                            {$ifdef _DGL_Inline} inline; {$endif}
     procedure MultiInsert(const Key: _HashKeyType);overload;                              {$ifdef _DGL_Inline} inline; {$endif}
     procedure Clear(); virtual;
-    property  AlwaysReserveSize:Cardinal read getAlwaysReserveSize write setAlwaysReserve;
-    function  Size():Cardinal;                                                            {$ifdef _DGL_Inline} inline; {$endif}
-    property  Capacity: Cardinal read FCapacity;
+    property  AlwaysReserveSize:_TNativeUInt read getAlwaysReserveSize write setAlwaysReserve;
+    function  Size():_TNativeUInt;                                                            {$ifdef _DGL_Inline} inline; {$endif}
+    property  Capacity: _TNativeUInt read FCapacity;
     function  GetItemValue(const Key: _HashKeyType): _HashValueType;                      {$ifdef _DGL_Inline} inline; {$endif}
     procedure Swap(HastTable:_THashTableBase);                                             {$ifdef _DGL_Inline} inline; {$endif}
 
-    function  EraseValue(const Value: _HashValueType): integer;  overload;                  {$ifdef _DGL_Inline} inline; {$endif}
-    function  EraseValue(const Key: _HashKeyType;const Value: _HashValueType): integer;  overload;     {$ifdef _DGL_Inline} inline; {$endif}
-    function  EraseKey(const Key: _HashKeyType): integer;  overload;            {$ifdef _DGL_Inline} inline; {$endif}
+    function  EraseValue(const Value: _HashValueType): _TNativeInt;  overload;                  {$ifdef _DGL_Inline} inline; {$endif}
+    function  EraseValue(const Key: _HashKeyType;const Value: _HashValueType): _TNativeInt;  overload;     {$ifdef _DGL_Inline} inline; {$endif}
+    function  EraseKey(const Key: _HashKeyType): _TNativeInt;  overload;            {$ifdef _DGL_Inline} inline; {$endif}
     procedure Erase(const ItPos:_IIterator);  overload;                         // {$ifdef _DGL_Inline} inline; {$endif}
     procedure Erase(const ItBegin,ItEnd: _IIterator);  overload;               //
 
-    function  Count(const Key:_HashKeyType):integer;
+    function  Count(const Key:_HashKeyType):_TNativeInt;
     function  FindKey(const Key:_HashKeyType):_TTagHashIterator;                  {$ifdef _DGL_Inline} inline; {$endif}
     function  FindValue(const Value:_HashValueType):_TTagHashIterator;
     function  LowerBound(const Key:_HashKeyType):_TTagHashIterator;//==FindKey
@@ -221,11 +216,6 @@ type
   //----------------------------------------------------------------------------
   // 作用描述: _THashTableBase的迭代器，供使用_THashTableBase的其他对外容器使用
   // 主要方法：(参见_IMapIterator的说明)
-  // 使用方式：
-  // 注意事项:
-  // 作    者: HouSisong , 2004.09.08
-  // [相关资料]: (如果有的话)
-  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
   //----------------------------------------------------------------------------
   //hash Iterator
   _THashBaseIterator = class(_TAbstractIterator)  

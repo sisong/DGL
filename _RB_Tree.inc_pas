@@ -500,7 +500,7 @@ begin
   result:=self.FNodeCount=0;
 end;
 
-function _TRB_Tree.Size: integer;
+function _TRB_Tree.Size: _TNativeInt;
 begin
   result:=self.FNodeCount;
 end;
@@ -647,7 +647,7 @@ begin
   //else  do noting
 end;
 
-function  _TRB_Tree.CountRange(const Key:_RB_Tree_KeyType;out ItBegin,ItEnd:_TRB_TreeIterator):integer;
+function  _TRB_Tree.CountRange(const Key:_RB_Tree_KeyType;out ItBegin,ItEnd:_TRB_TreeIterator):_TNativeInt;
 var
   it :_TRB_TreeIterator;
 begin
@@ -662,7 +662,7 @@ begin
   end;
 end;
 
-function _TRB_Tree.Count(const Key: _RB_Tree_KeyType): integer;
+function _TRB_Tree.Count(const Key: _RB_Tree_KeyType): _TNativeInt;
 var
   ItBegin,ItEnd: _TRB_TreeIterator;
 begin
@@ -702,7 +702,7 @@ begin
   end;
 end;
 
-function _TRB_Tree.EraseKey(const Key: _RB_Tree_KeyType): integer;
+function _TRB_Tree.EraseKey(const Key: _RB_Tree_KeyType): _TNativeInt;
 var
   ItBegin,ItEnd: _TRB_TreeIterator;
 begin
@@ -712,7 +712,7 @@ begin
 end;
 
 function _TRB_Tree.EraseValue(const Key: _RB_Tree_KeyType;
-  const Value: _RB_Tree_ValueType): integer;
+  const Value: _RB_Tree_ValueType): _TNativeInt;
 var
   It: _TRB_TreeIterator;
 begin
@@ -726,7 +726,7 @@ begin
   end;
 end;
 
-function _TRB_Tree.EraseValue(const Value: _RB_Tree_ValueType): integer;
+function _TRB_Tree.EraseValue(const Value: _RB_Tree_ValueType): _TNativeInt;
 var
   It: _TRB_TreeIterator;
 begin
@@ -838,7 +838,7 @@ end;
 
 procedure _TRB_Tree.Swap(RBTree: _TRB_Tree);
 var
-  tmpInt     : integer;
+  tmpInt     : _TNativeInt;
   tmpPNode   : _PRB_TreeNode;
 begin
   if self=RBTree then exit;

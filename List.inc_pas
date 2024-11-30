@@ -95,7 +95,7 @@ begin
   self.Insert(self.ItBegin,ItBegin, ItEnd);
 end;
 
-constructor _TList.Create(const num: integer; const Value: _ValueType);
+constructor _TList.Create(const num: _TNativeInt; const Value: _ValueType);
 begin
   inherited Create();
   self.FItEndNode.pNext:=@self.FItEndNode;
@@ -144,9 +144,9 @@ begin
   Insert(@self.FItEndNode,Value);
 end;
 
-procedure _TList.Insert(const ItPos:_IIterator;const num:integer;const Value:_ValueType);
+procedure _TList.Insert(const ItPos:_IIterator;const num:_TNativeInt;const Value:_ValueType);
 var
-  i : integer;
+  i : _TNativeInt;
 begin
   for i:=0 to num-1 do
     Insert(_PListNode(ItPos._Data0),Value);
@@ -207,7 +207,7 @@ begin
   end;
 end;
 
-function _TList.Size: Integer;
+function _TList.Size: _TNativeInt;
 var
   PNode : _PListNode;
 begin
@@ -328,7 +328,7 @@ begin
   ItBegin.pPrevious:=tmp;
 end;
 
-constructor _TList.Create(const num: integer);
+constructor _TList.Create(const num: _TNativeInt);
 {$ifdef  _DGL_ObjValue}
 var
   _Default_Value : _ValueType;
@@ -347,7 +347,7 @@ begin
   {$endif}
 end;
 
-procedure _TList.Assign(const num:integer;const Value: _ValueType);
+procedure _TList.Assign(const num:_TNativeInt;const Value: _ValueType);
 begin
   self.Clear();
   self.PushBack(num,Value);
@@ -359,9 +359,9 @@ begin
   self.PushBack(ItBegin,ItEnd);
 end;
 
-procedure _TList.PushBack(const num:integer;Value: _ValueType);
+procedure _TList.PushBack(const num:_TNativeInt;Value: _ValueType);
 var
-  i: integer;
+  i: _TNativeInt;
 begin
   for i:=0 to num-1 do
     self.PushBack(Value);
@@ -373,9 +373,9 @@ begin
 end;
 
 
-procedure _TList.PushFront(const num:integer;Value: _ValueType);
+procedure _TList.PushFront(const num:_TNativeInt;Value: _ValueType);
 var
-  i: integer;
+  i: _TNativeInt;
 begin
   for i:=0 to num-1 do
     self.PushFront(Value);
@@ -389,9 +389,9 @@ end;
 
 function _TList.IsEquals(const AContainer: _IContainer): Boolean;
 var
-  i : integer;
+  i : _TNativeInt;
   it: _IIterator;
-  ContainerSize: integer;
+  ContainerSize: _TNativeInt;
   ItSelf : _PListNode;
 begin
   ContainerSize:=AContainer.Size();
@@ -425,8 +425,8 @@ end;
 
 function _TList.IsLess(const AContainer: _IContainer): Boolean;
 var
-  i : integer;
-  selfSize,ACSize,MinSize : integer;
+  i : _TNativeInt;
+  selfSize,ACSize,MinSize : _TNativeInt;
   ItSelf : _PListNode;
   it : _IIterator;
 begin
@@ -459,10 +459,10 @@ end;
 
 
 
-procedure _TList.Resize(const num: integer; const Value: _ValueType);
+procedure _TList.Resize(const num: _TNativeInt; const Value: _ValueType);
 var
-  i : integer;
-  OldCount : integer;
+  i : _TNativeInt;
+  OldCount : _TNativeInt;
 begin
   OldCount:=self.Size();
   if num<OldCount then
@@ -477,7 +477,7 @@ begin
   end;
 end;
 
-procedure _TList.Resize(const num:integer);
+procedure _TList.Resize(const num:_TNativeInt);
 begin
   Resize(num,_NULL_Value);
 end;
@@ -566,7 +566,7 @@ begin
 end;
 
 
-class function _TListIterator.Distance(const SelfItData:_IIterator;const Iterator:_IIterator):integer;
+class function _TListIterator.Distance(const SelfItData:_IIterator;const Iterator:_IIterator):_TNativeInt;
 type
   _PIListIterator  = ^_IListIterator;
 var
@@ -581,11 +581,11 @@ begin
   end;
 end;
 
-class procedure _TListIterator.Next(var SelfItData:_IIterator; const Step:integer);
+class procedure _TListIterator.Next(var SelfItData:_IIterator; const Step:_TNativeInt);
 type
   _PIListIterator  = ^_IListIterator;
 var
-  i : integer;
+  i : _TNativeInt;
 begin
   if Step>=0 then
     for i:=0 to Step-1 do _PIListIterator(@SelfItData).Next()
@@ -614,7 +614,7 @@ begin
   result:=(_PListNode(Self._Data0)).Data;
 end;
 
-function  _IListIterator.GetNextValue(const Step:integer): _ValueType;
+function  _IListIterator.GetNextValue(const Step:_TNativeInt): _ValueType;
 var
   It : _IListIterator;
 begin
@@ -624,7 +624,7 @@ begin
   result:=It.Value;
 end;
 
-procedure _IListIterator.SetNextValue(const Step:integer;const aValue:_ValueType);
+procedure _IListIterator.SetNextValue(const Step:_TNativeInt;const aValue:_ValueType);
 var
   It : _IListIterator;
 begin
@@ -661,7 +661,7 @@ begin
   result._Data0:=self._Data0;
 end;
 
-function  _IListIterator.Clone(const NextStep:integer):_IIterator;
+function  _IListIterator.Clone(const NextStep:_TNativeInt):_IIterator;
 begin
   result._ObjIteratorClass:=self._ObjIteratorClass;
   result._Data0:=self._Data0;

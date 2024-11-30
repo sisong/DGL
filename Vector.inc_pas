@@ -56,7 +56,7 @@ begin
   {$endif}
 end;
 
-procedure _TVector.AlwaysReserve(const aAlwaysReserveSize: integer);
+procedure _TVector.AlwaysReserve(const aAlwaysReserveSize: _TNativeInt);
 begin
   self.Reserve(aAlwaysReserveSize);
   self.FAlwaysReserveSize:=aAlwaysReserveSize;
@@ -64,7 +64,7 @@ end;
 
 procedure _TVector.Clear;
 var
-  i,L : integer;
+  i,L : _TNativeInt;
 begin
 {$ifdef _DGL_ObjValue}
   for i:=0 to self.FCount-1 do
@@ -87,7 +87,7 @@ end;
 
 procedure _TVector.Swap(AVector:_TVector);
 var
-    tmpInt        : Integer;
+    tmpInt        : _TNativeInt;
     tmpDataArray  : _TValueDArray;
 begin
   if self=AVector then exit;
@@ -116,20 +116,20 @@ begin
   _TVectorIterator.ItCreate(result,self.UnSafe_GetVectorBufPointer(0));
 end;
 
-function  _TVector.NewIterator(const Index: Integer):_IIterator;
+function  _TVector.NewIterator(const Index: _TNativeInt):_IIterator;
 begin
   _TVectorIterator.ItCreate(result,self.UnSafe_GetVectorBufPointer(Index));
 end;
 
 
-function _TVector.GetItemValue(const Index: Integer): _ValueType;
+function _TVector.GetItemValue(const Index: _TNativeInt): _ValueType;
 begin
   Assert(Index>=0);
   Assert(Index<FCount);
   result:=self.FDataArray[Index];
 end;
 
-procedure _TVector.SetItemValue(const Index: Integer; const Value: _ValueType);
+procedure _TVector.SetItemValue(const Index: _TNativeInt; const Value: _ValueType);
 begin
   Assert(Index>=0);
   Assert(Index<FCount);
@@ -140,9 +140,9 @@ begin
   {$endif}
 end;
 
-function _TVector.IndexOf(const Value: _ValueType): Integer;
+function _TVector.IndexOf(const Value: _ValueType): _TNativeInt;
 var
-  i : integer;
+  i : _TNativeInt;
 begin
   for i:=0 to self.FCount-1 do
   begin
@@ -161,7 +161,7 @@ end;
 
 function _TVector.IsEquals(const AContainer: _IContainer): Boolean;
 var
-  i : integer;
+  i : _TNativeInt;
   it : _IIterator;
 begin
   if self.Size()<>AContainer.Size() then
@@ -191,8 +191,8 @@ end;
 
 function _TVector.IsLess(const AContainer: _IContainer): Boolean;
 var
-  i : integer;
-  ACSize,MinSize : integer;
+  i : _TNativeInt;
+  ACSize,MinSize : _TNativeInt;
   it : _IIterator;
 begin
   ACSize:=AContainer.Size();
@@ -256,19 +256,19 @@ begin
   self.Insert(self.ItEnd,ItBegin, ItEnd);
 end;
 
-procedure _TVector.PushBack(const num:integer;Value: _ValueType); 
+procedure _TVector.PushBack(const num:_TNativeInt;Value: _ValueType); 
 var
-  i : integer;
+  i : _TNativeInt;
 begin
   for i:=0 to num-1 do
     self.PushBack(Value);
 end;
 
-function _TVector.EraseValue(const Value: _ValueType): integer;
+function _TVector.EraseValue(const Value: _ValueType): _TNativeInt;
 var
-  iRead  : integer;
-  iWrite : integer;
-  fIndex : integer;
+  iRead  : _TNativeInt;
+  iWrite : _TNativeInt;
+  fIndex : _TNativeInt;
 begin
   fIndex:=IndexOf(Value);
   if fIndex<0 then
@@ -302,20 +302,20 @@ begin
   dec(self.FCount,result);
 end;
 
-function _TVector.Size: Integer;
+function _TVector.Size: _TNativeInt;
 begin
   result:=self.FCount;
 end;
 
 procedure _TVector.Insert(const ItPos:_IIterator; const Value: _ValueType);
 begin
-  self.InsertByIndex((ItPos._Data0-integer(UnSafe_GetVectorBufPointer(0))) div sizeof(_ValueType),Value);
+  self.InsertByIndex((ItPos._Data0-_TNativeUInt(UnSafe_GetVectorBufPointer(0))) div sizeof(_ValueType),Value);
 end;
 
 
-procedure _TVector.InsertByIndex(const Index: Integer;const Value: _ValueType);
+procedure _TVector.InsertByIndex(const Index: _TNativeInt;const Value: _ValueType);
 var
-  IndexPos : integer;
+  IndexPos : _TNativeInt;
 begin
   IndexPos:=Index;
   Assert(IndexPos>=0);
@@ -332,14 +332,14 @@ end;
 
 procedure _TVector.Insert(const ItPos:_IIterator; const ItBegin,ItEnd: _IIterator);
 var
-  i : integer;
+  i : _TNativeInt;
   _ItBegin : _IIterator;
-  CopyCount : integer;
-  IndexPos : integer;
+  CopyCount : _TNativeInt;
+  IndexPos : _TNativeInt;
 begin
   //todo: Check safe
 
-  IndexPos:=(ItPos._Data0-integer(UnSafe_GetVectorBufPointer(0))) div sizeof(_ValueType);
+  IndexPos:=(ItPos._Data0-_TNativeUInt(UnSafe_GetVectorBufPointer(0))) div sizeof(_ValueType);
   Assert(IndexPos>=0);
   Assert(IndexPos<=FCount);
   CopyCount:=ItBegin.Distance(ItEnd);
@@ -364,18 +364,18 @@ end;
 
 procedure _TVector.Insert(const ItPos:_IIterator; const ItBegin,ItEnd: _PValueType);
 var
-  i : integer;
+  i : _TNativeInt;
   _ItBegin : _PValueType;
-  CopyCount : integer;
-  IndexPos : integer;
+  CopyCount : _TNativeInt;
+  IndexPos : _TNativeInt;
 begin
-  Assert ( (longword(ItBegin)<longword(UnSafe_GetVectorBufPointer(0)) )
-       or (longword(ItBegin)>=longword(UnSafe_GetVectorBufPointer(FCount)) ) );  //Check safe
+  Assert ( (_TNativeUInt(ItBegin)<_TNativeUInt(UnSafe_GetVectorBufPointer(0)) )
+       or (_TNativeUInt(ItBegin)>=_TNativeUInt(UnSafe_GetVectorBufPointer(FCount)) ) );  //Check safe
 
-  IndexPos:=(ItPos._Data0-integer(UnSafe_GetVectorBufPointer(0))) div sizeof(_ValueType);
+  IndexPos:=(ItPos._Data0-_TNativeUInt(UnSafe_GetVectorBufPointer(0))) div sizeof(_ValueType);
   Assert(IndexPos>=0);
   Assert(IndexPos<=FCount);
-  CopyCount:=(Cardinal(integer(ItEnd)-integer(ItBegin)) div sizeof(_ValueType));
+  CopyCount:=(_TNativeUInt(_TNativeInt(ItEnd)-_TNativeInt(ItBegin)) div sizeof(_ValueType));
   if CopyCount<=0 then exit;
 
   self.SetNewCapability(FCount+CopyCount);
@@ -394,7 +394,7 @@ begin
   inc(FCount,CopyCount);
 end;
 
-function _DGL_Int_Max_Vector(const x,y:integer):integer;  {$ifdef _DGL_Inline} inline; {$endif}
+function _DGL_Int_Max_Vector(const x,y:_TNativeInt):_TNativeInt;  {$ifdef _DGL_Inline} inline; {$endif}
 begin
   if x<y then
     result:=y
@@ -402,10 +402,10 @@ begin
     result:=x;
 end;
 
-procedure _TVector.SetNewCapability(const NewCapability: integer);
+procedure _TVector.SetNewCapability(const NewCapability: _TNativeInt);
 var
-  NewLength : integer;
-  IncLength : integer;
+  NewLength : _TNativeInt;
+  IncLength : _TNativeInt;
 const
   MinSize = 32;
 begin
@@ -421,13 +421,13 @@ begin
   FArrayLength:=length(FDataArray);
 end;
 
-constructor _TVector.Create(const num: integer; const Value: _ValueType);
+constructor _TVector.Create(const num: _TNativeInt; const Value: _ValueType);
 begin
   inherited Create();
   self.Insert(self.ItBegin,num,Value);
 end;
 
-constructor _TVector.Create(const num: integer);
+constructor _TVector.Create(const num: _TNativeInt);
 {$ifdef  _DGL_ObjValue}
 var
   _Default_Value : _ValueType;
@@ -452,7 +452,7 @@ end;
 constructor _TVector.Create(const AVector: _TVector);
 {$ifdef _DGL_ObjValue}
 var
-  i : integer;
+  i : _TNativeInt;
 {$endif}
 begin
   inherited Create();
@@ -470,13 +470,13 @@ end;
 
 procedure _TVector.Erase(const ItBegin, ItEnd: _IIterator);
 var
-  DelCount : integer;
-  DelPos   : integer;
+  DelCount : _TNativeInt;
+  DelPos   : _TNativeInt;
   {$ifdef _DGL_ObjValue}
-  i : integer;
+  i : _TNativeInt;
   {$endif}
 begin
-  DelPos:=(ItBegin._Data0-integer(UnSafe_GetVectorBufPointer(0))) div sizeof(_ValueType);
+  DelPos:=(ItBegin._Data0-_TNativeUInt(UnSafe_GetVectorBufPointer(0))) div sizeof(_ValueType);
   DelCount:=ItBegin.Distance(ItEnd);
   if DelCount<=0 then exit;
   {$ifdef _DGL_ObjValue}
@@ -512,7 +512,7 @@ begin
   {$endif}
 end;
 
-procedure _TVector.EraseByIndex(const Index: integer);
+procedure _TVector.EraseByIndex(const Index: _TNativeInt);
 begin
   Erase(NewIterator(Index));
 end;
@@ -522,13 +522,13 @@ begin
   self.pushBack(Value);
 end;
 
-procedure _TVector.Insert(const ItPos: _IIterator; const num: integer; const Value: _ValueType);
+procedure _TVector.Insert(const ItPos: _IIterator; const num: _TNativeInt; const Value: _ValueType);
 var
-  i : integer;
-  IndexPos : integer;
+  i : _TNativeInt;
+  IndexPos : _TNativeInt;
 begin
   if num=0 then exit;
-  IndexPos:=(ItPos._Data0-integer(UnSafe_GetVectorBufPointer(0))) div sizeof(_ValueType);
+  IndexPos:=(ItPos._Data0-_TNativeUInt(UnSafe_GetVectorBufPointer(0))) div sizeof(_ValueType);
   Assert(IndexPos>=0);
   Assert(IndexPos<=FCount);
   Assert(num>=0);
@@ -558,15 +558,15 @@ begin
   self.Insert(self.ItBegin,Value);
 end;
 
-procedure _TVector.Reserve(const ReserveSize: integer);
+procedure _TVector.Reserve(const ReserveSize: _TNativeInt);
 begin
   self.SetNewCapability(ReserveSize);
 end;
 
-procedure _TVector.Resize(const num: integer; const Value: _ValueType);
+procedure _TVector.Resize(const num: _TNativeInt; const Value: _ValueType);
 {$ifdef _DGL_ObjValue}
 var
-  i : integer;
+  i : _TNativeInt;
 {$endif}
 begin
   SetNewCapability(num);
@@ -593,7 +593,7 @@ begin
   FCount:=num;  
 end;
 
-procedure _TVector.Resize(const num:integer);
+procedure _TVector.Resize(const num:_TNativeInt);
 {$ifdef  _DGL_ObjValue}
 var
   _Default_Value : _ValueType;
@@ -629,16 +629,16 @@ end;
 
 class procedure _TVector.ReCopy(PBegin, PEnd, PDest: _PValueType);
 var
-  CopyCount : integer;
-  i : integer;
+  CopyCount : _TNativeInt;
+  i : _TNativeInt;
 begin
-  CopyCount:=(integer(PEnd)-integer(PBegin)) div sizeof(_ValueType);
+  CopyCount:=(_TNativeInt(PEnd)-_TNativeInt(PBegin)) div sizeof(_ValueType);
   //从后面开始拷贝，避免覆盖
   PEnd:=PBegin;
   dec(PEnd);
-  i:= integer(CopyCount-1)*Sizeof(_ValueType);
-  PBegin:=_PValueType(integer(PBegin)+i);
-  PDest:=_PValueType(integer(PDest)+i);
+  i:= _TNativeInt(CopyCount-1)*Sizeof(_ValueType);
+  PBegin:=_PValueType(_TNativeInt(PBegin)+i);
+  PDest:=_PValueType(_TNativeInt(PDest)+i);
   while PBegin<>PEnd do
   begin
     PDest^:=PBegin^;
@@ -647,9 +647,9 @@ begin
   end;
 end;
 
-procedure _TVector.PushFront(const num: integer; Value: _ValueType);
+procedure _TVector.PushFront(const num: _TNativeInt; Value: _ValueType);
 var
-  EndIndex:integer;
+  EndIndex:_TNativeInt;
 begin
   EndIndex:=FCount;
   self.Resize(EndIndex+num);
@@ -676,7 +676,7 @@ begin
   _IVector(NewContainer):=_TVector.Create(self);
 end;
 
-function  _TVector.UnSafe_GetVectorBufPointer(const Index:integer): _PValueType;
+function  _TVector.UnSafe_GetVectorBufPointer(const Index:_TNativeInt): _PValueType;
 begin
   if FDataArray=nil then
     result:=nil
@@ -684,7 +684,7 @@ begin
     result:=@FDataArray[Index];
 end;
 
-procedure _TVector.Assign(const num:integer;const Value: _ValueType);
+procedure _TVector.Assign(const num:_TNativeInt;const Value: _ValueType);
 begin
   self.Clear();
   self.PushBack(num,Value);

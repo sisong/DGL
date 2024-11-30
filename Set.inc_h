@@ -34,11 +34,6 @@ type
   //----------------------------------------------------------------------------
   // 作用描述: _TSet的迭代器
   // 主要方法：(参见_Iterator的说明)
-  // 使用方式：
-  // 注意事项:
-  // 作    者: HouSisong , 2006.10.20
-  // [相关资料]: (如果有的话)
-  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
   //----------------------------------------------------------------------------
   //set Iterator
   _TSetIterator = class(_TRBTReeBaseIterator)
@@ -58,12 +53,12 @@ type
     function  ItBegin(): _IIterator;                           {$ifdef _DGL_Inline} inline; {$endif}
     function  ItEnd(): _IIterator;                             {$ifdef _DGL_Inline} inline; {$endif}
     procedure Clear();                                         {$ifdef _DGL_Inline} inline; {$endif}
-    function  Size(): Integer;                                 {$ifdef _DGL_Inline} inline; {$endif}
+    function  Size(): _TNativeInt;                                 {$ifdef _DGL_Inline} inline; {$endif}
     function  IsEmpty(): Boolean;                              {$ifdef _DGL_Inline} inline; {$endif}
-    function  EraseValue(const Value:_ValueType):integer; overload;       {$ifdef _DGL_Inline} inline; {$endif}
+    function  EraseValue(const Value:_ValueType):_TNativeInt; overload;       {$ifdef _DGL_Inline} inline; {$endif}
     procedure Erase(const ItPos:_IIterator);  overload;                   //{$ifdef _DGL_Inline} inline; {$endif}
     procedure Erase(const ItBegin,ItEnd: _IIterator);  overload;
-    function  Count(const Value:_ValueType):integer;                      {$ifdef _DGL_Inline} inline; {$endif}
+    function  Count(const Value:_ValueType):_TNativeInt;                      {$ifdef _DGL_Inline} inline; {$endif}
     function  Find(const Value:_ValueType):_IIterator;                    {$ifdef _DGL_Inline} inline; {$endif}
     function  LowerBound(const Value:_ValueType):_IIterator;               {$ifdef _DGL_Inline} inline; {$endif}
     function  UpperBound(const Value:_ValueType):_IIterator;               {$ifdef _DGL_Inline} inline; {$endif}
@@ -77,19 +72,14 @@ type
   //----------------------------------------------------------------------------
   // 作用描述: 底部利用_TRB_Tree实现的Set
   // 主要方法：(参见_ISet的说明)
-  // 使用方式：
-  // 注意事项:
-  // 作    者: HouSisong , 2006.10.20
-  // [相关资料]: (如果有的话)
-  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
   //----------------------------------------------------------------------------
   _TSet  = class(_TSet_Base,_ISet,_IContainer)
   public
     procedure Insert(const Value:_ValueType); overload;                                   {$ifdef _DGL_Inline} inline; {$endif}
     procedure Insert(const ItPos:_IIterator;const Value:_ValueType); overload;            //{$ifdef _DGL_Inline} inline; {$endif}
-    procedure Insert(const ItPos:_IIterator;const num:integer;const Value:_ValueType); overload; //{$ifdef _DGL_Inline} inline; {$endif}
+    procedure Insert(const ItPos:_IIterator;const num:_TNativeInt;const Value:_ValueType); overload; //{$ifdef _DGL_Inline} inline; {$endif}
     procedure Insert(const ItPos:_IIterator;const ItBegin,ItEnd:_IIterator);overload;       //
-    procedure Assign(const num:integer;const Value: _ValueType);overload;                   {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Assign(const num:_TNativeInt;const Value: _ValueType);overload;                   {$ifdef _DGL_Inline} inline; {$endif}
     procedure Assign(const ItBegin,ItEnd:_IIterator);overload;                              //{$ifdef _DGL_Inline} inline; {$endif}
     function  Clone():_IContainer;                                                          {$ifdef _DGL_Inline} inline; {$endif}
     procedure CloneToInterface(out NewContainer);                     {$ifdef _DGL_Inline} inline; {$endif}
@@ -102,19 +92,14 @@ type
   //----------------------------------------------------------------------------
   // 作用描述: 底部利用_TRB_Tree实现的MultiSet  , 以继承方式重用了_TSet_Base的部分代码
   // 主要方法：(参见_IMultiSet的说明)
-  // 使用方式：
-  // 注意事项:
-  // 作    者: HouSisong , 2006.10.20
-  // [相关资料]: (如果有的话)
-  // [维护记录]: (类发布后，其修改需要记录下来：修改人、时间、主要原因内容)
   //----------------------------------------------------------------------------
   _TMultiSet  = class(_TSet_Base,_IMultiSet,_ISet,_IContainer)
   public
     procedure Insert(const Value:_ValueType);overload;                                        {$ifdef _DGL_Inline} inline; {$endif}
     procedure Insert(const ItPos:_IIterator;const Value:_ValueType); overload;               // {$ifdef _DGL_Inline} inline; {$endif}
-    procedure Insert(const ItPos:_IIterator;const num:integer;const Value:_ValueType); overload;  //{$ifdef _DGL_Inline} inline; {$endif}
+    procedure Insert(const ItPos:_IIterator;const num:_TNativeInt;const Value:_ValueType); overload;  //{$ifdef _DGL_Inline} inline; {$endif}
     procedure Insert(const ItPos:_IIterator;const ItBegin,ItEnd:_IIterator);overload;             //
-    procedure Assign(const num:integer;const Value: _ValueType);overload;                     {$ifdef _DGL_Inline} inline; {$endif}
+    procedure Assign(const num:_TNativeInt;const Value: _ValueType);overload;                     {$ifdef _DGL_Inline} inline; {$endif}
     procedure Assign(const ItBegin,ItEnd:_IIterator);overload;                                   //
     function  Clone: _IContainer;                                                                 {$ifdef _DGL_Inline} inline; {$endif}
     procedure CloneToInterface(out NewContainer);  {$ifdef _DGL_Inline} inline; {$endif}
@@ -122,7 +107,7 @@ type
     constructor Create(); overload;
     constructor Create(const ItBegin,ItEnd:_IIterator);overload;
     constructor Create(const ASet:_TMultiSet);overload;
-    constructor Create(const num:integer;const Value: _ValueType);overload;
+    constructor Create(const num:_TNativeInt;const Value: _ValueType);overload;
   end;
   
 
